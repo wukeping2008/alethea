@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project-Based Learning - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            height: 60px;
+            margin-right: 10px;
+        }
+        
+        .nav-link {
+            position: relative;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .project-card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+        
+        .project-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .difficulty-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .difficulty-easy {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .difficulty-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .difficulty-hard {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .refresh-btn {
+            background: linear-gradient(135deg, var(--accent-color), #22d3ee);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 165, 141, 0.3);
+        }
+        
+        .category-filter {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            color: #64748b;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .category-filter:hover,
+        .category-filter.active {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        /* Animation effects */
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        .stagger-5 { animation-delay: 0.5s; }
+        .stagger-6 { animation-delay: 0.6s; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+            
+            .logo {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="logo-container">
+                <img src="/static/logo.png" alt="Alethea Logo" class="logo">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="/static/index-en.html" class="nav-link font-medium">Home</a>
+                <a href="/static/index-en.html#subjects" class="nav-link font-medium">Subjects</a>
+                <a href="/static/projects-en.html" class="nav-link font-medium active">Project Learning</a>
+                <a href="/static/experiments-en.html" class="nav-link font-medium">Lab Simulation</a>
+                <a href="/static/index-en.html#about" class="nav-link font-medium">About Us</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <button onclick="switchLanguage()" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span class="text-sm font-medium">🇨🇳 中文</span>
+                </button>
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <span class="hidden md:inline-block">Login/Register</span>
+                    </button>
+                </div>
+                <button class="md:hidden focus:outline-none" id="mobile-menu-button">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-white shadow-sm mt-2 py-3" id="mobile-menu">
+            <div class="container mx-auto px-4 flex flex-col space-y-3">
+                <a href="/static/index-en.html" class="block py-2 px-4 hover:bg-gray-100 rounded">Home</a>
+                <a href="/static/index-en.html#subjects" class="block py-2 px-4 hover:bg-gray-100 rounded">Subjects</a>
+                <a href="/static/projects-en.html" class="block py-2 px-4 hover:bg-gray-100 rounded bg-blue-50 text-blue-600">Project Learning</a>
+                <a href="/static/experiments-en.html" class="block py-2 px-4 hover:bg-gray-100 rounded">Lab Simulation</a>
+                <a href="/static/index-en.html#about" class="block py-2 px-4 hover:bg-gray-100 rounded">About Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-16 px-4 my-8 container mx-auto">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Project-Based Learning</h1>
+            <p class="text-xl mb-8">Master core engineering skills through real projects, from theory to practice</p>
+            <div class="flex flex-wrap justify-center gap-4 mb-8">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-lightbulb mr-2"></i>Innovation
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-tools mr-2"></i>Hands-on Practice
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-users mr-2"></i>Teamwork
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full text-sm">
+                    <i class="fas fa-trophy mr-2"></i>Results-Oriented
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Filter Section -->
+    <section class="container mx-auto px-4 mb-8">
+        <div class="flex flex-wrap justify-center gap-4 mb-6">
+            <button class="category-filter active" data-category="all">
+                <i class="fas fa-th-large mr-2"></i>All Projects
+            </button>
+            <button class="category-filter" data-category="electronics">
+                <i class="fas fa-microchip mr-2"></i>Electronics
+            </button>
+            <button class="category-filter" data-category="robotics">
+                <i class="fas fa-robot mr-2"></i>Robotics
+            </button>
+            <button class="category-filter" data-category="iot">
+                <i class="fas fa-wifi mr-2"></i>IoT
+            </button>
+            <button class="category-filter" data-category="ai">
+                <i class="fas fa-brain mr-2"></i>AI
+            </button>
+            <button class="category-filter" data-category="automation">
+                <i class="fas fa-cogs mr-2"></i>Automation
+            </button>
+        </div>
+        
+        <div class="text-center space-x-4">
+            <button class="refresh-btn" id="refresh-projects">
+                <i class="fas fa-sync-alt mr-2"></i>Refresh Projects
+            </button>
+            <button class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 font-medium" id="ai-recommend-btn">
+                <i class="fas fa-magic mr-2"></i>AI Recommendations
+            </button>
+        </div>
+    </section>
+
+    <!-- Projects Grid -->
+    <section class="container mx-auto px-4 py-8">
+        <div id="projects-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- Projects will be dynamically loaded here -->
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Alethea</h3>
+                    <p class="text-gray-400">Higher Education Q&A Platform</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/static/index-en.html" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="/static/index-en.html#subjects" class="text-gray-400 hover:text-white">Subjects</a></li>
+                        <li><a href="/static/projects-en.html" class="text-gray-400 hover:text-white">Project Learning</a></li>
+                        <li><a href="/static/index-en.html#about" class="text-gray-400 hover:text-white">About Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Alethea. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Language switching function
+        function switchLanguage() {
+            window.location.href = '/static/projects.html';
+        }
+
+        // Project data
+        const projectsData = {
+            electronics: [
+                {
+                    id: 'smart-car',
+                    title: 'Smart Car',
+                    description: 'Arduino-based obstacle avoidance smart car with ultrasonic sensors and motor drivers',
+                    difficulty: 'medium',
+                    duration: '2-3 weeks',
+                    skills: ['Arduino Programming', 'Sensor Applications', 'Motor Control', 'Circuit Design'],
+                    icon: 'fas fa-car',
+                    color: 'bg-blue-500',
+                    category: 'electronics'
+                },
+                {
+                    id: 'led-matrix',
+                    title: 'LED Matrix Display',
+                    description: 'Programmable LED matrix display with text scrolling and pattern display functions',
+                    difficulty: 'easy',
+                    duration: '1-2 weeks',
+                    skills: ['Digital Circuits', 'LED Drivers', 'Microcontroller Programming', 'Display Principles'],
+                    icon: 'fas fa-tv',
+                    color: 'bg-green-500',
+                    category: 'electronics'
+                },
+                {
+                    id: 'digital-clock',
+                    title: 'Digital Clock',
+                    description: 'Digital clock with alarm function, including RTC module and LCD display',
+                    difficulty: 'easy',
+                    duration: '1 week',
+                    skills: ['Clock Circuits', 'LCD Display', 'RTC Applications', 'Button Control'],
+                    icon: 'fas fa-clock',
+                    color: 'bg-purple-500',
+                    category: 'electronics'
+                }
+            ],
+            robotics: [
+                {
+                    id: 'robotic-arm',
+                    title: 'Robotic Arm Control',
+                    description: 'Multi-DOF robotic arm with precise position control and path planning',
+                    difficulty: 'hard',
+                    duration: '4-6 weeks',
+                    skills: ['Mechanical Design', 'Servo Control', 'Kinematics', 'Programming Control'],
+                    icon: 'fas fa-robot',
+                    color: 'bg-red-500',
+                    category: 'robotics'
+                },
+                {
+                    id: 'line-follower',
+                    title: 'Line Following Robot',
+                    description: 'Autonomous line-following robot using infrared sensors for path detection',
+                    difficulty: 'medium',
+                    duration: '2 weeks',
+                    skills: ['Sensor Fusion', 'PID Control', 'Path Tracking', 'Robot Navigation'],
+                    icon: 'fas fa-route',
+                    color: 'bg-yellow-500',
+                    category: 'robotics'
+                },
+                {
+                    id: 'drone-basic',
+                    title: 'Quadcopter Drone',
+                    description: 'Assemble and program a quadcopter drone for stable flight and basic control',
+                    difficulty: 'hard',
+                    duration: '3-4 weeks',
+                    skills: ['Flight Control', 'Attitude Sensors', 'Motor Speed Control', 'Wireless Communication'],
+                    icon: 'fas fa-helicopter',
+                    color: 'bg-indigo-500',
+                    category: 'robotics'
+                }
+            ],
+            iot: [
+                {
+                    id: 'smart-home',
+                    title: 'Smart Home System',
+                    description: 'IoT smart home system with remote control and environmental monitoring',
+                    difficulty: 'medium',
+                    duration: '3-4 weeks',
+                    skills: ['WiFi Communication', 'Sensor Networks', 'Mobile Apps', 'Cloud Platforms'],
+                    icon: 'fas fa-home',
+                    color: 'bg-teal-500',
+                    category: 'iot'
+                },
+                {
+                    id: 'weather-station',
+                    title: 'Weather Station',
+                    description: 'Real-time weather monitoring station for temperature, humidity, and pressure',
+                    difficulty: 'easy',
+                    duration: '1-2 weeks',
+                    skills: ['Environmental Sensors', 'Data Collection', 'Wireless Transmission', 'Data Visualization'],
+                    icon: 'fas fa-cloud-sun',
+                    color: 'bg-cyan-500',
+                    category: 'iot'
+                },
+                {
+                    id: 'smart-garden',
+                    title: 'Smart Garden',
+                    description: 'Automated watering and environmental monitoring smart garden system',
+                    difficulty: 'medium',
+                    duration: '2-3 weeks',
+                    skills: ['Soil Sensors', 'Automatic Control', 'Timer Systems', 'Mobile Monitoring'],
+                    icon: 'fas fa-seedling',
+                    color: 'bg-green-600',
+                    category: 'iot'
+                }
+            ],
+            ai: [
+                {
+                    id: 'face-recognition',
+                    title: 'Face Recognition System',
+                    description: 'Deep learning-based face recognition system for identity verification',
+                    difficulty: 'hard',
+                    duration: '4-5 weeks',
+                    skills: ['Deep Learning', 'Computer Vision', 'Python Programming', 'Model Training'],
+                    icon: 'fas fa-user-check',
+                    color: 'bg-pink-500',
+                    category: 'ai'
+                },
+                {
+                    id: 'chatbot',
+                    title: 'AI Chatbot',
+                    description: 'Natural language processing-based intelligent chatbot development',
+                    difficulty: 'medium',
+                    duration: '3 weeks',
+                    skills: ['NLP', 'Machine Learning', 'Dialogue Systems', 'API Development'],
+                    icon: 'fas fa-comments',
+                    color: 'bg-blue-600',
+                    category: 'ai'
+                },
+                {
+                    id: 'image-classifier',
+                    title: 'Image Classifier',
+                    description: 'Train convolutional neural networks for image classification and object recognition',
+                    difficulty: 'medium',
+                    duration: '2-3 weeks',
+                    skills: ['CNN', 'Image Processing', 'TensorFlow', 'Data Preprocessing'],
+                    icon: 'fas fa-images',
+                    color: 'bg-purple-600',
+                    category: 'ai'
+                }
+            ],
+            automation: [
+                {
+                    id: 'plc-control',
+                    title: 'PLC Control System',
+                    description: 'Industrial automation PLC control system for production line automation',
+                    difficulty: 'hard',
+                    duration: '4-6 weeks',
+                    skills: ['PLC Programming', 'Industrial Control', 'Sensor Applications', 'HMI'],
+                    icon: 'fas fa-industry',
+                    color: 'bg-gray-600',
+                    category: 'automation'
+                },
+                {
+                    id: 'motor-control',
+                    title: 'Motor Speed Control',
+                    description: 'Precise speed control for DC motors and stepper motors',
+                    difficulty: 'medium',
+                    duration: '2-3 weeks',
+                    skills: ['Motor Principles', 'PWM Control', 'Feedback Control', 'Driver Circuits'],
+                    icon: 'fas fa-cog',
+                    color: 'bg-orange-500',
+                    category: 'automation'
+                },
+                {
+                    id: 'conveyor-system',
+                    title: 'Conveyor Control System',
+                    description: 'Automated conveyor system with material detection and sorting functions',
+                    difficulty: 'medium',
+                    duration: '3 weeks',
+                    skills: ['Sensor Applications', 'Logic Control', 'Mechanical Design', 'System Integration'],
+                    icon: 'fas fa-conveyor-belt',
+                    color: 'bg-amber-500',
+                    category: 'automation'
+                }
+            ]
+        };
+
+        // Current displayed projects
+        let currentProjects = [];
+        let currentCategory = 'all';
+
+        // Get all projects
+        function getAllProjects() {
+            const allProjects = [];
+            Object.values(projectsData).forEach(categoryProjects => {
+                allProjects.push(...categoryProjects);
+            });
+            return allProjects;
+        }
+
+        // Filter projects by category
+        function getProjectsByCategory(category) {
+            if (category === 'all') {
+                return getAllProjects();
+            }
+            return projectsData[category] || [];
+        }
+
+        // Randomly select projects
+        function getRandomProjects(projects, count = 6) {
+            const shuffled = [...projects].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        // Get difficulty badge class
+        function getDifficultyClass(difficulty) {
+            const classes = {
+                'easy': 'difficulty-easy',
+                'medium': 'difficulty-medium',
+                'hard': 'difficulty-hard'
+            };
+            return classes[difficulty] || 'difficulty-easy';
+        }
+
+        // Get difficulty text
+        function getDifficultyText(difficulty) {
+            const texts = {
+                'easy': 'Beginner',
+                'medium': 'Intermediate',
+                'hard': 'Advanced'
+            };
+            return texts[difficulty] || 'Beginner';
+        }
+
+        // Render project card
+        function renderProjectCard(project, index) {
+            return `
+                <div class="project-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1}" 
+                     data-project-id="${project.id}" 
+                     onclick="openProjectDetail('${project.id}')">
+                    <div class="project-icon ${project.color}">
+                        <i class="${project.icon}"></i>
+                    </div>
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-gray-800">${project.title}</h3>
+                        <span class="difficulty-badge ${getDifficultyClass(project.difficulty)}">
+                            ${getDifficultyText(project.difficulty)}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 mb-4 line-clamp-2">${project.description}</p>
+                    <div class="mb-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>Duration: ${project.duration}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${project.skills.slice(0, 3).map(skill => 
+                                `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
+                            ).join('')}
+                            ${project.skills.length > 3 ? 
+                                `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
+                            }
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <button class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                            Start Project <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <div class="flex space-x-2">
+                            <button class="p-2 rounded hover:bg-gray-100" title="Favorite">
+                                <i class="far fa-heart text-gray-400"></i>
+                            </button>
+                            <button class="p-2 rounded hover:bg-gray-100" title="Share">
+                                <i class="fas fa-share-alt text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Render projects grid
+        function renderProjects(projects) {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = projects.map((project, index) => renderProjectCard(project, index)).join('');
+        }
+
+        // Load projects
+        function loadProjects(category = 'all', refresh = false) {
+            const availableProjects = getProjectsByCategory(category);
+            
+            if (refresh || currentProjects.length === 0) {
+                currentProjects = getRandomProjects(availableProjects, 6);
+            }
+            
+            renderProjects(currentProjects);
+        }
+
+        // Open project detail
+        function openProjectDetail(projectId) {
+            console.log('Opening project:', projectId);
+            // Navigate to project detail page
+            window.location.href = `/static/project-detail-en.html?id=${projectId}`;
+        }
+
+        // Category filter events
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initial load projects
+            loadProjects('all');
+
+            // Category filter button events
+            document.querySelectorAll('.category-filter').forEach(button => {
+                button.addEventListener('click', function() {
+                    // Update button state
+                    document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Get category and load projects
+                    const category = this.dataset.category;
+                    currentCategory = category;
+                    loadProjects(category, true);
+                });
+            });
+
+            // Refresh button event
+            document.getElementById('refresh-projects').addEventListener('click', function() {
+                // Add rotation animation
+                const icon = this.querySelector('i');
+                icon.style.transform = 'rotate(360deg)';
+                icon.style.transition = 'transform 0.5s ease';
+                
+                setTimeout(() => {
+                    icon.style.transform = 'rotate(0deg)';
+                }, 500);
+                
+                // Reload projects
+                loadProjects(currentCategory, true);
+            });
+
+            // AI recommendation button event
+            document.getElementById('ai-recommend-btn').addEventListener('click', function() {
+                getAIRecommendations();
+            });
+
+            // Mobile menu toggle
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+
+        // AI recommendation function
+        async function getAIRecommendations() {
+            const button = document.getElementById('ai-recommend-btn');
+            const originalText = button.innerHTML;
+            
+            // Show loading state
+            button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI Analyzing...';
+            button.disabled = true;
+
+            try {
+                // Simulate user preferences (in real application, get from user profile)
+                const userPreferences = {
+                    user_skills: getUserSkills(),
+                    difficulty_preference: getUserDifficultyPreference(),
+                    interests: getUserInterests(),
+                    completed_projects: getCompletedProjects()
+                };
+
+                // Call AI recommendation API
+                const response = await fetch('/api/llm/recommend-projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(userPreferences)
+                });
+
+                const data = await response.json();
+
+                if (data.success && data.recommendations) {
+                    // Display AI recommended projects
+                    displayAIRecommendations(data.recommendations);
+                    
+                    // If there's a learning path, display it too
+                    if (data.learning_path) {
+                        console.log('Learning path suggestions:', data.learning_path);
+                    }
+                } else {
+                    // AI recommendation failed, use fallback
+                    console.log('AI recommendation failed, using fallback');
+                    loadProjects(currentCategory, true);
+                }
+            } catch (error) {
+                console.error('AI recommendation error:', error);
+                // Network error, use fallback
+                loadProjects(currentCategory, true);
+            } finally {
+                // Restore button state
+                button.innerHTML = originalText;
+                button.disabled = false;
+            }
+        }
+
+        // Get user skills (simulated data, in real application get from user config)
+        function getUserSkills() {
+            // Can get from localStorage, user config or survey
+            const savedSkills = localStorage.getItem('userSkills');
+            if (savedSkills) {
+                return JSON.parse(savedSkills);
+            }
+            
+            // Default skills
+            return ['Programming Basics', 'Circuit Basics', 'Math Basics'];
+        }
+
+        // Get user difficulty preference
+        function getUserDifficultyPreference() {
+            const savedPreference = localStorage.getItem('difficultyPreference');
+            return savedPreference || 'medium';
+        }
+
+        // Get user interests
+        function getUserInterests() {
+            const savedInterests = localStorage.getItem('userInterests');
+            if (savedInterests) {
+                return JSON.parse(savedInterests);
+            }
+            
+            // Infer interests based on current category
+            if (currentCategory !== 'all') {
+                return [currentCategory];
+            }
+            
+            return ['electronics', 'robotics'];
+        }
+
+        // Get completed projects
+        function getCompletedProjects() {
+            const completed = localStorage.getItem('completedProjects');
+            return completed ? JSON.parse(completed) : [];
+        }
+
+        // Display AI recommended projects
+        function displayAIRecommendations(recommendations) {
+            // Convert recommendation data format to match existing project data structure
+            const formattedProjects = recommendations.map(rec => ({
+                id: rec.project_id,
+                title: rec.title,
+                description: rec.description,
+                difficulty: rec.difficulty,
+                duration: rec.duration,
+                skills: rec.skills_required,
+                icon: getProjectIcon(rec.category),
+                color: getProjectColor(rec.category),
+                category: rec.category,
+                matchScore: rec.match_score,
+                reason: rec.reason
+            }));
+
+            // Update current project list
+            currentProjects = formattedProjects;
+            
+            // Render recommended projects
+            renderAIRecommendedProjects(formattedProjects);
+            
+            // Show recommendation notice
+            showRecommendationNotice();
+        }
+
+        // Render AI recommended projects (with recommendation reasons)
+        function renderAIRecommendedProjects(projects) {
+            const grid = document.getElementById('projects-grid');
+            grid.innerHTML = projects.map((project, index) => `
+                <div class="project-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1} border-2 border-purple-200" 
+                     data-project-id="${project.id}" 
+                     onclick="openProjectDetail('${project.id}')">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="project-icon ${project.color}">
+                            <i class="${project.icon}"></i>
+                        </div>
+                        <div class="flex items-center bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
+                            <i class="fas fa-magic mr-1"></i>
+                            AI Recommended ${project.matchScore}%
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start mb-3">
+                        <h3 class="text-xl font-bold text-gray-800">${project.title}</h3>
+                        <span class="difficulty-badge ${getDifficultyClass(project.difficulty)}">
+                            ${getDifficultyText(project.difficulty)}
+                        </span>
+                    </div>
+                    <p class="text-gray-600 mb-3 line-clamp-2">${project.description}</p>
+                    ${project.reason ? `
+                        <div class="bg-purple-50 border-l-4 border-purple-400 p-3 mb-4">
+                            <p class="text-sm text-purple-700">
+                                <i class="fas fa-lightbulb mr-1"></i>
+                                Recommendation: ${project.reason}
+                            </p>
+                        </div>
+                    ` : ''}
+                    <div class="mb-4">
+                        <div class="flex items-center text-sm text-gray-500 mb-2">
+                            <i class="fas fa-clock mr-2"></i>
+                            <span>Duration: ${project.duration}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-1">
+                            ${project.skills.slice(0, 3).map(skill => 
+                                `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
+                            ).join('')}
+                            ${project.skills.length > 3 ? 
+                                `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
+                            }
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <button class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                            Start Project <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                        <div class="flex space-x-2">
+                            <button class="p-2 rounded hover:bg-gray-100" title="Favorite">
+                                <i class="far fa-heart text-gray-400"></i>
+                            </button>
+                            <button class="p-2 rounded hover:bg-gray-100" title="Share">
+                                <i class="fas fa-share-alt text-gray-400"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Get project icon by category
+        function getProjectIcon(category) {
+            const icons = {
+                'electronics': 'fas fa-microchip',
+                'robotics': 'fas fa-robot',
+                'iot': 'fas fa-wifi',
+                'ai': 'fas fa-brain',
+                'automation': 'fas fa-cogs'
+            };
+            return icons[category] || 'fas fa-project-diagram';
+        }
+
+        // Get project color by category
+        function getProjectColor(category) {
+            const colors = {
+                'electronics': 'bg-blue-500',
+                'robotics': 'bg-red-500',
+                'iot': 'bg-teal-500',
+                'ai': 'bg-purple-500',
+                'automation': 'bg-gray-600'
+            };
+            return colors[category] || 'bg-indigo-500';
+        }
+
+        // Show recommendation notice
+        function showRecommendationNotice() {
+            // Create notice message
+            const notice = document.createElement('div');
+            notice.className = 'fixed top-4 right-4 bg-purple-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 transform translate-x-full transition-transform duration-300';
+            notice.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-magic mr-2"></i>
+                    <span>AI has recommended the most suitable projects for you!</span>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-white hover:text-gray-200">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notice);
+            
+            // Show animation
+            setTimeout(() => {
+                notice.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto hide
+            setTimeout(() => {
+                notice.classList.add('translate-x-full');
+                setTimeout(() => {
+                    if (notice.parentElement) {
+                        notice.remove();
+                    }
+                }, 300);
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

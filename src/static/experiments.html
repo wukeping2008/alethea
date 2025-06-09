@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>仿真实验 - Alethea Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .experiment-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .experiment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #3b82f6;
+        }
+        .subject-tab {
+            transition: all 0.3s ease;
+        }
+        .subject-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-overlay {
+            backdrop-filter: blur(8px);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 导航栏 -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img src="logo.png" alt="Alethea" class="h-8 w-8 mr-3">
+                    <span class="text-xl font-bold text-gray-900">Alethea Enhanced</span>
+                </div>
+                <div class="flex items-center space-x-8">
+                    <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">首页</a>
+                    <a href="index.html#subjects" class="text-gray-600 hover:text-blue-600 transition-colors">学科</a>
+                    <a href="projects.html" class="text-gray-600 hover:text-blue-600 transition-colors">项目制学习</a>
+                    <a href="experiments.html" class="text-blue-600 font-medium">仿真实验</a>
+                    <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">学习分析</a>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl mr-1"></i>
+                            <span>用户</span>
+                            <i class="fas fa-chevron-down ml-1 text-sm"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</a>
+                            <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">设置</a>
+                            <hr class="my-1">
+                            <a href="login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">退出登录</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容 -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- 页面标题 -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-flask text-blue-600 mr-3"></i>
+                仿真实验平台
+            </h1>
+            <p class="text-gray-600">选择实验主题，AI将为您生成个性化的实验内容和在线仿真环境</p>
+        </div>
+
+        <!-- 学科标签页 -->
+        <div class="mb-8">
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button class="subject-tab active px-6 py-3 rounded-lg font-medium transition-all" data-subject="all">
+                    <i class="fas fa-th-large mr-2"></i>全部实验
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="circuit">
+                    <i class="fas fa-bolt mr-2"></i>电路分析
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="digital">
+                    <i class="fas fa-microchip mr-2"></i>数字电路
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="analog">
+                    <i class="fas fa-wave-square mr-2"></i>模拟电路
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="signal">
+                    <i class="fas fa-signal mr-2"></i>信号与系统
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="communication">
+                    <i class="fas fa-broadcast-tower mr-2"></i>通信原理
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="embedded">
+                    <i class="fas fa-memory mr-2"></i>嵌入式系统
+                </button>
+            </div>
+        </div>
+
+        <!-- 实验模块列表 -->
+        <div id="experimentsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- 实验卡片将通过JavaScript动态生成 -->
+        </div>
+    </div>
+
+    <!-- 实验详情模态框 -->
+    <div id="experimentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-900"></h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div id="modalContent">
+                    <!-- 模态框内容将通过JavaScript动态生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI助手浮动按钮 -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button id="aiAssistantBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <!-- AI助手聊天窗口 -->
+    <div id="aiChatWindow" class="hidden fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
+            <h4 class="font-medium">AI实验助手</h4>
+            <button id="closeChatBtn" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto h-64 space-y-3">
+            <div class="bg-blue-100 rounded-lg p-3">
+                <p class="text-sm text-blue-800">👋 你好！我是AI实验助手，可以帮你解答实验相关问题。</p>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="输入你的问题..." 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="sendChatBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 实验模块数据
+        const experimentModules = {
+            circuit: [
+                {
+                    id: 'circuit_ohm',
+                    title: '欧姆定律验证',
+                    description: '通过改变电阻值，观察电压和电流的关系，验证欧姆定律',
+                    icon: 'fas fa-bolt',
+                    color: 'blue',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_rc',
+                    title: 'RC电路分析',
+                    description: '分析RC电路的充放电过程，理解时间常数的概念',
+                    icon: 'fas fa-chart-line',
+                    color: 'green',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_thevenin',
+                    title: '戴维南等效电路',
+                    description: '验证戴维南定理，求解复杂电路的等效电路',
+                    icon: 'fas fa-project-diagram',
+                    color: 'purple',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_rlc',
+                    title: 'RLC谐振电路',
+                    description: '研究RLC串联谐振电路的频率特性和品质因数',
+                    icon: 'fas fa-wave-square',
+                    color: 'indigo',
+                    subject: 'circuit'
+                }
+            ],
+            digital: [
+                {
+                    id: 'digital_gates',
+                    title: '逻辑门特性',
+                    description: '测试各种逻辑门的真值表，理解数字逻辑基础',
+                    icon: 'fas fa-microchip',
+                    color: 'cyan',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_combinational',
+                    title: '组合逻辑设计',
+                    description: '设计并实现多路选择器，掌握组合逻辑设计方法',
+                    icon: 'fas fa-sitemap',
+                    color: 'teal',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_counter',
+                    title: '计数器设计',
+                    description: '设计同步二进制计数器，理解时序电路原理',
+                    icon: 'fas fa-stopwatch',
+                    color: 'red',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_flipflop',
+                    title: '触发器应用',
+                    description: '学习各种触发器的工作原理和应用场景',
+                    icon: 'fas fa-toggle-on',
+                    color: 'orange',
+                    subject: 'digital'
+                }
+            ],
+            analog: [
+                {
+                    id: 'analog_transistor',
+                    title: '三极管特性',
+                    description: '测量三极管的输入输出特性，理解三极管工作原理',
+                    icon: 'fas fa-wave-square',
+                    color: 'orange',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_opamp',
+                    title: '运放基本电路',
+                    description: '实现反相放大器和同相放大器，掌握运放应用',
+                    icon: 'fas fa-expand-arrows-alt',
+                    color: 'pink',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_filter',
+                    title: '滤波器设计',
+                    description: '设计低通、高通、带通滤波器，分析频率响应',
+                    icon: 'fas fa-filter',
+                    color: 'emerald',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_oscillator',
+                    title: '振荡器电路',
+                    description: '设计正弦波和方波振荡器，理解振荡条件',
+                    icon: 'fas fa-broadcast-tower',
+                    color: 'violet',
+                    subject: 'analog'
+                }
+            ],
+            signal: [
+                {
+                    id: 'signal_time',
+                    title: '信号时域分析',
+                    description: '分析各种基本信号的时域特性，掌握信号分析方法',
+                    icon: 'fas fa-chart-area',
+                    color: 'cyan',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_fourier',
+                    title: '傅里叶变换',
+                    description: '使用MATLAB分析信号频谱，理解傅里叶变换',
+                    icon: 'fas fa-wave-square',
+                    color: 'lime',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_sampling',
+                    title: '采样定理验证',
+                    description: '验证奈奎斯特采样定理，理解混叠现象',
+                    icon: 'fas fa-chart-line',
+                    color: 'amber',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_convolution',
+                    title: '卷积运算',
+                    description: '理解卷积的物理意义，掌握系统响应分析',
+                    icon: 'fas fa-calculator',
+                    color: 'rose',
+                    subject: 'signal'
+                }
+            ],
+            communication: [
+                {
+                    id: 'comm_am',
+                    title: 'AM调制解调',
+                    description: '实现AM调制和解调，理解模拟调制原理',
+                    icon: 'fas fa-radio',
+                    color: 'amber',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_fm',
+                    title: 'FM调制解调',
+                    description: '实现FM调制和解调，比较不同调制方式',
+                    icon: 'fas fa-satellite',
+                    color: 'sky',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_digital',
+                    title: '数字调制',
+                    description: '学习ASK、FSK、PSK等数字调制技术',
+                    icon: 'fas fa-wifi',
+                    color: 'emerald',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_channel',
+                    title: '信道编码',
+                    description: '理解信道编码原理，实现错误检测和纠正',
+                    icon: 'fas fa-shield-alt',
+                    color: 'indigo',
+                    subject: 'communication'
+                }
+            ],
+            embedded: [
+                {
+                    id: 'embedded_gpio',
+                    title: 'GPIO控制',
+                    description: 'STM32微控制器的GPIO控制和基本应用',
+                    icon: 'fas fa-microchip',
+                    color: 'slate',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_timer',
+                    title: '定时器应用',
+                    description: '学习定时器的配置和中断处理',
+                    icon: 'fas fa-clock',
+                    color: 'blue',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_adc',
+                    title: 'ADC数据采集',
+                    description: '使用ADC进行模拟信号采集和处理',
+                    icon: 'fas fa-chart-bar',
+                    color: 'green',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_uart',
+                    title: '串口通信',
+                    description: '实现UART串口通信和数据传输',
+                    icon: 'fas fa-exchange-alt',
+                    color: 'purple',
+                    subject: 'embedded'
+                }
+            ]
+        };
+
+        // 获取所有实验模块
+        function getAllExperiments() {
+            const allExperiments = [];
+            Object.keys(experimentModules).forEach(subject => {
+                experimentModules[subject].forEach(exp => {
+                    allExperiments.push({...exp, subject});
+                });
+            });
+            return allExperiments;
+        }
+
+        // 渲染实验卡片
+        function renderExperiments(experiments) {
+            const container = document.getElementById('experimentsContainer');
+            container.innerHTML = '';
+
+            experiments.forEach(exp => {
+                const card = document.createElement('div');
+                card.className = 'experiment-card bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-all';
+                card.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="p-4 bg-${exp.color}-100 rounded-lg mr-4">
+                            <i class="${exp.icon} text-${exp.color}-600 text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-1">${exp.title}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${exp.color}-100 text-${exp.color}-800">
+                                ${getSubjectName(exp.subject)}
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-6 line-clamp-2">${exp.description}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-magic mr-2"></i>
+                            <span>AI生成实验</span>
+                        </div>
+                        <button class="bg-${exp.color}-600 hover:bg-${exp.color}-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            开始实验
+                        </button>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => generateExperiment(exp));
+                container.appendChild(card);
+            });
+        }
+
+        // 获取学科名称
+        function getSubjectName(subject) {
+            const names = {
+                'circuit': '电路分析',
+                'digital': '数字电路',
+                'analog': '模拟电路',
+                'signal': '信号与系统',
+                'communication': '通信原理',
+                'embedded': '嵌入式系统'
+            };
+            return names[subject] || '实验';
+        }
+
+        // AI生成实验内容
+        async function generateExperiment(experiment) {
+            const modal = document.getElementById('experimentModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+            
+            title.textContent = experiment.title;
+            
+            // 显示加载状态
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="loading-spinner mb-4"></div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">AI正在生成实验内容...</h3>
+                    <p class="text-gray-600 text-center">请稍候，我们正在为您定制专属的实验方案</p>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+
+            try {
+                // 调用AI生成实验内容
+                const response = await fetch('/api/llm/generate-experiment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        experiment_id: experiment.id,
+                        title: experiment.title,
+                        description: experiment.description,
+                        subject: experiment.subject,
+                        language: 'zh'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // 显示生成的实验内容
+                    displayGeneratedExperiment(data.experiment, experiment);
+                } else {
+                    // 显示错误信息
+                    content.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">生成失败</h3>
+                            <p class="text-gray-600 mb-4">抱歉，AI实验生成暂时不可用</p>
+                            <button onclick="generateExperiment({id: '${experiment.id}', title: '${experiment.title}', description: '${experiment.description}', subject: '${experiment.subject}'})" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                                重试
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('生成实验内容失败:', error);
+                // 显示备用内容
+                displayFallbackExperiment(experiment);
+            }
+        }
+
+        // 显示生成的实验内容
+        function displayGeneratedExperiment(experimentData, originalExp) {
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- 实验概览 -->
+                    <div class="bg-gradient-to-r from-${originalExp.color}-50 to-${originalExp.color}-100 rounded-lg p-6">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-${originalExp.color}-200 rounded-lg mr-4">
+                                <i class="${originalExp.icon} text-${originalExp.color}-700 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">实验概览</h4>
+                                <p class="text-gray-700">${experimentData.overview || originalExp.description}</p>
+                                <div class="mt-4 flex items-center text-sm text-${originalExp.color}-700">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    <span>由AI智能生成的个性化实验内容</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 实验目标 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-bullseye text-blue-600 mr-2"></i>
+                            实验目标
+                        </h4>
+                        <ul class="space-y-2">
+                            ${(experimentData.objectives || []).map(obj => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-gray-700">${obj}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- 理论基础 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-book text-purple-600 mr-2"></i>
+                            理论基础
+                        </h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-700">${experimentData.theory || '相关理论知识将在实验过程中详细介绍'}</p>
+                        </div>
+                    </div>
+
+                    <!-- 实验步骤 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-list-ol text-orange-600 mr-2"></i>
+                            实验步骤
+                        </h4>
+                        <ol class="space-y-3">
+                            ${(experimentData.steps || []).map((step, index) => `
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-${originalExp.color}-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                                        ${index + 1}
+                                    </div>
+                                    <span class="text-gray-700 pt-1">${step}</span>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+
+                    <!-- 在线仿真界面 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-desktop text-green-600 mr-2"></i>
+                            在线仿真界面
+                        </h4>
+                        <div class="bg-gray-900 rounded-lg p-6 text-center">
+                            <div class="bg-gray-800 rounded-lg p-8 mb-4">
+                                <i class="fas fa-play-circle text-4xl text-green-400 mb-4"></i>
+                                <h5 class="text-white text-lg font-medium mb-2">交互式仿真环境</h5>
+                                <p class="text-gray-300 text-sm mb-4">点击下方按钮启动专为此实验定制的仿真环境</p>
+                                ${experimentData.simulation_url ? `
+                                    <iframe src="${experimentData.simulation_url}" 
+                                            class="w-full h-64 rounded-lg border-2 border-gray-600 mb-4"
+                                            frameborder="0">
+                                    </iframe>
+                                ` : `
+                                    <div class="bg-gray-700 rounded-lg p-6 mb-4">
+                                        <i class="fas fa-cogs text-2xl text-blue-400 mb-2"></i>
+                                        <p class="text-gray-300 text-sm">仿真环境正在准备中...</p>
+                                    </div>
+                                `}
+                            </div>
+                            <button class="bg-${originalExp.color}-600 hover:bg-${originalExp.color}-700 text-white px-6 py-3 rounded-lg font-medium transition-colors" 
+                                    onclick="startSimulation('${originalExp.id}')">
+                                <i class="fas fa-rocket mr-2"></i>
+                                启动仿真实验
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 预期结果 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-chart-line text-indigo-600 mr-2"></i>
+                            预期结果
+                        </h4>
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <p class="text-gray-700">${experimentData.expected_results || '通过本实验，您将获得对相关理论的深入理解和实践经验'}</p>
+                        </div>
+                    </div>
+
+                    <!-- AI助手建议 -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+                        <h4 class="text-lg font-semibold text-blue-900 mb-3">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI助手建议
+                        </h4>
+                        <div class="space-y-2 text-blue-800">
+                            <p>• 实验前请仔细阅读实验目标和理论基础</p>
+                            <p>• 按照步骤逐步进行，注意观察实验现象</p>
+                            <p>• 如有疑问，可随时点击AI助手获取帮助</p>
+                            <p>• 实验完成后，请认真分析结果并总结经验</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 显示备用实验内容
+        function displayFallbackExperiment(experiment) {
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- 实验概览 -->
+                    <div class="bg-gradient-to-r from-${experiment.color}-50 to-${experiment.color}-100 rounded-lg p-6">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-${experiment.color}-200 rounded-lg mr-4">
+                                <i class="${experiment.icon} text-${experiment.color}-700 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">实验概览</h4>
+                                <p class="text-gray-700">${experiment.description}</p>
+                                <div class="mt-4 flex items-center text-sm text-${experiment.color}-700">
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                    <span>AI生成服务暂时不可用，显示基础实验内容</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 基础信息 -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                            实验信息
+                        </h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-700 mb-4">这是一个关于${experiment.title}的实验。</p>
+                            <p class="text-gray-700">AI助手将在服务恢复后为您生成详细的实验内容，包括：</p>
+                            <ul class="mt-2 space-y-1 text-gray-600">
+                                <li>• 详细的实验目标和理论基础</li>
+                                <li>• 逐步的实验操作指导</li>
+                                <li>• 交互式在线仿真环境</li>
+                                <li>• 个性化的学习建议</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 重试按钮 -->
+                    <div class="text-center">
+                        <button onclick="generateExperiment({id: '${experiment.id}', title: '${experiment.title}', description: '${experiment.description}', subject: '${experiment.subject}', icon: '${experiment.icon}', color: '${experiment.color}'})" 
+                                class="bg-${experiment.color}-600 hover:bg-${experiment.color}-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            重新生成实验内容
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // 启动仿真实验
+        function startSimulation(experimentId) {
+            alert(`启动仿真实验: ${experimentId}\n\n在实际应用中，这里会打开相应的在线仿真环境。`);
+        }
+
+        // 学科标签页切换
+        function initSubjectTabs() {
+            const tabs = document.querySelectorAll('.subject-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // 移除所有活动状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // 添加当前活动状态
+                    tab.classList.add('active');
+                    
+                    const subject = tab.dataset.subject;
+                    if (subject === 'all') {
+                        renderExperiments(getAllExperiments());
+                    } else {
+                        renderExperiments(experimentModules[subject] || []);
+                    }
+                });
+            });
+        }
+
+        // AI助手功能
+        function initAIAssistant() {
+            const aiBtn = document.getElementById('aiAssistantBtn');
+            const chatWindow = document.getElementById('aiChatWindow');
+            const closeBtn = document.getElementById('closeChatBtn');
+            const sendBtn = document.getElementById('sendChatBtn');
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+
+            aiBtn.addEventListener('click', () => {
+                chatWindow.classList.toggle('hidden');
+            });
+
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.add('hidden');
+            });
+
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // 添加用户消息
+                const userMsg = document.createElement('div');
+                userMsg.className = 'bg-gray-100 rounded-lg p-3 ml-8';
+                userMsg.innerHTML = `<p class="text-sm text-gray-800">${message}</p>`;
+                chatMessages.appendChild(userMsg);
+
+                // 清空输入框
+                chatInput.value = '';
+
+                // 模拟AI回复
+                setTimeout(() => {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'bg-blue-100 rounded-lg p-3';
+                    aiMsg.innerHTML = `<p class="text-sm text-blue-800">🤖 关于"${message}"的问题，我建议你查看相关实验的理论基础，或者参考实验步骤中的详细说明。如需更具体的帮助，请描述你遇到的具体问题。</p>`;
+                    chatMessages.appendChild(aiMsg);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // 模态框控制
+        function initModal() {
+            const modal = document.getElementById('experimentModal');
+            const closeBtn = document.getElementById('closeModal');
+
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        // 用户菜单
+        function initUserMenu() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+
+            userMenuBtn.addEventListener('click', () => {
+                userMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userMenuBtn.contains(e.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // 页面初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            renderExperiments(getAllExperiments());
+            initSubjectTabs();
+            initAIAssistant();
+            initModal();
+            initUserMenu();
+        });
+    </script>
+</body>
+</html>

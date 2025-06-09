@@ -1,0 +1,1108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .logo {
+            height: 50px;
+        }
+        
+        .nav-link {
+            position: relative;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            stroke-dasharray: 251.2;
+            stroke-dashoffset: 251.2;
+            transition: stroke-dashoffset 0.5s ease-in-out;
+        }
+        
+        .skill-bar {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 8px;
+        }
+        
+        .skill-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), #22d3ee);
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .recommendation-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .recommendation-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(44, 165, 141, 0.1);
+        }
+        
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .badge-easy {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .badge-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .badge-hard {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .tab-button.active {
+            background-color: var(--accent-color);
+            color: white;
+        }
+        
+        .tab-button:not(.active) {
+            color: #6b7280;
+            border-color: #e5e7eb;
+        }
+        
+        .tab-button:not(.active):hover {
+            background-color: #f9fafb;
+            border-color: var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="logo mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="/static/index.html" class="nav-link font-medium">首页</a>
+                <a href="/static/projects.html" class="nav-link font-medium">项目制学习</a>
+                <a href="/static/answer.html" class="nav-link font-medium">AI问答</a>
+                <a href="/static/dashboard.html" class="nav-link font-medium active">个人中心</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <button onclick="switchLanguage()" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span class="text-sm font-medium">🇺🇸 English</span>
+                </button>
+                <div class="relative" id="user-menu">
+                    <button class="flex items-center space-x-2 focus:outline-none" id="user-menu-button">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                            <i class="fas fa-user text-white text-sm"></i>
+                        </div>
+                        <span class="hidden md:inline-block" id="user-name">加载中...</span>
+                        <i class="fas fa-chevron-down text-sm"></i>
+                    </button>
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user mr-2"></i>个人资料
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog mr-2"></i>设置
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，<span id="welcome-name">学习者</span>！</h1>
+            <p class="text-gray-600">继续您的学习之旅，探索更多知识</p>
+        </div>
+
+        <!-- Metrics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="metric-card">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-sm">学习天数</p>
+                        <p class="text-2xl font-bold" id="learning-days">--</p>
+                    </div>
+                    <i class="fas fa-calendar-alt text-2xl text-white/60"></i>
+                </div>
+            </div>
+            
+            <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-sm">提问次数</p>
+                        <p class="text-2xl font-bold" id="questions-count">--</p>
+                    </div>
+                    <i class="fas fa-question-circle text-2xl text-white/60"></i>
+                </div>
+            </div>
+            
+            <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-sm">项目参与</p>
+                        <p class="text-2xl font-bold" id="projects-count">--</p>
+                    </div>
+                    <i class="fas fa-project-diagram text-2xl text-white/60"></i>
+                </div>
+            </div>
+            
+            <div class="metric-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-white/80 text-sm">学习积分</p>
+                        <p class="text-2xl font-bold" id="learning-points">--</p>
+                    </div>
+                    <i class="fas fa-star text-2xl text-white/60"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Dashboard Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Digital Portrait & Analytics -->
+            <div class="lg:col-span-2 space-y-8">
+                <!-- Digital Portrait -->
+                <div class="dashboard-card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-user-circle text-blue-500 mr-2"></i>
+                            AI数字画像
+                        </h2>
+                        <button id="generate-portrait-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-sync-alt mr-2"></i>更新画像
+                        </button>
+                    </div>
+                    
+                    <div id="portrait-content">
+                        <div class="text-center py-8">
+                            <div class="loading-skeleton w-full h-4 rounded mb-4"></div>
+                            <div class="loading-skeleton w-3/4 h-4 rounded mb-4"></div>
+                            <div class="loading-skeleton w-1/2 h-4 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Learning Analytics -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
+                        学习分析
+                    </h2>
+                    
+                    <!-- Tab Navigation -->
+                    <div class="flex space-x-2 mb-6">
+                        <button class="tab-button active" data-tab="engagement">参与度</button>
+                        <button class="tab-button" data-tab="subjects">学科分布</button>
+                        <button class="tab-button" data-tab="progress">学习进度</button>
+                    </div>
+                    
+                    <!-- Tab Content -->
+                    <div id="analytics-content">
+                        <div id="engagement-tab" class="tab-content">
+                            <canvas id="engagement-chart" width="400" height="200"></canvas>
+                        </div>
+                        <div id="subjects-tab" class="tab-content hidden">
+                            <canvas id="subjects-chart" width="400" height="200"></canvas>
+                        </div>
+                        <div id="progress-tab" class="tab-content hidden">
+                            <div id="progress-content">
+                                <!-- Progress content will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Recommendations & Knowledge Map -->
+            <div class="space-y-8">
+                <!-- AI Project Recommendations -->
+                <div class="dashboard-card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h2 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            AI推荐项目
+                        </h2>
+                        <button id="refresh-recommendations-btn" class="text-blue-500 hover:text-blue-600">
+                            <i class="fas fa-refresh"></i>
+                        </button>
+                    </div>
+                    
+                    <div id="recommendations-content">
+                        <div class="space-y-4">
+                            <div class="loading-skeleton w-full h-20 rounded"></div>
+                            <div class="loading-skeleton w-full h-20 rounded"></div>
+                            <div class="loading-skeleton w-full h-20 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Knowledge Map -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-brain text-purple-500 mr-2"></i>
+                        知识图谱
+                    </h2>
+                    
+                    <div id="knowledge-map-content">
+                        <div class="space-y-4">
+                            <!-- Knowledge points will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card p-6">
+                    <h2 class="text-xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-history text-indigo-500 mr-2"></i>
+                        最近活动
+                    </h2>
+                    
+                    <div id="recent-activity-content">
+                        <div class="space-y-3">
+                            <div class="loading-skeleton w-full h-12 rounded"></div>
+                            <div class="loading-skeleton w-full h-12 rounded"></div>
+                            <div class="loading-skeleton w-full h-12 rounded"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let currentUser = null;
+        let analyticsData = null;
+        let digitalPortrait = null;
+        let engagementChart = null;
+        let subjectsChart = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuthentication();
+            initializeEventListeners();
+        });
+
+        // Check if user is authenticated
+        function checkAuthentication() {
+            const token = localStorage.getItem('auth_token');
+            const userInfo = localStorage.getItem('user_info');
+            
+            if (!token || !userInfo) {
+                window.location.href = '/static/login.html?return=' + encodeURIComponent(window.location.href);
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(userInfo);
+                updateUserInfo();
+                loadDashboardData();
+            } catch (error) {
+                console.error('Error parsing user info:', error);
+                logout();
+            }
+        }
+
+        // Update user information in UI
+        function updateUserInfo() {
+            if (currentUser) {
+                document.getElementById('user-name').textContent = currentUser.full_name || currentUser.username;
+                document.getElementById('welcome-name').textContent = currentUser.full_name || currentUser.username;
+            }
+        }
+
+        // Initialize event listeners
+        function initializeEventListeners() {
+            // User menu toggle
+            document.getElementById('user-menu-button').addEventListener('click', function() {
+                const dropdown = document.getElementById('user-dropdown');
+                dropdown.classList.toggle('hidden');
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(event) {
+                const userMenu = document.getElementById('user-menu');
+                const dropdown = document.getElementById('user-dropdown');
+                if (!userMenu.contains(event.target)) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+
+            // Logout button
+            document.getElementById('logout-btn').addEventListener('click', logout);
+
+            // Generate portrait button
+            document.getElementById('generate-portrait-btn').addEventListener('click', generateDigitalPortrait);
+
+            // Refresh recommendations button
+            document.getElementById('refresh-recommendations-btn').addEventListener('click', refreshRecommendations);
+
+            // Tab navigation
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    switchTab(tabName);
+                });
+            });
+        }
+
+        // Load all dashboard data
+        async function loadDashboardData() {
+            try {
+                await Promise.all([
+                    loadAnalytics(),
+                    loadDigitalPortrait(),
+                    loadRecommendations(),
+                    loadKnowledgeMap(),
+                    loadRecentActivity()
+                ]);
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load analytics data
+        async function loadAnalytics() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/dashboard?days=30', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    analyticsData = await response.json();
+                    updateMetrics();
+                    updateCharts();
+                } else {
+                    console.error('Failed to load analytics');
+                }
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        // Update metrics cards
+        function updateMetrics() {
+            if (!analyticsData) return;
+
+            const engagement = analyticsData.engagement_metrics;
+            const sessions = analyticsData.learning_sessions;
+            
+            // Calculate learning days
+            const uniqueDates = new Set();
+            sessions.forEach(session => {
+                if (session.start_time) {
+                    const date = new Date(session.start_time).toDateString();
+                    uniqueDates.add(date);
+                }
+            });
+            
+            document.getElementById('learning-days').textContent = uniqueDates.size;
+            document.getElementById('questions-count').textContent = analyticsData.total_actions || 0;
+            document.getElementById('projects-count').textContent = analyticsData.action_breakdown.view_project || 0;
+            document.getElementById('learning-points').textContent = Math.round(engagement.engagement_score * 1000);
+        }
+
+        // Update charts
+        function updateCharts() {
+            if (!analyticsData) return;
+
+            // Engagement chart
+            updateEngagementChart();
+            
+            // Subjects chart
+            updateSubjectsChart();
+            
+            // Progress content
+            updateProgressContent();
+        }
+
+        // Update engagement chart
+        function updateEngagementChart() {
+            const ctx = document.getElementById('engagement-chart').getContext('2d');
+            
+            // Prepare data for the last 7 days
+            const last7Days = [];
+            const today = new Date();
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+                last7Days.push(date.toISOString().split('T')[0]);
+            }
+            
+            const dailyActivity = analyticsData.daily_activity || {};
+            const activityData = last7Days.map(date => dailyActivity[date] || 0);
+            
+            if (engagementChart) {
+                engagementChart.destroy();
+            }
+            
+            engagementChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: last7Days.map(date => {
+                        const d = new Date(date);
+                        return `${d.getMonth() + 1}/${d.getDate()}`;
+                    }),
+                    datasets: [{
+                        label: '每日活动',
+                        data: activityData,
+                        borderColor: '#2ca58d',
+                        backgroundColor: 'rgba(44, 165, 141, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update subjects chart
+        function updateSubjectsChart() {
+            const ctx = document.getElementById('subjects-chart').getContext('2d');
+            
+            const subjectInterests = analyticsData.subject_interests || {};
+            const subjects = Object.keys(subjectInterests);
+            const values = Object.values(subjectInterests);
+            
+            if (subjectsChart) {
+                subjectsChart.destroy();
+            }
+            
+            subjectsChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: subjects,
+                    datasets: [{
+                        data: values,
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe',
+                            '#00f2fe',
+                            '#43e97b',
+                            '#38f9d7'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update progress content
+        function updateProgressContent() {
+            const progressContent = document.getElementById('progress-content');
+            const knowledgePoints = analyticsData.knowledge_points || [];
+            
+            if (knowledgePoints.length === 0) {
+                progressContent.innerHTML = '<p class="text-gray-500 text-center py-8">暂无学习进度数据</p>';
+                return;
+            }
+            
+            // Group by subject and show top skills
+            const subjectSkills = {};
+            knowledgePoints.forEach(kp => {
+                const subject = kp.subject_name || '其他';
+                if (!subjectSkills[subject]) {
+                    subjectSkills[subject] = [];
+                }
+                subjectSkills[subject].push(kp);
+            });
+            
+            let html = '';
+            Object.keys(subjectSkills).forEach(subject => {
+                const skills = subjectSkills[subject].slice(0, 3); // Top 3 skills per subject
+                html += `
+                    <div class="mb-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">${subject}</h4>
+                        <div class="space-y-3">
+                `;
+                
+                skills.forEach(skill => {
+                    const percentage = Math.round(skill.mastery_level * 100);
+                    html += `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-700">${skill.knowledge_point}</span>
+                                <span class="text-gray-500">${percentage}%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            progressContent.innerHTML = html;
+        }
+
+        // Load digital portrait
+        async function loadDigitalPortrait() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/portrait', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    digitalPortrait = await response.json();
+                    updateDigitalPortrait();
+                } else if (response.status === 404) {
+                    // Portrait doesn't exist, show generate button
+                    showGeneratePortraitPrompt();
+                } else {
+                    console.error('Failed to load digital portrait');
+                }
+            } catch (error) {
+                console.error('Error loading digital portrait:', error);
+            }
+        }
+
+        // Update digital portrait display
+        function updateDigitalPortrait() {
+            if (!digitalPortrait) return;
+
+            const content = document.getElementById('portrait-content');
+            
+            let html = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-3">学习特征</h4>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">学习风格:</span>
+                                <span class="font-medium">${getLearningStyleText(digitalPortrait.learning_style)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">学习节奏:</span>
+                                <span class="font-medium">${getLearningPaceText(digitalPortrait.learning_pace)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-600">置信度:</span>
+                                <span class="font-medium">${Math.round(digitalPortrait.confidence_score * 100)}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-semibold text-gray-800 mb-3">个性特征</h4>
+                        <div class="space-y-2">
+            `;
+            
+            if (digitalPortrait.personality_traits) {
+                Object.keys(digitalPortrait.personality_traits).forEach(trait => {
+                    const value = digitalPortrait.personality_traits[trait];
+                    const percentage = Math.round(value * 100);
+                    html += `
+                        <div>
+                            <div class="flex justify-between text-sm mb-1">
+                                <span class="text-gray-700">${getTraitText(trait)}</span>
+                                <span class="text-gray-500">${percentage}%</span>
+                            </div>
+                            <div class="skill-bar">
+                                <div class="skill-fill" style="width: ${percentage}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+            
+            html += `
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-semibold text-gray-800 mb-3">AI洞察</h4>
+                    <p class="text-gray-600 leading-relaxed">${digitalPortrait.ai_insights || '暂无AI洞察'}</p>
+                </div>
+            `;
+            
+            if (digitalPortrait.strengths && digitalPortrait.strengths.length > 0) {
+                html += `
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">优势领域</h4>
+                        <div class="flex flex-wrap gap-2">
+                `;
+                digitalPortrait.strengths.forEach(strength => {
+                    html += `<span class="badge badge-easy">${strength}</span>`;
+                });
+                html += '</div></div>';
+            }
+            
+            if (digitalPortrait.improvement_areas && digitalPortrait.improvement_areas.length > 0) {
+                html += `
+                    <div class="mt-6">
+                        <h4 class="font-semibold text-gray-800 mb-3">提升空间</h4>
+                        <div class="flex flex-wrap gap-2">
+                `;
+                digitalPortrait.improvement_areas.forEach(area => {
+                    html += `<span class="badge badge-medium">${area}</span>`;
+                });
+                html += '</div></div>';
+            }
+            
+            content.innerHTML = html;
+        }
+
+        // Show generate portrait prompt
+        function showGeneratePortraitPrompt() {
+            const content = document.getElementById('portrait-content');
+            content.innerHTML = `
+                <div class="text-center py-8">
+                    <i class="fas fa-user-circle text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-lg font-semibold text-gray-800 mb-2">还没有数字画像</h3>
+                    <p class="text-gray-600 mb-4">AI将分析您的学习行为，生成个性化的数字画像</p>
+                    <button onclick="generateDigitalPortrait()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                        <i class="fas fa-magic mr-2"></i>生成我的数字画像
+                    </button>
+                </div>
+            `;
+        }
+
+        // Generate digital portrait
+        async function generateDigitalPortrait() {
+            try {
+                const btn = document.getElementById('generate-portrait-btn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
+                btn.disabled = true;
+
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/portrait/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    digitalPortrait = data.portrait;
+                    updateDigitalPortrait();
+                } else {
+                    console.error('Failed to generate digital portrait');
+                    alert('生成数字画像失败，请稍后重试');
+                }
+            } catch (error) {
+                console.error('Error generating digital portrait:', error);
+                alert('生成数字画像时发生错误');
+            } finally {
+                const btn = document.getElementById('generate-portrait-btn');
+                btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>更新画像';
+                btn.disabled = false;
+            }
+        }
+
+        // Load recommendations
+        async function loadRecommendations() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/recommendations', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const recommendations = await response.json();
+                    updateRecommendations(recommendations);
+                } else {
+                    console.error('Failed to load recommendations');
+                }
+            } catch (error) {
+                console.error('Error loading recommendations:', error);
+            }
+        }
+
+        // Update recommendations display
+        function updateRecommendations(recommendations) {
+            const content = document.getElementById('recommendations-content');
+            
+            if (!recommendations || recommendations.length === 0) {
+                content.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-lightbulb text-4xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-600">暂无推荐项目</p>
+                        <button onclick="refreshRecommendations()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            生成推荐
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            recommendations.slice(0, 3).forEach(rec => {
+                const difficultyClass = getDifficultyClass(rec.difficulty_match);
+                const score = Math.round(rec.recommendation_score * 100);
+                
+                html += `
+                    <div class="recommendation-card p-4 bg-white border" onclick="viewProject('${rec.project_id}')">
+                        <div class="flex justify-between items-start mb-2">
+                            <h4 class="font-semibold text-gray-800">${rec.project_title}</h4>
+                            <span class="text-xs text-gray-500">${score}%匹配</span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-3">${rec.recommendation_reason}</p>
+                        <div class="flex justify-between items-center">
+                            <span class="badge ${difficultyClass}">
+                                ${getDifficultyText(rec.difficulty_match)}
+                            </span>
+                            <i class="fas fa-arrow-right text-gray-400"></i>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+        }
+
+        // Refresh recommendations
+        async function refreshRecommendations() {
+            try {
+                const btn = document.getElementById('refresh-recommendations-btn');
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/recommendations/generate', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    updateRecommendations(data.recommendations);
+                } else {
+                    console.error('Failed to refresh recommendations');
+                }
+            } catch (error) {
+                console.error('Error refreshing recommendations:', error);
+            } finally {
+                const btn = document.getElementById('refresh-recommendations-btn');
+                btn.innerHTML = '<i class="fas fa-refresh"></i>';
+            }
+        }
+
+        // Load knowledge map
+        async function loadKnowledgeMap() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/analytics/knowledge-points', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const knowledgePoints = await response.json();
+                    updateKnowledgeMap(knowledgePoints);
+                } else {
+                    console.error('Failed to load knowledge map');
+                }
+            } catch (error) {
+                console.error('Error loading knowledge map:', error);
+            }
+        }
+
+        // Update knowledge map display
+        function updateKnowledgeMap(knowledgePoints) {
+            const content = document.getElementById('knowledge-map-content');
+            
+            if (!knowledgePoints || Object.keys(knowledgePoints).length === 0) {
+                content.innerHTML = '<p class="text-gray-500 text-center py-8">暂无知识点数据</p>';
+                return;
+            }
+
+            let html = '';
+            Object.keys(knowledgePoints).forEach(subject => {
+                const points = knowledgePoints[subject].slice(0, 5); // Top 5 per subject
+                html += `
+                    <div class="mb-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">${subject}</h4>
+                        <div class="space-y-2">
+                `;
+                
+                points.forEach(point => {
+                    const percentage = Math.round(point.mastery_level * 100);
+                    const color = percentage > 70 ? 'text-green-600' : percentage > 40 ? 'text-yellow-600' : 'text-red-600';
+                    
+                    html += `
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-700">${point.knowledge_point}</span>
+                            <span class="${color} font-medium">${percentage}%</span>
+                        </div>
+                    `;
+                });
+                
+                html += '</div></div>';
+            });
+            
+            content.innerHTML = html;
+        }
+
+        // Load recent activity
+        async function loadRecentActivity() {
+            try {
+                const token = localStorage.getItem('auth_token');
+                const response = await fetch('/api/user/questions?limit=5', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.ok) {
+                    const questions = await response.json();
+                    updateRecentActivity(questions);
+                } else {
+                    console.error('Failed to load recent activity');
+                }
+            } catch (error) {
+                console.error('Error loading recent activity:', error);
+            }
+        }
+
+        // Update recent activity display
+        function updateRecentActivity(questions) {
+            const content = document.getElementById('recent-activity-content');
+            
+            if (!questions || questions.length === 0) {
+                content.innerHTML = '<p class="text-gray-500 text-center py-8">暂无最近活动</p>';
+                return;
+            }
+
+            let html = '';
+            questions.forEach(question => {
+                const date = new Date(question.created_at).toLocaleDateString();
+                html += `
+                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                        <i class="fas fa-question-circle text-blue-500 mt-1"></i>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800 line-clamp-2">${question.content}</p>
+                            <p class="text-xs text-gray-500 mt-1">${date}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content.innerHTML = html;
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+            
+            // Update tab content
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.add('hidden');
+            });
+            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
+        }
+
+        // View project
+        function viewProject(projectId) {
+            window.location.href = `/static/project-detail.html?id=${projectId}`;
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('user_info');
+            window.location.href = '/static/login.html';
+        }
+
+        // Language switching function
+        function switchLanguage() {
+            window.location.href = '/static/dashboard-en.html';
+        }
+
+        // Helper functions
+        function getLearningStyleText(style) {
+            const styles = {
+                'visual': '视觉型',
+                'auditory': '听觉型',
+                'kinesthetic': '动手型',
+                'mixed': '混合型'
+            };
+            return styles[style] || '未知';
+        }
+
+        function getLearningPaceText(pace) {
+            const paces = {
+                'slow': '稳步型',
+                'medium': '适中型',
+                'fast': '快速型'
+            };
+            return paces[pace] || '未知';
+        }
+
+        function getTraitText(trait) {
+            const traits = {
+                'curiosity': '好奇心',
+                'persistence': '坚持性',
+                'methodical': '条理性'
+            };
+            return traits[trait] || trait;
+        }
+
+        function getDifficultyClass(difficulty) {
+            if (difficulty > 0.7) return 'badge-easy';
+            if (difficulty > 0.4) return 'badge-medium';
+            return 'badge-hard';
+        }
+
+        function getDifficultyText(difficulty) {
+            if (difficulty > 0.7) return '简单';
+            if (difficulty > 0.4) return '中等';
+            return '困难';
+        }
+    </script>
+</body>
+</html>

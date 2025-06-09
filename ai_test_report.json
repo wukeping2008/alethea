@@ -1,0 +1,363 @@
+{
+  "timestamp": "2025-06-09T00:05:19.861614",
+  "server_url": "http://localhost:8083",
+  "test_questions": [
+    {
+      "question": "什么是PID控制器？",
+      "expected_keywords": [
+        "比例",
+        "积分",
+        "微分",
+        "控制"
+      ],
+      "category": "控制理论"
+    },
+    {
+      "question": "解释欧姆定律",
+      "expected_keywords": [
+        "电压",
+        "电流",
+        "电阻",
+        "V=IR"
+      ],
+      "category": "电路理论"
+    },
+    {
+      "question": "什么是机器学习？",
+      "expected_keywords": [
+        "算法",
+        "数据",
+        "模型",
+        "学习"
+      ],
+      "category": "人工智能"
+    }
+  ],
+  "ai_providers": [
+    "openai",
+    "deepseek",
+    "volces_deepseek",
+    "ollama_deepseek",
+    "qianwen",
+    "ali_qwen",
+    "claude",
+    "gemini",
+    "llama"
+  ],
+  "detailed_results": [
+    {
+      "provider": "openai",
+      "status": "success",
+      "response_time": 0.0024657249450683594,
+      "content_length": 72,
+      "keyword_match": true,
+      "selected_model": "gpt-4o",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "deepseek",
+      "status": "success",
+      "response_time": 0.0023910999298095703,
+      "content_length": 81,
+      "keyword_match": true,
+      "selected_model": "deepseek-chat",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "volces_deepseek",
+      "status": "timeout",
+      "error": "Request timeout (60s)",
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "ollama_deepseek",
+      "status": "success",
+      "response_time": 49.633086919784546,
+      "content_length": 1803,
+      "keyword_match": true,
+      "selected_model": "deepseek-r1:7b",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "qianwen",
+      "status": "success",
+      "response_time": 0.0028600692749023438,
+      "content_length": 75,
+      "keyword_match": true,
+      "selected_model": "ERNIE-Bot-4",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "ali_qwen",
+      "status": "success",
+      "response_time": 21.765224933624268,
+      "content_length": 1454,
+      "keyword_match": true,
+      "selected_model": "qwen-plus-2025-04-28",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "claude",
+      "status": "success",
+      "response_time": 7.874212026596069,
+      "content_length": 389,
+      "keyword_match": true,
+      "selected_model": "claude-3-sonnet-20240229",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "gemini",
+      "status": "success",
+      "response_time": 4.497698068618774,
+      "content_length": 907,
+      "keyword_match": true,
+      "selected_model": "gemini-1.5-flash",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "llama",
+      "status": "success",
+      "response_time": 0.006731986999511719,
+      "content_length": 76,
+      "keyword_match": true,
+      "selected_model": "llama-3-70b",
+      "error": null,
+      "question_category": "控制理论",
+      "question": "什么是PID控制器？"
+    },
+    {
+      "provider": "openai",
+      "status": "success",
+      "response_time": 0.008085012435913086,
+      "content_length": 68,
+      "keyword_match": false,
+      "selected_model": "gpt-4o",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "deepseek",
+      "status": "success",
+      "response_time": 0.006752967834472656,
+      "content_length": 77,
+      "keyword_match": false,
+      "selected_model": "deepseek-chat",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "volces_deepseek",
+      "status": "timeout",
+      "error": "Request timeout (60s)",
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "ollama_deepseek",
+      "status": "success",
+      "response_time": 24.122904062271118,
+      "content_length": 862,
+      "keyword_match": true,
+      "selected_model": "deepseek-r1:7b",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "qianwen",
+      "status": "success",
+      "response_time": 0.007873058319091797,
+      "content_length": 71,
+      "keyword_match": false,
+      "selected_model": "ERNIE-Bot-4",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "ali_qwen",
+      "status": "success",
+      "response_time": 15.40070390701294,
+      "content_length": 924,
+      "keyword_match": true,
+      "selected_model": "qwen-plus-2025-04-28",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "claude",
+      "status": "success",
+      "response_time": 7.823396921157837,
+      "content_length": 423,
+      "keyword_match": true,
+      "selected_model": "claude-3-sonnet-20240229",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "gemini",
+      "status": "success",
+      "response_time": 2.6665709018707275,
+      "content_length": 435,
+      "keyword_match": true,
+      "selected_model": "gemini-1.5-flash",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "llama",
+      "status": "success",
+      "response_time": 0.00460505485534668,
+      "content_length": 72,
+      "keyword_match": false,
+      "selected_model": "llama-3-70b",
+      "error": null,
+      "question_category": "电路理论",
+      "question": "解释欧姆定律"
+    },
+    {
+      "provider": "openai",
+      "status": "success",
+      "response_time": 0.007652759552001953,
+      "content_length": 70,
+      "keyword_match": true,
+      "selected_model": "gpt-4o",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "deepseek",
+      "status": "success",
+      "response_time": 0.004358053207397461,
+      "content_length": 79,
+      "keyword_match": true,
+      "selected_model": "deepseek-chat",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "volces_deepseek",
+      "status": "timeout",
+      "error": "Request timeout (60s)",
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "ollama_deepseek",
+      "status": "success",
+      "response_time": 23.763540029525757,
+      "content_length": 933,
+      "keyword_match": true,
+      "selected_model": "deepseek-r1:7b",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "qianwen",
+      "status": "success",
+      "response_time": 0.002696990966796875,
+      "content_length": 73,
+      "keyword_match": true,
+      "selected_model": "ERNIE-Bot-4",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "ali_qwen",
+      "status": "success",
+      "response_time": 27.250762939453125,
+      "content_length": 2126,
+      "keyword_match": true,
+      "selected_model": "qwen-plus-2025-04-28",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "claude",
+      "status": "success",
+      "response_time": 7.589841842651367,
+      "content_length": 384,
+      "keyword_match": true,
+      "selected_model": "claude-3-sonnet-20240229",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "gemini",
+      "status": "success",
+      "response_time": 3.415827989578247,
+      "content_length": 691,
+      "keyword_match": true,
+      "selected_model": "gemini-1.5-flash",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    },
+    {
+      "provider": "llama",
+      "status": "success",
+      "response_time": 0.0027511119842529297,
+      "content_length": 74,
+      "keyword_match": true,
+      "selected_model": "llama-3-70b",
+      "error": null,
+      "question_category": "人工智能",
+      "question": "什么是机器学习？"
+    }
+  ],
+  "auto_selection_results": [
+    {
+      "question": "计算积分 ∫x²dx",
+      "category": "数学",
+      "selected_provider": "ollama_deepseek",
+      "selected_model": "deepseek-r1:7b",
+      "selection_reason": "数学问题，使用本地DeepSeek数学计算模型",
+      "is_appropriate": true,
+      "response_time": 18.124916791915894
+    },
+    {
+      "question": "写一个Python冒泡排序算法",
+      "category": "编程",
+      "selected_provider": "ollama_deepseek",
+      "selected_model": "deepseek-r1:7b",
+      "selection_reason": "编程问题，使用本地DeepSeek专业代码模型",
+      "is_appropriate": true,
+      "response_time": 47.93213224411011
+    },
+    {
+      "question": "今天天气怎么样？",
+      "category": "一般",
+      "selected_provider": "gemini",
+      "selected_model": "gemini-1.5-flash",
+      "selection_reason": "通用问题，使用云端Gemini专业模型",
+      "is_appropriate": true,
+      "response_time": 1.049182415008545
+    }
+  ]
+}

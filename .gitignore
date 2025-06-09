@@ -159,6 +159,7 @@ cache/
 .env.production
 config/secrets.py
 secrets.json
+src/config.json
 
 # Node modules (if any frontend build tools are used)
 node_modules/

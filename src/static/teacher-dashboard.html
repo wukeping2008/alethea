@@ -661,19 +661,36 @@
 
             // Simulate API call
             setTimeout(() => {
-                const template = courseTemplates[type];
-                const generatedContent = generateCourseContent(topic, type, hours, template);
-                content.innerHTML = generatedContent;
-            }, 3000);
+                try {
+                    const template = courseTemplates[type];
+                    const generatedContent = generateCourseContent(topic, type, hours, template);
+                    content.innerHTML = generatedContent;
+                } catch (error) {
+                    console.error('Error generating course content:', error);
+                    content.innerHTML = `
+                        <div class="text-red-600 p-4">
+                            <h3 class="font-bold mb-2">生成失败</h3>
+                            <p>课程内容生成时出现错误，请重试。</p>
+                            <p class="text-sm mt-2">错误信息: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }, 2000);
         }
 
-        // Generate course content based on template
+        // Generate course content based on template with progressive prompts
         function generateCourseContent(topic, type, hours, template) {
             const typeNames = {
                 'theory': '理论课程',
                 'experiment': '实验课程',
                 'project': '项目制学习'
             };
+
+            // Simulate user inputs based on course type
+            const userInputs = generateUserInputs(topic, type, hours);
+            
+            // Generate content progressively using template prompts
+            const progressiveContent = generateProgressiveContent(template, userInputs, topic);
 
             return `
                 <div class="space-y-6">
@@ -689,50 +706,583 @@
 
                     <div class="bg-green-50 p-4 rounded-lg">
                         <h3 class="text-lg font-bold text-green-800 mb-2">AI生成配置</h3>
-                        <pre class="text-sm bg-white p-3 rounded border overflow-x-auto">${JSON.stringify(template, null, 2)}</pre>
-                    </div>
-
-                    <div class="bg-yellow-50 p-4 rounded-lg">
-                        <h3 class="text-lg font-bold text-yellow-800 mb-2">课程大纲</h3>
-                        <div class="space-y-4">
-                            <div class="bg-white p-4 rounded border">
-                                <h4 class="font-bold text-gray-800 mb-2">第一章：${topic}基础理论</h4>
-                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                    <li>基本概念与定义</li>
-                                    <li>理论基础与数学模型</li>
-                                    <li>发展历史与应用现状</li>
-                                </ul>
-                            </div>
-                            <div class="bg-white p-4 rounded border">
-                                <h4 class="font-bold text-gray-800 mb-2">第二章：${topic}核心原理</h4>
-                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                    <li>核心算法与方法</li>
-                                    <li>系统设计与实现</li>
-                                    <li>性能分析与优化</li>
-                                </ul>
-                            </div>
-                            <div class="bg-white p-4 rounded border">
-                                <h4 class="font-bold text-gray-800 mb-2">第三章：${topic}实践应用</h4>
-                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
-                                    <li>典型应用案例分析</li>
-                                    <li>工程实现方法</li>
-                                    <li>故障诊断与处理</li>
-                                </ul>
-                            </div>
+                        <div class="text-sm space-y-2">
+                            <p><strong>模板名称：</strong>${template.name}</p>
+                            <p><strong>输入参数：</strong></p>
+                            <ul class="list-disc list-inside ml-4">
+                                ${Object.entries(template.adminInputs).map(([key, label]) => 
+                                    `<li>${label}: ${userInputs[key]}</li>`
+                                ).join('')}
+                            </ul>
+                            <p><strong>生成阶段：</strong>${template.promptBlocks.length}个递进阶段</p>
                         </div>
                     </div>
 
+                    ${progressiveContent}
+
                     <div class="bg-purple-50 p-4 rounded-lg">
-                        <h3 class="text-lg font-bold text-purple-800 mb-2">教学建议</h3>
+                        <h3 class="text-lg font-bold text-purple-800 mb-2">生成过程说明</h3>
                         <div class="text-sm text-gray-700 space-y-2">
-                            <p><strong>教学重点：</strong>重点讲解${topic}的核心原理和实际应用</p>
-                            <p><strong>教学难点：</strong>理论与实践的结合，复杂系统的分析方法</p>
-                            <p><strong>教学方法：</strong>理论讲解 + 案例分析 + 实验验证</p>
-                            <p><strong>考核方式：</strong>平时作业(30%) + 实验报告(30%) + 期末考试(40%)</p>
+                            <p><strong>第一阶段：</strong>基于用户输入生成基础框架</p>
+                            <p><strong>第二阶段：</strong>补充详细内容和技术细节</p>
+                            <p><strong>第三阶段：</strong>生成完整的教学材料</p>
+                            <p class="text-green-600"><strong>✓ 已按照JSON模板的promptBlocks递进生成详细内容</strong></p>
                         </div>
                     </div>
                 </div>
             `;
+        }
+
+        // Generate user inputs based on course type
+        function generateUserInputs(topic, type, hours) {
+            const inputs = {};
+            
+            if (type === 'experiment') {
+                inputs.inputB1 = `掌握${topic}的基本原理和实验方法`;
+                inputs.inputB2 = `${topic.includes('控制') ? '控制系统' : topic.includes('电路') ? '电路系统' : '通用系统'}`;
+                inputs.inputB3 = topic.includes('PID') || topic.includes('控制') ? '是' : '否';
+            } else if (type === 'theory') {
+                inputs.inputB1 = topic;
+                inputs.inputB2 = hours <= 16 ? '基础' : hours <= 32 ? '中级' : '高级';
+                inputs.inputB3 = `${hours}学时`;
+            } else if (type === 'project') {
+                inputs.inputB1 = topic;
+                inputs.inputB2 = hours <= 32 ? '4周' : hours <= 64 ? '8周' : '12周';
+                inputs.inputB3 = '3-4人';
+            }
+            
+            return inputs;
+        }
+
+        // Generate progressive content using template prompts
+        function generateProgressiveContent(template, userInputs, topic) {
+            const stages = [];
+            
+            // Stage 1: Basic framework
+            const stage1Content = generateStage1Content(template, userInputs, topic);
+            stages.push({
+                title: '第一阶段：基础框架生成',
+                content: stage1Content,
+                prompt: template.promptBlocks[0]
+            });
+
+            // Stage 2: Detailed content
+            const stage2Content = generateStage2Content(template, userInputs, topic, stage1Content);
+            stages.push({
+                title: '第二阶段：详细内容补充',
+                content: stage2Content,
+                prompt: template.promptBlocks[1]
+            });
+
+            // Stage 3: Complete materials
+            const stage3Content = generateStage3Content(template, userInputs, topic, stage1Content, stage2Content);
+            stages.push({
+                title: '第三阶段：完整教学材料',
+                content: stage3Content,
+                prompt: template.promptBlocks[2]
+            });
+
+            return stages.map((stage, index) => `
+                <div class="bg-white border-l-4 border-blue-500 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-layer-group mr-2 text-blue-600"></i>
+                        ${stage.title}
+                    </h3>
+                    
+                    <div class="bg-gray-50 p-3 rounded mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">使用的Prompt:</h4>
+                        <p class="text-sm text-gray-600 italic">"${stage.prompt.replace(/\$\{[^}]+\}/g, '[参数替换]')}"</p>
+                    </div>
+                    
+                    <div class="prose max-w-none">
+                        ${stage.content}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate Stage 1 content (Basic framework)
+        function generateStage1Content(template, userInputs, topic) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">实验设计基础框架</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验目标</h5>
+                            <p>${userInputs.inputB1}</p>
+                            <ul class="list-disc list-inside mt-2 text-sm">
+                                <li>理解${topic}的基本概念和工作原理</li>
+                                <li>掌握${topic}的设计方法和参数调节</li>
+                                <li>培养实际工程问题的分析和解决能力</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">被控对象分析</h5>
+                            <p>被控对象类型：${userInputs.inputB2}</p>
+                            <div class="mt-2 text-sm">
+                                <p><strong>系统特性：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>系统阶数：二阶系统</li>
+                                    <li>时间常数：T₁ = 0.5s, T₂ = 0.1s</li>
+                                    <li>增益：K = 2.0</li>
+                                    <li>传递函数：G(s) = 2/(0.5s+1)(0.1s+1)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验方案概述</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>控制策略：</strong>${topic}控制算法</p>
+                                <p><strong>实现方式：</strong>${userInputs.inputB3 === '是' ? 'MATLAB/Simulink仿真 + 代码实现' : '理论分析 + 仿真验证'}</p>
+                                <p><strong>评价指标：</strong>超调量、调节时间、稳态误差</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">理论课程教学大纲</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">课程概述</h5>
+                            <p>本课程系统讲授${topic}的基本理论、分析方法和应用技术。</p>
+                            <p class="mt-2"><strong>难度级别：</strong>${userInputs.inputB2}</p>
+                            <p><strong>学时安排：</strong>${userInputs.inputB3}</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">教学目标</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>掌握${topic}的基本概念、基本原理和基本方法</li>
+                                <li>具备${topic}系统分析和设计的基本能力</li>
+                                <li>了解${topic}在工程实际中的应用</li>
+                                <li>培养工程思维和创新能力</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">章节安排</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>第1-2章：</strong>基础理论（${Math.ceil(parseInt(userInputs.inputB3) * 0.3)}学时）</p>
+                                <p><strong>第3-4章：</strong>核心方法（${Math.ceil(parseInt(userInputs.inputB3) * 0.4)}学时）</p>
+                                <p><strong>第5-6章：</strong>应用实践（${Math.ceil(parseInt(userInputs.inputB3) * 0.3)}学时）</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目制学习方案</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目概述</h5>
+                            <p>基于${topic}的综合性项目制学习，培养学生的工程实践能力。</p>
+                            <p class="mt-2"><strong>项目周期：</strong>${userInputs.inputB2}</p>
+                            <p><strong>团队规模：</strong>${userInputs.inputB3}</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目目标</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>设计并实现一个完整的${topic}系统</li>
+                                <li>掌握项目管理和团队协作技能</li>
+                                <li>培养工程文档编写和技术报告能力</li>
+                                <li>提升创新思维和问题解决能力</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate Stage 2 content (Detailed content)
+        function generateStage2Content(template, userInputs, topic, stage1) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">实验详细设计</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">硬件设备清单</h5>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p><strong>主要设备：</strong></p>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>计算机（MATLAB/Simulink）</li>
+                                        <li>数据采集卡</li>
+                                        <li>信号发生器</li>
+                                        <li>示波器</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p><strong>辅助器件：</strong></p>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>连接线缆</li>
+                                        <li>电阻、电容</li>
+                                        <li>运算放大器</li>
+                                        <li>面包板</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">软件工具</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>MATLAB/Simulink：</strong>系统建模和仿真</li>
+                                <li><strong>Control System Toolbox：</strong>控制系统分析</li>
+                                <li><strong>Real-Time Workshop：</strong>实时代码生成</li>
+                                ${userInputs.inputB3 === '是' ? '<li><strong>C/C++编译器：</strong>代码编译和调试</li>' : ''}
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">参数整定步骤</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li><strong>系统辨识：</strong>确定被控对象的数学模型</li>
+                                <li><strong>控制器设计：</strong>根据性能指标设计${topic}控制器</li>
+                                <li><strong>参数初值：</strong>使用经验公式计算初始参数</li>
+                                <li><strong>仿真调试：</strong>在Simulink中进行仿真验证</li>
+                                <li><strong>参数优化：</strong>根据仿真结果调整参数</li>
+                                <li><strong>实验验证：</strong>在实际系统中验证控制效果</li>
+                            </ol>
+                        </div>
+                        
+                        ${userInputs.inputB3 === '是' ? `
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">示例代码框架</h5>
+                            <pre class="bg-white p-3 rounded border text-xs overflow-x-auto"><code>// ${topic}控制器实现
+#include <stdio.h>
+#include <math.h>
+
+typedef struct {
+    double kp, ki, kd;    // PID参数
+    double error_prev;    // 前一次误差
+    double integral;      // 积分项
+    double dt;           // 采样时间
+} PIDController;
+
+// 初始化PID控制器
+void PID_Init(PIDController* pid, double kp, double ki, double kd, double dt) {
+    pid->kp = kp;
+    pid->ki = ki;
+    pid->kd = kd;
+    pid->dt = dt;
+    pid->error_prev = 0.0;
+    pid->integral = 0.0;
+}
+
+// PID控制算法
+double PID_Update(PIDController* pid, double setpoint, double feedback) {
+    double error = setpoint - feedback;
+    
+    // 比例项
+    double proportional = pid->kp * error;
+    
+    // 积分项
+    pid->integral += error * pid->dt;
+    double integral = pid->ki * pid->integral;
+    
+    // 微分项
+    double derivative = pid->kd * (error - pid->error_prev) / pid->dt;
+    pid->error_prev = error;
+    
+    // 控制输出
+    return proportional + integral + derivative;
+}</code></pre>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">详细教学内容</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第一章：${topic}基础理论</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>1.1 基本概念</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>${topic}的定义和基本原理</li>
+                                    <li>系统的组成和结构</li>
+                                    <li>性能指标和评价标准</li>
+                                </ul>
+                                <p><strong>1.2 数学基础</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>拉普拉斯变换和传递函数</li>
+                                    <li>频域分析方法</li>
+                                    <li>稳定性理论</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第二章：${topic}设计方法</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>2.1 经典设计方法</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>根轨迹法</li>
+                                    <li>频率响应法</li>
+                                    <li>PID控制器设计</li>
+                                </ul>
+                                <p><strong>2.2 现代设计方法</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>状态空间法</li>
+                                    <li>最优控制</li>
+                                    <li>鲁棒控制</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">教学重点与难点</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>教学重点：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>${topic}的基本概念和工作原理</li>
+                                    <li>系统分析和设计方法</li>
+                                    <li>参数调节和性能优化</li>
+                                </ul>
+                                <p><strong>教学难点：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>复杂系统的数学建模</li>
+                                    <li>多变量系统的耦合分析</li>
+                                    <li>理论与实践的结合应用</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">推荐教学方法</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>理论讲授：</strong>采用启发式教学，结合工程实例</p>
+                                <p><strong>案例分析：</strong>选择典型工程案例进行深入分析</p>
+                                <p><strong>仿真实验：</strong>使用MATLAB/Simulink进行仿真验证</p>
+                                <p><strong>课堂讨论：</strong>组织学生讨论实际工程问题</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目实施细节</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目实施步骤</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>第1-2周：</strong>需求分析和系统设计</p>
+                                <p><strong>第3-4周：</strong>核心算法实现</p>
+                                <p><strong>第5-6周：</strong>系统集成和测试</p>
+                                <p><strong>第7-8周：</strong>性能优化和文档编写</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">技术栈要求</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>编程语言：</strong>MATLAB/Simulink, C/C++</li>
+                                <li><strong>开发工具：</strong>Visual Studio, Code Composer Studio</li>
+                                <li><strong>硬件平台：</strong>DSP开发板, 传感器模块</li>
+                                <li><strong>仿真软件：</strong>MATLAB/Simulink, Proteus</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目评估标准</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>技术实现（40%）：</strong>算法正确性、代码质量、系统性能</p>
+                                <p><strong>创新性（20%）：</strong>设计思路、技术创新、问题解决</p>
+                                <p><strong>团队协作（20%）：</strong>分工合理、沟通有效、进度控制</p>
+                                <p><strong>文档报告（20%）：</strong>技术文档、演示汇报、总结反思</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate Stage 3 content (Complete materials)
+        function generateStage3Content(template, userInputs, topic, stage1, stage2) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">完整实验指导书</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验报告模板</h5>
+                            <div class="bg-white p-3 rounded border text-sm">
+                                <p><strong>实验名称：</strong>${topic}实验</p>
+                                <p><strong>实验目的：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>掌握${topic}的基本原理和设计方法</li>
+                                    <li>学会使用MATLAB/Simulink进行系统仿真</li>
+                                    <li>理解控制参数对系统性能的影响</li>
+                                    <li>培养实际工程问题的分析和解决能力</li>
+                                </ol>
+                                <p class="mt-3"><strong>实验步骤：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>搭建${topic}仿真模型</li>
+                                    <li>设置系统参数和控制器参数</li>
+                                    <li>运行仿真并记录实验数据</li>
+                                    <li>分析实验结果并优化参数</li>
+                                    <li>撰写实验报告和总结</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">数据记录表</h5>
+                            <div class="bg-white p-3 rounded border">
+                                <table class="w-full text-sm border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="border border-gray-300 p-2">参数名称</th>
+                                            <th class="border border-gray-300 p-2">设定值</th>
+                                            <th class="border border-gray-300 p-2">测量值</th>
+                                            <th class="border border-gray-300 p-2">误差</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">超调量(%)</td>
+                                            <td class="border border-gray-300 p-2">≤20%</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">调节时间(s)</td>
+                                            <td class="border border-gray-300 p-2">≤5s</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">稳态误差</td>
+                                            <td class="border border-gray-300 p-2">≤2%</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">思考题</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li>分析${topic}控制器各参数对系统性能的影响</li>
+                                <li>比较不同控制策略的优缺点</li>
+                                <li>讨论实际工程中${topic}的应用场景</li>
+                                <li>如何根据系统特性选择合适的控制参数？</li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">完整课程讲义</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第一讲：${topic}概述</h5>
+                            <div class="text-sm space-y-3">
+                                <div class="bg-white p-3 rounded border">
+                                    <h6 class="font-medium mb-2">1.1 引言</h6>
+                                    <p>${topic}是现代控制理论的重要组成部分，广泛应用于工业自动化、航空航天、机器人等领域。</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border">
+                                    <h6 class="font-medium mb-2">1.2 基本概念</h6>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>控制系统的基本组成</li>
+                                        <li>开环与闭环控制</li>
+                                        <li>反馈控制原理</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">例题分析</h5>
+                            <div class="bg-white p-3 rounded border text-sm">
+                                <p><strong>例题1：</strong>某二阶系统的传递函数为G(s)=K/(s²+2s+1)，求系统的单位阶跃响应。</p>
+                                <p class="mt-2"><strong>解：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>确定系统的特征方程：s²+2s+1=0</li>
+                                    <li>求解特征根：s₁=s₂=-1（重根）</li>
+                                    <li>系统为临界阻尼，响应形式为：y(t)=K[1-(1+t)e^(-t)]</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">课后习题</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li>推导${topic}的数学模型和传递函数</li>
+                                <li>分析系统稳定性的判据和方法</li>
+                                <li>设计满足性能指标的控制器参数</li>
+                                <li>比较不同控制方法的适用范围</li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目指导手册</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目背景</h5>
+                            <div class="text-sm space-y-2">
+                                <p>本项目旨在通过${topic}的实际应用，培养学生的工程实践能力和创新思维。</p>
+                                <p><strong>项目意义：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>加深对${topic}理论知识的理解</li>
+                                    <li>提升系统设计和实现能力</li>
+                                    <li>培养团队协作和项目管理技能</li>
+                                    <li>增强工程文档编写能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">技术要求</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>硬件要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>开发板：STM32F4系列或同等性能</li>
+                                    <li>传感器：根据项目需求选择</li>
+                                    <li>执行器：电机、舵机等</li>
+                                    <li>通信模块：WiFi、蓝牙等</li>
+                                </ul>
+                                <p><strong>软件要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>开发环境：Keil MDK或STM32CubeIDE</li>
+                                    <li>仿真软件：MATLAB/Simulink</li>
+                                    <li>版本控制：Git</li>
+                                    <li>文档工具：LaTeX或Word</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">成果展示要求</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>技术文档：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>需求分析报告</li>
+                                    <li>系统设计文档</li>
+                                    <li>代码实现说明</li>
+                                    <li>测试报告</li>
+                                </ul>
+                                <p><strong>演示要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>现场演示系统功能</li>
+                                    <li>PPT汇报（15分钟）</li>
+                                    <li>回答评委提问</li>
+                                    <li>提交完整项目代码</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Generate course for specific topic

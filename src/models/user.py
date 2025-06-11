@@ -831,6 +831,7 @@ def _create_default_roles_and_permissions(role_manager, permission_manager):
 def _create_default_subjects(subject_manager):
     """Create default subjects"""
     subjects = [
+        # 电子工程类
         {
             'name': '电工电子实验',
             'category': 'engineering',
@@ -878,6 +879,96 @@ def _create_default_subjects(subject_manager):
             'category': 'engineering',
             'description': '微处理器原理与接口设计，包括汇编语言、中断系统、I/O接口等',
             'icon': 'fa-microchip'
+        },
+        # 半导体与集成电路
+        {
+            'name': '半导体集成电路',
+            'category': 'engineering',
+            'description': '芯片设计、VLSI、FPGA、ASIC等集成电路技术',
+            'icon': 'fa-memory'
+        },
+        # 计算机科学
+        {
+            'name': '计算机科学',
+            'category': 'computer_science',
+            'description': '算法、数据结构、操作系统、计算机网络',
+            'icon': 'fa-laptop-code'
+        },
+        # 人工智能
+        {
+            'name': '人工智能',
+            'category': 'artificial_intelligence',
+            'description': '机器学习、深度学习、自然语言处理、计算机视觉',
+            'icon': 'fa-robot'
+        },
+        {
+            'name': '深度学习',
+            'category': 'artificial_intelligence',
+            'description': '神经网络、CNN、RNN、Transformer、生成模型',
+            'icon': 'fa-brain'
+        },
+        # 物理学
+        {
+            'name': '物理学',
+            'category': 'physics',
+            'description': '力学、电磁学、热力学、光学、现代物理',
+            'icon': 'fa-atom'
+        },
+        # 量子科学
+        {
+            'name': '量子科学',
+            'category': 'physics',
+            'description': '量子力学、量子计算、量子通信、量子材料',
+            'icon': 'fa-infinity'
+        },
+        # 生物学
+        {
+            'name': '生物学',
+            'category': 'biology',
+            'description': '分子生物学、细胞生物学、遗传学、生物化学',
+            'icon': 'fa-dna'
+        },
+        # 医学
+        {
+            'name': '医学',
+            'category': 'medicine',
+            'description': '基础医学、临床医学、生物医学工程、医学影像',
+            'icon': 'fa-heartbeat'
+        },
+        # 建筑工程
+        {
+            'name': '建筑工程',
+            'category': 'engineering',
+            'description': '结构力学、建筑设计、工程力学、土木工程',
+            'icon': 'fa-building'
+        },
+        # 材料科学
+        {
+            'name': '材料科学',
+            'category': 'materials',
+            'description': '材料物理、材料化学、纳米材料、复合材料',
+            'icon': 'fa-cube'
+        },
+        # 化学工程
+        {
+            'name': '化学工程',
+            'category': 'engineering',
+            'description': '化工原理、反应工程、分离工程、化工设计',
+            'icon': 'fa-flask'
+        },
+        # 机械工程
+        {
+            'name': '机械工程',
+            'category': 'engineering',
+            'description': '机械设计、制造工艺、机械原理、工程力学',
+            'icon': 'fa-cogs'
+        },
+        # 航空航天
+        {
+            'name': '航空航天',
+            'category': 'engineering',
+            'description': '空气动力学、飞行器设计、推进系统、航天工程',
+            'icon': 'fa-rocket'
         }
     ]
     

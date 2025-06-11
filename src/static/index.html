@@ -1,16 +1,18 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Alethea - 高等教育知识问答平台</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <!-- Highlight.js for code syntax highlighting -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/atom-one-dark.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -19,7 +21,7 @@
     <!-- Custom styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
-        
+
         :root {
             --primary-color: #0a2342;
             --secondary-color: #126872;
@@ -27,33 +29,33 @@
             --light-color: #f8f9fa;
             --dark-color: #212529;
         }
-        
+
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7fa;
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .logo {
             height: 60px;
             margin-right: 10px;
         }
-        
+
         .nav-link {
             position: relative;
             color: var(--dark-color);
             transition: all 0.3s ease;
         }
-        
+
         .nav-link:hover {
             color: var(--primary-color);
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
@@ -64,63 +66,64 @@
             background-color: var(--primary-color);
             transition: width 0.3s ease;
         }
-        
+
         .nav-link:hover::after {
             width: 100%;
         }
-        
+
         .hero-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
+            background: #f8f9fa;
+            color: #1f2937;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e5e7eb;
         }
-        
+
         .question-input {
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             transition: all 0.3s ease;
         }
-        
+
         .question-input:focus {
             border-color: var(--accent-color);
             box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.2);
             outline: none;
         }
-        
+
         .submit-btn {
             background-color: var(--primary-color);
             color: white;
             transition: all 0.3s ease;
         }
-        
+
         .submit-btn:hover {
             background-color: var(--secondary-color);
             transform: translateY(-2px);
         }
-        
+
         .answer-card {
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
-        
+
         .answer-card:hover {
             box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
-        
+
         .subject-card {
             border-radius: 8px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
+
         .subject-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
-        
+
         .feature-icon {
             background-color: var(--primary-color);
             color: white;
@@ -132,7 +135,7 @@
             justify-content: center;
             margin-bottom: 15px;
         }
-        
+
         .language-switcher {
             display: flex;
             align-items: center;
@@ -144,18 +147,18 @@
             cursor: pointer;
             transition: all 0.3s ease;
         }
-        
+
         .language-switcher:hover {
             border-color: var(--accent-color);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
-        
+
         .language-flag {
             width: 20px;
             height: 15px;
             border-radius: 2px;
         }
-        
+
         /* Math formula styles */
         .math-formula {
             padding: 10px;
@@ -164,29 +167,509 @@
             margin: 15px 0;
             overflow-x: auto;
         }
-        
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .hero-section {
                 padding: 2rem 1rem;
             }
-            
+
             .logo {
                 height: 40px;
             }
         }
-        
+
         /* Animation effects */
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
-        
+
         .fade-in {
             animation: fadeIn 0.5s ease forwards;
         }
+
+        /* 网格化学科卡片 */
+        .subject-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 20px;
+            width: 100%;
+            height: 100%;
+            padding: 40px;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        .blackboard-card {
+            width: 100%;
+            height: 140px;
+            padding: 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            position: relative;
+        }
+
+        .blackboard-card:hover {
+            transform: translateY(-4px);
+            background: rgba(255, 255, 255, 1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            border: 2px solid rgba(255, 255, 255, 1);
+        }
+
+        .blackboard-card .icon-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: #374151;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .blackboard-card .icon-container i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .blackboard-card:hover .icon-container {
+            background: #1f2937;
+            transform: scale(1.1);
+        }
+
+        .blackboard-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .blackboard-card p {
+            font-size: 12px;
+            color: #6b7280;
+            line-height: 1.3;
+            margin: 0;
+        }
+
+        /* 滑动控制按钮 */
+        .slide-control {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .slide-control:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .slide-control i {
+            font-size: 18px;
+            color: #374151;
+        }
+
+        .slide-left {
+            left: 20px;
+        }
+
+        .slide-right {
+            right: 20px;
+        }
+
+        /* Subject Explorer Styles */
+        #subject-explorer {
+            position: relative;
+            background: linear-gradient(135deg,
+                    #0f0f23 0%,
+                    #1a0033 25%,
+                    #330066 50%,
+                    #4d0099 75%,
+                    #6600cc 100%);
+            border: 2px solid;
+            border-image: linear-gradient(135deg, #ff0096, #00ffff, #ffff00) 1;
+            overflow: hidden;
+            box-shadow:
+                0 0 50px rgba(255, 0, 150, 0.3),
+                0 0 100px rgba(0, 255, 255, 0.2),
+                inset 0 0 50px rgba(255, 255, 0, 0.1);
+        }
+
+        /* Mouse Follower Animation */
+        #mouse-follower {
+            transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            mix-blend-mode: multiply;
+        }
+
+        /* Floating Animation for Cards */
+        @keyframes float {
+
+            0%,
+            100% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .glass-card:nth-child(odd) {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .glass-card:nth-child(even) {
+            animation: float 6s ease-in-out infinite reverse;
+        }
+
+        /* Responsive adjustments for glass cards */
+        @media (max-width: 768px) {
+            .glass-card {
+                width: 160px;
+                height: 130px;
+                padding: 15px;
+            }
+
+            .glass-card h3 {
+                font-size: 14px;
+            }
+
+            .glass-card p {
+                font-size: 11px;
+            }
+
+            .glass-card .icon-container {
+                width: 40px;
+                height: 40px;
+            }
+
+            .glass-card .icon-container i {
+                font-size: 20px;
+            }
+        }
+
+        /* Academic Blackboard Background */
+        #subject-explorer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                /* Chalk dust texture */
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 40% 90%, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+                /* Grid lines */
+                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+            background-size:
+                200px 200px,
+                150px 150px,
+                180px 180px,
+                50px 50px,
+                50px 50px;
+            animation: chalkDust 30s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        /* Fixed Academic formulas and symbols background - like teacher's blackboard */
+        .blackboard-formula {
+            position: absolute;
+            font-family: 'Times New Roman', serif;
+            color: rgba(255, 255, 255, 0.12);
+            pointer-events: none;
+            z-index: 1;
+            transform-origin: center;
+        }
+
+        /* Large formulas */
+        .formula-large {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Medium formulas */
+        .formula-medium {
+            font-size: 18px;
+        }
+
+        /* Small formulas */
+        .formula-small {
+            font-size: 14px;
+        }
+
+        /* Faded formulas */
+        .formula-faded {
+            opacity: 0.6;
+        }
+
+        @keyframes chalkDust {
+
+            0%,
+            100% {
+                opacity: 0.6;
+                transform: translateX(0px) translateY(0px);
+            }
+
+            25% {
+                opacity: 0.8;
+                transform: translateX(10px) translateY(-5px);
+            }
+
+            50% {
+                opacity: 0.7;
+                transform: translateX(-5px) translateY(10px);
+            }
+
+            75% {
+                opacity: 0.9;
+                transform: translateX(8px) translateY(-8px);
+            }
+        }
+
+        @keyframes formulaFloat {
+            0% {
+                transform: translateY(100%) rotate(0deg);
+            }
+
+            100% {
+                transform: translateY(-100%) rotate(360deg);
+            }
+        }
+
+        /* Gentle card drift animation */
+        @keyframes gentleDrift {
+
+            0%,
+            100% {
+                transform: translate(0px, 0px) rotate(0deg);
+            }
+
+            25% {
+                transform: translate(3px, -2px) rotate(0.5deg);
+            }
+
+            50% {
+                transform: translate(-2px, 3px) rotate(-0.3deg);
+            }
+
+            75% {
+                transform: translate(2px, 1px) rotate(0.2deg);
+            }
+        }
+
+        /* Apply gentle drift to cards */
+        .glass-card {
+            animation: gentleDrift 15s ease-in-out infinite;
+        }
+
+        .glass-card:nth-child(2n) {
+            animation: gentleDrift 18s ease-in-out infinite reverse;
+        }
+
+        .glass-card:nth-child(3n) {
+            animation: gentleDrift 20s ease-in-out infinite;
+            animation-delay: -5s;
+        }
+
+        .glass-card:nth-child(4n) {
+            animation: gentleDrift 22s ease-in-out infinite reverse;
+            animation-delay: -8s;
+        }
+
+        .glass-card:nth-child(5n) {
+            animation: gentleDrift 16s ease-in-out infinite;
+            animation-delay: -12s;
+        }
+
+        /* Enhanced glass effect for better visibility on dark background */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow:
+                0 20px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .glass-card h3 {
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .glass-card p {
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        .glass-card .icon-container {
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .glass-card .icon-container i {
+            background: linear-gradient(135deg, #ffffff 0%, #e0e7ff 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* Magnetic attraction effect enhancement */
+        .glass-card.attracted {
+            z-index: 10;
+            animation-play-state: paused;
+        }
+
+        /* Navigation header styles */
+        .nav-header {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Glass module for navigation elements */
+        .glass-module {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.25);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .glass-module:hover {
+            background: rgba(255, 255, 255, 0.35);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+
+        /* Hero section glass effect */
+        .hero-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        /* Features section glass cards */
+        .feature-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        /* About section glass effect */
+        .about-section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+        }
+
+        /* Footer dark theme */
+        .footer-dark {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Adjust text colors for dark theme */
+        .text-description {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* Subject explorer description */
+        .subject-description {
+            color: rgba(255, 255, 255, 0.7);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Add top padding for fixed navigation */
+        body {
+            padding-top: 80px;
+        }
+
+        /* Slower animation for cards */
+        .glass-card {
+            animation: gentleDrift 25s ease-in-out infinite;
+        }
+
+        .glass-card:nth-child(2n) {
+            animation: gentleDrift 30s ease-in-out infinite reverse;
+        }
+
+        .glass-card:nth-child(3n) {
+            animation: gentleDrift 35s ease-in-out infinite;
+            animation-delay: -8s;
+        }
+
+        .glass-card:nth-child(4n) {
+            animation: gentleDrift 40s ease-in-out infinite reverse;
+            animation-delay: -12s;
+        }
+
+        .glass-card:nth-child(5n) {
+            animation: gentleDrift 28s ease-in-out infinite;
+            animation-delay: -18s;
+        }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="bg-white shadow-sm py-4">
@@ -200,6 +683,7 @@
                 <a href="#subjects" class="nav-link font-medium">学科</a>
                 <a href="/static/projects.html" class="nav-link font-medium">项目制学习</a>
                 <a href="/static/experiments.html" class="nav-link font-medium">实验仿真</a>
+                <a href="/static/teacher-dashboard.html" class="nav-link font-medium">教师助手</a>
                 <a href="#about" class="nav-link font-medium">关于我们</a>
             </div>
             <div class="flex items-center space-x-4">
@@ -209,7 +693,7 @@
                     <span class="text-sm font-medium">English</span>
                     <i class="fas fa-chevron-down text-xs"></i>
                 </div>
-                
+
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100" title="切换主题">
                     <i class="fas fa-moon"></i>
                 </button>
@@ -221,8 +705,9 @@
                         <span class="hidden md:inline-block" id="user-menu-text">登录/注册</span>
                         <i class="fas fa-chevron-down text-sm hidden md:inline-block" id="user-menu-arrow"></i>
                     </button>
-                    <!-- 未登录状态的菜单 -->
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="guest-dropdown">
+                    <!-- Guest menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden"
+                        id="guest-dropdown">
                         <a href="/static/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-sign-in-alt mr-2"></i>登录
                         </a>
@@ -230,13 +715,15 @@
                             <i class="fas fa-user-plus mr-2"></i>注册
                         </a>
                     </div>
-                    <!-- 已登录状态的菜单 -->
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="user-dropdown">
+                    <!-- User menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden"
+                        id="user-dropdown">
                         <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
                             <div class="font-medium" id="user-name">用户名</div>
                             <div class="text-xs" id="user-email">user@example.com</div>
                         </div>
-                        <a href="/static/dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        <a href="/static/dashboard.html"
+                            class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-tachometer-alt mr-2"></i>个人仪表板
                         </a>
                         <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="profile-link">
@@ -251,7 +738,7 @@
                         </a>
                     </div>
                 </div>
-                <button class="md:hidden focus:outline-none" id="mobile-menu-button" title="菜单">
+                <button class="md:hidden focus:outline-none" id="mobile-menu-button" title="打开菜单">
                     <i class="fas fa-bars text-xl"></i>
                 </button>
             </div>
@@ -271,13 +758,15 @@
     <!-- Hero Section -->
     <section class="hero-section py-16 px-4 my-8 container mx-auto">
         <div class="text-center">
-            <h1 class="text-4xl md:text-5xl font-bold mb-4">高等教育知识问答平台</h1>
-            <p class="text-xl mb-8">专为理工科师生打造的智能学习助手</p>
+            <h1 class="text-4xl md:text-5xl font-bold mb-4 text-gray-800">高等教育知识问答平台</h1>
+            <p class="text-xl mb-8 text-gray-700">专为理工科师生打造的智能学习助手</p>
             <div class="max-w-3xl mx-auto">
                 <div class="bg-white p-6 rounded-lg shadow-lg">
-                    <textarea id="question-input" class="question-input w-full p-4 mb-4 h-32 text-gray-800" placeholder="请输入您的问题，例如：'请解释电路中的基尔霍夫定律及其应用'"></textarea>
+                    <textarea id="question-input" class="question-input w-full p-4 mb-4 h-32 text-gray-800"
+                        placeholder="请输入您的问题，例如：'请解释电路中的基尔霍夫定律及其应用'"></textarea>
                     <div class="flex justify-center">
-                        <button id="submit-question" class="submit-btn px-8 py-3 rounded-lg font-medium flex items-center">
+                        <button id="submit-question"
+                            class="submit-btn px-8 py-3 rounded-lg font-medium flex items-center">
                             <i class="fas fa-search mr-2"></i>
                             搜索答案
                         </button>
@@ -289,91 +778,179 @@
 
     <!-- Subjects Section -->
     <section id="subjects" class="container mx-auto px-4 py-16">
-        <h2 class="text-3xl font-bold text-center mb-12">学科分类</h2>
+        <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">学科分类</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+            <!-- 电工电子 -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('电工实验')">
                 <div class="text-4xl text-blue-600 mb-4">
                     <i class="fas fa-bolt"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">电工电子实验</h3>
-                <p class="text-gray-600 mb-4">电路分析、模拟电路、数字电路等实验内容</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">电工实验</h3>
+                <p class="text-gray-600 mb-4">电路分析、模拟电路、数字电路实验</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
             </div>
-            
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('电路分析')">
                 <div class="text-4xl text-green-600 mb-4">
                     <i class="fas fa-project-diagram"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">电路分析</h3>
-                <p class="text-gray-600 mb-4">直流电路、交流电路、三相电路等理论与分析</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">电路分析</h3>
+                <p class="text-gray-600 mb-4">直流电路、交流电路、三相电路理论</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
             </div>
-            
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('模拟电子技术')">
                 <div class="text-4xl text-purple-600 mb-4">
                     <i class="fas fa-wave-square"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">模拟电子技术</h3>
-                <p class="text-gray-600 mb-4">放大器、滤波器、振荡器等模拟电路设计</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">模拟电子技术</h3>
+                <p class="text-gray-600 mb-4">放大器、滤波器、振荡器、模拟电路设计</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
             </div>
-            
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('数字电子技术')">
                 <div class="text-4xl text-red-600 mb-4">
                     <i class="fas fa-microchip"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">数字电子技术</h3>
-                <p class="text-gray-600 mb-4">逻辑门、触发器、计数器等数字电路设计</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">数字电子技术</h3>
+                <p class="text-gray-600 mb-4">逻辑门、触发器、计数器、数字电路设计</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
             </div>
-            
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('电力电子技术')">
                 <div class="text-4xl text-yellow-600 mb-4">
                     <i class="fas fa-plug"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">电力电子技术</h3>
-                <p class="text-gray-600 mb-4">整流器、逆变器、变频器等电力电子应用</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">电力电子技术</h3>
+                <p class="text-gray-600 mb-4">整流器、逆变器、变换器、电力应用</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
             </div>
-            
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
+                onclick="askSubjectQuestion('控制系统')">
                 <div class="text-4xl text-indigo-600 mb-4">
                     <i class="fas fa-sliders-h"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">自动控制原理</h3>
-                <p class="text-gray-600 mb-4">时域分析、频域分析、状态空间分析等控制理论</p>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">控制系统</h3>
+                <p class="text-gray-600 mb-4">时域分析、频域分析、状态空间分析</p>
+                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
+                </div>
+            </div>
+
+            <!-- 物理 -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-blue-500 mb-4">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">大学物理</h3>
+                <p class="text-gray-600 mb-4">力学、热学、电磁学、光学</p>
                 <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
                     查看详情 <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
-            
+
             <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-pink-600 mb-4">
+                <div class="text-4xl text-purple-500 mb-4">
+                    <i class="fas fa-magnet"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">电磁学</h3>
+                <p class="text-gray-600 mb-4">电场、磁场、电磁感应</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-orange-500 mb-4">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">量子力学</h3>
+                <p class="text-gray-600 mb-4">波函数、薛定谔方程、量子态</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 化学 -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-green-500 mb-4">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">无机化学</h3>
+                <p class="text-gray-600 mb-4">原子结构、化学键、配位化合物</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-emerald-500 mb-4">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">有机化学</h3>
+                <p class="text-gray-600 mb-4">有机化合物、反应机理、合成</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- 计算机科学 -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-blue-700 mb-4">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">程序设计基础</h3>
+                <p class="text-gray-600 mb-4">C/C++、Python、Java编程语言</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-green-700 mb-4">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">数据结构与算法</h3>
+                <p class="text-gray-600 mb-4">线性结构、树、图、排序算法</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+
+            <!-- AI与机器学习 -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-indigo-600 mb-4">
                     <i class="fas fa-robot"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">机器学习</h3>
-                <p class="text-gray-600 mb-4">监督学习、无监督学习、强化学习、特征工程</p>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">机器学习</h3>
+                <p class="text-gray-600 mb-4">监督学习、无监督学习、强化学习</p>
                 <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
                     查看详情 <i class="fas fa-arrow-right ml-2"></i>
                 </a>
             </div>
-            
+
             <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-cyan-600 mb-4">
+                <div class="text-4xl text-pink-600 mb-4">
                     <i class="fas fa-brain"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">深度学习</h3>
-                <p class="text-gray-600 mb-4">神经网络、CNN、RNN、Transformer、生成模型</p>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">深度学习</h3>
+                <p class="text-gray-600 mb-4">神经网络、CNN、RNN、Transformer模型</p>
                 <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
                     查看详情 <i class="fas fa-arrow-right ml-2"></i>
                 </a>
@@ -381,31 +958,32 @@
         </div>
     </section>
 
+
     <!-- Features Section -->
     <section class="container mx-auto px-4 py-16">
-        <h2 class="text-3xl font-bold text-center mb-12">平台特色</h2>
+        <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">平台特色</h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div class="text-center">
                 <div class="feature-icon mx-auto">
                     <i class="fas fa-brain"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">多模型智能集成</h3>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">多模型智能集成</h3>
                 <p class="text-gray-600">集成OpenAI、Claude、Gemini等多种大模型，智能选择最适合的模型回答您的问题</p>
             </div>
-            
+
             <div class="text-center">
                 <div class="feature-icon mx-auto">
                     <i class="fas fa-flask"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">在线实验仿真</h3>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">在线实验仿真</h3>
                 <p class="text-gray-600">提供电路、电子实验的在线仿真环境，无需实体设备即可进行实验操作</p>
             </div>
-            
+
             <div class="text-center">
                 <div class="feature-icon mx-auto">
                     <i class="fas fa-chart-line"></i>
                 </div>
-                <h3 class="text-xl font-bold mb-2">数据可视化</h3>
+                <h3 class="text-xl font-bold mb-2 text-gray-800">数据可视化</h3>
                 <p class="text-gray-600">支持数学公式、图表和代码的精美渲染，让复杂概念更易理解</p>
             </div>
         </div>
@@ -414,17 +992,19 @@
     <!-- About Section -->
     <section id="about" class="bg-gray-50 py-16">
         <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-bold text-center mb-12">关于 Alethea</h2>
+            <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">关于 Alethea</h2>
             <div class="max-w-3xl mx-auto">
-                <p class="text-lg text-gray-700 mb-6">Alethea 是一个专为高等教育特别是理工科师生打造的知识问答平台。我们的使命是通过先进的人工智能技术，为教学和学习提供智能支持，让知识获取变得更加高效和便捷。</p>
-                <p class="text-lg text-gray-700 mb-6">目前，我们重点服务于电工电子、电路分析、模拟电子技术等工程类学科，未来将逐步扩展到更多高等教育学科，并最终涵盖中小学教育领域。</p>
+                <p class="text-lg text-gray-700 mb-6">Alethea
+                    是一个专为高等教育特别是理工科师生打造的知识问答平台。我们的使命是通过先进的人工智能技术，为教学和学习提供智能支持，让知识获取变得更加高效和便捷。</p>
+                <p class="text-lg text-gray-700 mb-6">目前，我们重点服务于电工电子、电路分析、模拟电子技术等工程类学科，未来将逐步扩展到更多高等教育学科，并最终涵盖中小学教育领域。
+                </p>
                 <p class="text-lg text-gray-700">Alethea 名称源自希腊语，意为"真理"和"发现"，代表我们对知识探索的不懈追求。</p>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="bg-gray-800 text-white py-12">
+    <footer class="footer-dark text-white py-12">
         <div class="container mx-auto px-4">
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <div>
@@ -445,7 +1025,7 @@
                         </a>
                     </div>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">快速链接</h3>
                     <ul class="space-y-2">
@@ -455,7 +1035,7 @@
                         <li><a href="#about" class="text-gray-400 hover:text-white">关于我们</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">支持</h3>
                     <ul class="space-y-2">
@@ -465,7 +1045,7 @@
                         <li><a href="#" class="text-gray-400 hover:text-white">反馈建议</a></li>
                     </ul>
                 </div>
-                
+
                 <div>
                     <h3 class="text-lg font-bold mb-4">法律</h3>
                     <ul class="space-y-2">
@@ -475,7 +1055,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
                 <p>&copy; 2025 Alethea. 保留所有权利。</p>
             </div>
@@ -483,6 +1063,91 @@
     </footer>
 
     <!-- JavaScript -->
+    <script>
+        // Language switching function
+        function switchLanguage() {
+            window.location.href = '/static/index-en.html';
+        }
+
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', function () {
+            document.body.classList.toggle('dark-mode');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        });
+
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function () {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // User menu toggle
+        document.getElementById('user-menu-button').addEventListener('click', function () {
+            const guestDropdown = document.getElementById('guest-dropdown');
+            const userDropdown = document.getElementById('user-dropdown');
+
+            // Toggle guest dropdown (when not logged in)
+            guestDropdown.classList.toggle('hidden');
+        });
+
+        // Question submission
+        document.getElementById('submit-question').addEventListener('click', function () {
+            const question = document.getElementById('question-input').value.trim();
+            if (question) {
+                // Save current question to localStorage
+                localStorage.setItem('currentQuestion', question);
+
+                // Open answer page in new window
+                window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+            } else {
+                alert('请输入问题');
+            }
+        });
+
+        // Subject question function
+        function askSubjectQuestion(subject) {
+            const questions = {
+                '电工实验': '请详细介绍电工实验的基本内容，包括电路分析、模拟电路和数字电路实验的主要知识点和实验方法',
+                '电路分析': '请解释电路分析的基本理论，包括直流电路、交流电路和三相电路的分析方法和应用',
+                '模拟电子技术': '请详细说明模拟电子技术的核心概念，包括放大器、滤波器、振荡器的工作原理和设计方法',
+                '数字电子技术': '请介绍数字电子技术的基础知识，包括逻辑门、触发器、计数器的原理和数字电路设计方法',
+                '电力电子技术': '请解释电力电子技术的主要内容，包括整流器、逆变器、变换器的工作原理和电力应用',
+                '控制系统': '请详细介绍控制系统的基本理论，包括时域分析、频域分析和状态空间分析方法'
+            };
+
+            const question = questions[subject] || `请详细介绍${subject}的相关知识和应用`;
+
+            // Save current question to localStorage
+            localStorage.setItem('currentQuestion', question);
+
+            // Open answer page
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+        }
+
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+
+        // Initialize syntax highlighting
+        document.addEventListener('DOMContentLoaded', function () {
+            if (window.hljs) {
+                hljs.highlightAll();
+            }
+        });
+    </script>
     <script src="/static/js/main.js"></script>
 </body>
+
 </html>

@@ -1,0 +1,7 @@
+{
+    "defaultAdmin": {
+        "username": "admin",
+        "password": "jytek2025",
+        "note": "请在首次登录后立即修改默认密码"
+    }
+}

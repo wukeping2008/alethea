@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人中心 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card {
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            color: white;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(20px, -20px);
+        }
+        
+        .stat-card.purple {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .stat-card.pink {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+        
+        .stat-card.blue {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+        
+        .stat-card.green {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+        
+        .ai-portrait-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        .trait-bar {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+        
+        .trait-progress {
+            background: rgba(255, 255, 255, 0.8);
+            height: 100%;
+            border-radius: 10px;
+            transition: width 1s ease-in-out;
+        }
+        
+        .project-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            border-left: 4px solid var(--accent-color);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            border-left-width: 8px;
+            transform: translateX(4px);
+        }
+        
+        .difficulty-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .difficulty-easy {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .difficulty-medium {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        
+        .difficulty-hard {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .knowledge-node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .knowledge-node:hover {
+            transform: scale(1.1);
+        }
+        
+        .knowledge-mastered {
+            background: #10b981;
+        }
+        
+        .knowledge-learning {
+            background: #f59e0b;
+        }
+        
+        .knowledge-todo {
+            background: #6b7280;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+        
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+        
+        .tab-button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+        
+        .tab-button.active {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 200px;
+            margin: 20px 0;
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-card {
+                margin-bottom: 16px;
+            }
+            
+            .stat-card {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-12 mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="/static/index.html" class="nav-link font-medium">首页</a>
+                <a href="/static/projects.html" class="nav-link font-medium">项目制学习</a>
+                <a href="/static/answer.html" class="nav-link font-medium">AI问答</a>
+                <a href="/static/student-dashboard.html" class="nav-link font-medium text-blue-600">个人中心</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <div class="language-switcher cursor-pointer" onclick="switchLanguage()">
+                    <span class="text-lg">🇺🇸</span>
+                    <span class="text-sm font-medium">English</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+                
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div class="relative" id="user-menu">
+                    <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <span class="hidden md:inline-block font-medium">张老师</span>
+                        <i class="fas fa-chevron-down text-sm hidden md:inline-block"></i>
+                    </button>
+                    
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="user-dropdown">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                            <div class="font-medium">张老师</div>
+                            <div class="text-xs">电子工程系学生</div>
+                        </div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user-circle mr-2"></i>个人资料
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog mr-2"></i>学习设置
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-chart-bar mr-2"></i>学习报告
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，张老师！</h1>
+            <p class="text-gray-600">继续您的学习之旅，探索更多知识</p>
+        </div>
+
+        <!-- 学习统计卡片 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card purple">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">学习天数</h3>
+                        <i class="fas fa-calendar text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">0</div>
+                    <div class="text-sm opacity-80">连续学习记录</div>
+                </div>
+            </div>
+
+            <div class="stat-card pink">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">提问次数</h3>
+                        <i class="fas fa-question-circle text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">0</div>
+                    <div class="text-sm opacity-80">AI问答互动</div>
+                </div>
+            </div>
+
+            <div class="stat-card blue">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">项目参与</h3>
+                        <i class="fas fa-project-diagram text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">0</div>
+                    <div class="text-sm opacity-80">完成项目数量</div>
+                </div>
+            </div>
+
+            <div class="stat-card green">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">学习积分</h3>
+                        <i class="fas fa-star text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">0</div>
+                    <div class="text-sm opacity-80">累计获得积分</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要内容区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧：AI数字画像和学习分析 -->
+            <div class="lg:col-span-2">
+                <!-- AI数字画像 -->
+                <div class="dashboard-card mb-6">
+                    <div class="ai-portrait-section">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-user-circle text-2xl mr-3"></i>
+                            <h3 class="text-xl font-bold">AI数字画像</h3>
+                            <button class="ml-auto bg-white bg-opacity-20 hover:bg-opacity-30 px-3 py-1 rounded-lg text-sm transition-colors" onclick="updatePortrait()">
+                                <i class="fas fa-sync-alt mr-1"></i>更新画像
+                            </button>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- 学习特征 -->
+                            <div>
+                                <h4 class="font-semibold mb-3">学习特征</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>学习风格:</span>
+                                            <span>混合型</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>学习节奏:</span>
+                                            <span>稳步型</span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>置信度:</span>
+                                            <span>0%</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 个性特征 -->
+                            <div>
+                                <h4 class="font-semibold mb-3">个性特征</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>好奇心</span>
+                                            <span>0%</span>
+                                        </div>
+                                        <div class="trait-bar">
+                                            <div class="trait-progress" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>稳步型</span>
+                                            <span>0%</span>
+                                        </div>
+                                        <div class="trait-bar">
+                                            <div class="trait-progress" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-sm mb-1">
+                                            <span>坚持性</span>
+                                            <span>0%</span>
+                                        </div>
+                                        <div class="trait-bar">
+                                            <div class="trait-progress" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 p-4 bg-white bg-opacity-10 rounded-lg">
+                            <h4 class="font-semibold mb-2">AI洞察</h4>
+                            <p class="text-sm opacity-90">
+                                建议您建立更规律的学习习惯，提高学习效率。建议用户尝试延长学习时间，进行更深入的探索。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 学习分析 -->
+                <div class="dashboard-card">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold">
+                                <i class="fas fa-chart-line mr-2 text-green-500"></i>学习分析
+                            </h3>
+                            <div class="flex space-x-2">
+                                <button class="tab-button active" onclick="switchTab('participation')">参与度</button>
+                                <button class="tab-button" onclick="switchTab('subject')">学科分布</button>
+                                <button class="tab-button" onclick="switchTab('progress')">学习进度</button>
+                            </div>
+                        </div>
+                        
+                        <!-- 参与度图表 -->
+                        <div id="participation-chart" class="chart-container">
+                            <canvas id="participationCanvas"></canvas>
+                        </div>
+                        
+                        <!-- 学科分布图表 -->
+                        <div id="subject-chart" class="chart-container" style="display: none;">
+                            <canvas id="subjectCanvas"></canvas>
+                        </div>
+                        
+                        <!-- 学习进度图表 -->
+                        <div id="progress-chart" class="chart-container" style="display: none;">
+                            <canvas id="progressCanvas"></canvas>
+                        </div>
+                        
+                        <div class="grid grid-cols-3 gap-4 mt-4 text-center">
+                            <div>
+                                <div class="text-2xl font-bold text-blue-600">85%</div>
+                                <div class="text-sm text-gray-600">完成率</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-green-600">92%</div>
+                                <div class="text-sm text-gray-600">正确率</div>
+                            </div>
+                            <div>
+                                <div class="text-2xl font-bold text-purple-600">78%</div>
+                                <div class="text-sm text-gray-600">活跃度</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：AI推荐项目、知识图谱、最近活动 -->
+            <div>
+                <!-- AI推荐项目 -->
+                <div class="dashboard-card mb-6">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-xl font-bold">
+                                <i class="fas fa-lightbulb mr-2 text-orange-500"></i>AI推荐项目
+                            </h3>
+                            <button class="text-blue-600 hover:text-blue-800 text-sm" onclick="refreshRecommendations()">
+                                <i class="fas fa-sync-alt mr-1"></i>刷新
+                            </button>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="project-card" onclick="viewProject('led-matrix')">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">LED点阵显示屏</h4>
+                                    <span class="difficulty-badge difficulty-easy">简单</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">可以学习数字电路，LED驱动等基础技能</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500">80%匹配度</span>
+                                    <i class="fas fa-arrow-right text-blue-500"></i>
+                                </div>
+                            </div>
+
+                            <div class="project-card" onclick="viewProject('weather-station')">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">气象监测站</h4>
+                                    <span class="difficulty-badge difficulty-easy">简单</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">可以学习环境传感器，数据采集等基础技能</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500">80%匹配度</span>
+                                    <i class="fas fa-arrow-right text-blue-500"></i>
+                                </div>
+                            </div>
+
+                            <div class="project-card" onclick="viewProject('digital-clock')">
+                                <div class="flex items-start justify-between mb-2">
+                                    <h4 class="font-semibold text-gray-800">数字时钟</h4>
+                                    <span class="difficulty-badge difficulty-medium">中等</span>
+                                </div>
+                                <p class="text-sm text-gray-600 mb-3">可以学习时钟电路，LCD显示等基础技能</p>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-xs text-gray-500">80%匹配度</span>
+                                    <i class="fas fa-arrow-right text-blue-500"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 知识图谱 -->
+                <div class="dashboard-card mb-6">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4">
+                            <i class="fas fa-sitemap mr-2 text-purple-500"></i>知识图谱
+                        </h3>
+                        
+                        <div class="text-center mb-4">
+                            <p class="text-sm text-gray-600">暂无知识点数据</p>
+                        </div>
+                        
+                        <!-- 知识点网络图 -->
+                        <div class="relative h-48 bg-gray-50 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-network-wired text-4xl text-gray-400 mb-2"></i>
+                                <p class="text-gray-500 text-sm">开始学习后将显示知识图谱</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-4 flex justify-center">
+                            <button class="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg text-sm" onclick="exploreKnowledge()">
+                                <i class="fas fa-search mr-2"></i>探索知识点
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="dashboard-card">
+                    <div class="p-6">
+                        <h3 class="text-xl font-bold mb-4">
+                            <i class="fas fa-clock mr-2 text-blue-500"></i>最近活动
+                        </h3>
+                        
+                        <div class="space-y-1">
+                            <div class="activity-item">
+                                <div class="activity-icon bg-blue-100">
+                                    <i class="fas fa-sign-in-alt text-blue-600"></i>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium">登录系统</p>
+                                    <p class="text-xs text-gray-500">刚刚</p>
+                                </div>
+                            </div>
+                            
+                            <div class="text-center py-8">
+                                <i class="fas fa-history text-4xl text-gray-300 mb-2"></i>
+                                <p class="text-gray-500 text-sm">暂无更多活动记录</p>
+                                <p class="text-gray-400 text-xs">开始学习后将显示活动历史</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        let participationChart, subjectChart, progressChart;
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            initializeUserMenu();
+            animateTraitBars();
+        });
+
+        // 初始化图表
+        function initializeCharts() {
+            // 参与度图表
+            const participationCtx = document.getElementById('participationCanvas').getContext('2d');
+            participationChart = new Chart(participationCtx, {
+                type: 'line',
+                data: {
+                    labels: ['6/3', '6/4', '6/5', '6/6', '6/7', '6/8', '6/9'],
+                    datasets: [{
+                        label: '学习时长(小时)',
+                        data: [0, 0, 0, 0, 0, 0, 0],
+                        borderColor: '#2ca58d',
+                        backgroundColor: 'rgba(44, 165, 141, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1.0
+                        }
+                    }
+                }
+            });
+
+            // 学科分布图表
+            const subjectCtx = document.getElementById('subjectCanvas').getContext('2d');
+            subjectChart = new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['电子工程', '数学', '物理', '计算机'],
+                    datasets: [{
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#667eea',
+                            '#f093fb',
+                            '#4facfe',
+                            '#43e97b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // 学习进度图表
+            const progressCtx = document.getElementById('progressCanvas').getContext('2d');
+            progressChart = new Chart(progressCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['基础概念', '实践应用', '项目实战', '综合能力'],
+                    datasets: [{
+                        label: '掌握程度',
+                        data: [0, 0, 0, 0],
+                        backgroundColor: [
+                            '#667eea',
+                            '#f093fb',
+                            '#4facfe',
+                            '#43e97b'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // 初始化用户菜单
+        function initializeUserMenu() {
+            const userMenuButton = document.getElementById('user-menu-button');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            userMenuButton.addEventListener('click', function() {
+                userDropdown.classList.toggle('hidden');
+            });
+            
+            // 点击外部关闭菜单
+            document.addEventListener('click', function(event) {
+                if (!userMenuButton.contains(event.target) && !userDropdown.contains(event.target)) {
+                    userDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // 动画显示特征条
+        function animateTraitBars() {
+            setTimeout(() => {
+                document.querySelectorAll('.trait-progress').forEach((bar, index) => {
+                    const values = [0, 0, 0]; // 初始值都为0
+                    bar.style.width = values[index] + '%';
+                });
+            }, 500);
+        }
+
+        // 切换分析标签
+        function switchTab(tabName) {
+            // 更新按钮状态
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // 显示对应图表
+            document.getElementById('participation-chart').style.display = 'none';
+            document.getElementById('subject-chart').style.display = 'none';
+            document.getElementById('progress-chart').style.display = 'none';
+
+            // 显示选中的图表
+            document.getElementById(tabName + '-chart').style.display = 'block';
+        }
+
+        // 更新AI数字画像
+        function updatePortrait() {
+            showNotification('正在更新AI数字画像...', 'info');
+            
+            // 模拟AI分析过程
+            setTimeout(() => {
+                // 更新特征值
+                const newValues = [75, 60, 85]; // 模拟新的特征值
+                document.querySelectorAll('.trait-progress').forEach((bar, index) => {
+                    bar.style.width = newValues[index] + '%';
+                });
+                
+                // 更新百分比显示
+                const percentageElements = document.querySelectorAll('.ai-portrait-section .space-y-3 span');
+                percentageElements[1].textContent = '75%';
+                percentageElements[3].textContent = '60%';
+                percentageElements[5].textContent = '85%';
+                
+                showNotification('AI数字画像更新完成！', 'success');
+            }, 2000);
+        }
+
+        // 刷新推荐项目
+        function refreshRecommendations() {
+            showNotification('正在刷新推荐项目...', 'info');
+            
+            setTimeout(() => {
+                showNotification('推荐项目已更新！', 'success');
+            }, 1500);
+        }
+
+        // 查看项目详情
+        function viewProject(projectId) {
+            window.location.href = `/static/project-detail.html?id=${projectId}`;
+        }
+
+        // 探索知识点
+        function exploreKnowledge() {
+            window.location.href = '/static/knowledge-map.html';
+        }
+
+        // 语言切换
+        function switchLanguage() {
+            window.location.href = '/static/student-dashboard-en.html';
+        }
+
+        // 通知系统
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+            
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500', 'text-white');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    break;
+                case 'info':
+                    notification.classList.add('bg-blue-500', 'text-white');
+                    break;
+                default:
+                    notification.classList.add('bg-gray-500', 'text-white');
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 模拟数据更新
+        function simulateDataUpdate() {
+            // 更新统计卡片
+            setTimeout(() => {
+                const statValues = document.querySelectorAll('.stat-card .text-3xl');
+                statValues[0].textContent = '15'; // 学习天数
+                statValues[1].textContent = '42'; // 提问次数
+                statValues[2].textContent = '3';  // 项目参与
+                statValues[3].textContent = '1250'; // 学习积分
+            }, 1000);
+
+            // 更新图表数据
+            setTimeout(() => {
+                // 更新参与度图表
+                participationChart.data.datasets[0].data = [0.2, 0.5, 0.8, 0.6, 0.9, 0.7, 1.0];
+                participationChart.update();
+
+                // 更新学科分布图表
+                subjectChart.data.datasets[0].data = [40, 25, 20, 15];
+                subjectChart.update();
+
+                // 更新学习进度图表
+                progressChart.data.datasets[0].data = [75, 60, 45, 30];
+                progressChart.update();
+            }, 2000);
+        }
+
+        // 页面加载后模拟数据更新
+        setTimeout(simulateDataUpdate, 3000);
+    </script>
+</body>
+</html>

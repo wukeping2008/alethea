@@ -32,8 +32,8 @@ class UserBehavior(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    user = relationship('User')
-    subject = relationship('Subject')
+    user = relationship('User', overlaps="behaviors")
+    subject = relationship('Subject', overlaps="user_behaviors")
     
     def __repr__(self):
         return f"<UserBehavior {self.action_type} by user {self.user_id}>"
@@ -68,8 +68,8 @@ class UserKnowledgePoint(db.Model):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     
     # Relationships
-    user = relationship('User')
-    subject = relationship('Subject')
+    user = relationship('User', overlaps="user_knowledge_points")
+    subject = relationship('Subject', overlaps="user_knowledge_points")
     
     def __repr__(self):
         return f"<UserKnowledgePoint {self.knowledge_point} for user {self.user_id}>"
@@ -111,7 +111,7 @@ class UserDigitalPortrait(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    user = relationship('User', uselist=False)
+    user = relationship('User', uselist=False, overlaps="user_digital_portraits")
     
     def __repr__(self):
         return f"<UserDigitalPortrait for user {self.user_id}>"
@@ -157,7 +157,7 @@ class ProjectRecommendation(db.Model):
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships
-    user = relationship('User')
+    user = relationship('User', overlaps="project_recommendations")
     
     def __repr__(self):
         return f"<ProjectRecommendation {self.project_title} for user {self.user_id}>"
@@ -199,7 +199,7 @@ class LearningSession(db.Model):
     engagement_score = Column(Float)  # Calculated engagement score
     
     # Relationships
-    user = relationship('User')
+    user = relationship('User', overlaps="learning_sessions")
     
     def __repr__(self):
         return f"<LearningSession {self.session_id} for user {self.user_id}>"

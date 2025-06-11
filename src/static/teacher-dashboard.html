@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师数智化课程AI助手 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+            color: #1f2937;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .course-generator {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .input-field {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary:hover {
+            background: #249c7a;
+        }
+
+        .recommendation-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            background: #f1f5f9;
+            border-color: var(--accent-color);
+        }
+
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        .nav-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav-header py-4 px-6">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-8 mr-3">
+                <span class="text-xl font-bold text-gray-800">Alethea 教师助手</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-user-tie text-white text-sm"></i>
+                    </div>
+                    <span class="text-gray-700 font-medium">张教授</span>
+                </div>
+                <button class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">数智化课程AI助手</h1>
+            <p class="text-gray-600">基于学生学习数据的智能教学规划与课程生成系统</p>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card">
+                <div class="stat-number" id="total-students">156</div>
+                <div class="stat-label">总学生数</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-number" id="total-knowledge-points">2,847</div>
+                <div class="stat-label">累积知识点</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-number" id="total-experiments">89</div>
+                <div class="stat-label">完成实验数</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-number" id="avg-progress">78%</div>
+                <div class="stat-label">平均学习进度</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Analytics -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Subject Distribution Chart -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-pie mr-2 text-blue-600"></i>
+                        学科学习分布
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Trend -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line mr-2 text-green-600"></i>
+                        学习进度趋势
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student Performance -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-users mr-2 text-purple-600"></i>
+                        学生表现概览
+                    </h3>
+                    <div class="space-y-4" id="student-performance">
+                        <!-- Student items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: AI Recommendations & Tools -->
+            <div class="space-y-6">
+                <!-- AI Recommendations -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        AI智能推荐
+                    </h3>
+                    <div class="space-y-3" id="ai-recommendations">
+                        <div class="recommendation-item priority-high">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-red-600">高优先级</span>
+                                <span class="text-sm text-gray-500">基于78%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">PID控制系统实验</h4>
+                            <p class="text-sm text-gray-600">多数学生在控制理论方面需要加强实践</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('PID控制系统')">
+                                生成课程
+                            </button>
+                        </div>
+
+                        <div class="recommendation-item priority-medium">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-yellow-600">中优先级</span>
+                                <span class="text-sm text-gray-500">基于65%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">数字信号处理项目</h4>
+                            <p class="text-sm text-gray-600">信号处理算法理解需要项目实践</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('数字信号处理')">
+                                生成课程
+                            </button>
+                        </div>
+
+                        <div class="recommendation-item priority-low">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-green-600">低优先级</span>
+                                <span class="text-sm text-gray-500">基于45%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">电路仿真设计</h4>
+                            <p class="text-sm text-gray-600">部分学生需要加强电路设计能力</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('电路仿真设计')">
+                                生成课程
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Generator -->
+                <div class="course-generator">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-magic mr-2"></i>
+                        AI课程讲义生成器
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">课程主题</label>
+                            <input type="text" id="course-topic" class="input-field text-gray-800"
+                                placeholder="例如：PID控制原理与应用">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">课程类型</label>
+                            <select id="course-type" class="input-field text-gray-800">
+                                <option value="theory">理论课程</option>
+                                <option value="experiment">实验课程</option>
+                                <option value="project">项目制学习</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">目标学时</label>
+                            <input type="number" id="course-hours" class="input-field text-gray-800" placeholder="例如：16"
+                                min="1" max="64">
+                        </div>
+                        <button class="btn-primary w-full" onclick="generateCourseOutline()">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI生成课程讲义
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-orange-600"></i>
+                        快速操作
+                    </h3>
+                    <div class="space-y-3">
+                        <button class="w-full btn-primary" onclick="viewStudentDetails()">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            查看学生详细数据
+                        </button>
+                        <button class="w-full btn-primary" onclick="exportLearningReport()">
+                            <i class="fas fa-download mr-2"></i>
+                            导出学习报告
+                        </button>
+                        <button class="w-full btn-primary" onclick="customizeTeachingPlan()">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            定制教学计划
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Generation Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCourseModal()">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">AI生成的课程讲义</h2>
+            <div id="course-content" class="prose max-w-none">
+                <!-- Generated content will be inserted here -->
+            </div>
+            <div class="mt-6 flex space-x-4">
+                <button class="btn-primary" onclick="downloadCourse()">
+                    <i class="fas fa-download mr-2"></i>
+                    下载讲义
+                </button>
+                <button class="btn-secondary" onclick="editCourse()">
+                    <i class="fas fa-edit mr-2"></i>
+                    编辑修改
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStudentModal()">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">学生学习详情</h2>
+            <div id="student-details" class="space-y-6">
+                <!-- Student details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Sample data for demonstration
+        const sampleData = {
+            students: [
+                { id: 1, name: '张三', progress: 85, knowledgePoints: 45, experiments: 12, subjects: ['电工实验', '控制系统'] },
+                { id: 2, name: '李四', progress: 72, knowledgePoints: 38, experiments: 9, subjects: ['电路分析', '数字电子'] },
+                { id: 3, name: '王五', progress: 91, knowledgePoints: 52, experiments: 15, subjects: ['模拟电子', 'PID控制'] },
+                { id: 4, name: '赵六', progress: 68, knowledgePoints: 34, experiments: 8, subjects: ['电力电子', '控制系统'] },
+                { id: 5, name: '钱七', progress: 79, knowledgePoints: 41, experiments: 11, subjects: ['电工实验', '数字信号处理'] }
+            ],
+            subjectDistribution: {
+                '电工实验': 28,
+                '电路分析': 22,
+                '控制系统': 18,
+                '数字电子': 15,
+                '模拟电子': 12,
+                '其他': 5
+            },
+            progressTrend: {
+                labels: ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'],
+                data: [45, 52, 58, 65, 71, 76, 78, 82]
+            }
+        };
+
+        // Course generation templates
+        const courseTemplates = {
+            experiment: {
+                "name": "实验课程模板",
+                "adminInputs": {
+                    "inputB1": "实验目标",
+                    "inputB2": "被控对象类型",
+                    "inputB3": "是否需要包含代码实现"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n实验目标：${inputB1}\n被控对象类型：${inputB2}\n是否需要包含代码实现：${inputB3}\n\n请根据以上信息，提供一个完整的实验课程设计方案。",
+                    "基于已提供的实验设计方案 ${promptBlock1}，请进一步补充以下内容：\n1. 实验所需的硬件设备清单和软件工具；\n2. 参数整定的具体步骤；\n3. 如果选择了代码实现，请生成示例代码框架及注释说明。",
+                    "在已有实验方案 ${promptBlock1} 和详细补充内容 ${promptBlock2} 的基础上，请提供一份可打印的实验指导书模板，包括实验目的、原理简介、实验步骤、数据记录表、思考题等内容。"
+                ]
+            },
+            theory: {
+                "name": "理论课程模板",
+                "adminInputs": {
+                    "inputB1": "课程主题",
+                    "inputB2": "难度级别",
+                    "inputB3": "学时安排"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n课程主题：${inputB1}\n难度级别：${inputB2}\n学时安排：${inputB3}\n\n请根据以上信息，提供一个完整的理论课程教学大纲。",
+                    "基于已提供的教学大纲 ${promptBlock1}，请进一步补充以下内容：\n1. 详细的章节内容和知识点分解；\n2. 每章节的教学重点和难点；\n3. 推荐的教学方法和辅助材料。",
+                    "在已有教学大纲 ${promptBlock1} 和详细内容 ${promptBlock2} 的基础上，请生成完整的课程讲义，包括理论阐述、例题分析、课后习题等内容。"
+                ]
+            },
+            project: {
+                "name": "项目制学习模板",
+                "adminInputs": {
+                    "inputB1": "项目主题",
+                    "inputB2": "项目周期",
+                    "inputB3": "团队规模"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n项目主题：${inputB1}\n项目周期：${inputB2}\n团队规模：${inputB3}\n\n请根据以上信息，设计一个完整的项目制学习方案。",
+                    "基于已提供的项目方案 ${promptBlock1}，请进一步补充以下内容：\n1. 项目的具体实施步骤和时间节点；\n2. 所需的技术栈和工具；\n3. 项目评估标准和考核方式。",
+                    "在已有项目方案 ${promptBlock1} 和实施细节 ${promptBlock2} 的基础上，请生成项目指导手册，包括项目背景、技术要求、实施指南、成果展示要求等内容。"
+                ]
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCharts();
+            populateStudentPerformance();
+            updateStatistics();
+        });
+
+        // Initialize charts
+        function initializeCharts() {
+            // Subject Distribution Pie Chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(sampleData.subjectDistribution),
+                    datasets: [{
+                        data: Object.values(sampleData.subjectDistribution),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe',
+                            '#00f2fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Progress Trend Line Chart
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            new Chart(progressCtx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.progressTrend.labels,
+                    datasets: [{
+                        label: '平均学习进度 (%)',
+                        data: sampleData.progressTrend.data,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate student performance
+        function populateStudentPerformance() {
+            const container = document.getElementById('student-performance');
+            container.innerHTML = '';
+
+            sampleData.students.forEach(student => {
+                const studentItem = document.createElement('div');
+                studentItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+                studentItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="student-avatar">
+                            ${student.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-800">${student.name}</div>
+                            <div class="text-sm text-gray-600">${student.knowledgePoints}个知识点 · ${student.experiments}个实验</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-gray-800">${student.progress}%</div>
+                        <div class="w-20 progress-bar mt-1">
+                            <div class="progress-fill" style="width: ${student.progress}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(studentItem);
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const totalStudents = sampleData.students.length;
+            const totalKnowledgePoints = sampleData.students.reduce((sum, student) => sum + student.knowledgePoints, 0);
+            const totalExperiments = sampleData.students.reduce((sum, student) => sum + student.experiments, 0);
+            const avgProgress = Math.round(sampleData.students.reduce((sum, student) => sum + student.progress, 0) / totalStudents);
+
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('total-knowledge-points').textContent = totalKnowledgePoints.toLocaleString();
+            document.getElementById('total-experiments').textContent = totalExperiments;
+            document.getElementById('avg-progress').textContent = avgProgress + '%';
+        }
+
+        // Generate course outline
+        function generateCourseOutline() {
+            const topic = document.getElementById('course-topic').value;
+            const type = document.getElementById('course-type').value;
+            const hours = document.getElementById('course-hours').value;
+
+            if (!topic || !hours) {
+                alert('请填写完整的课程信息');
+                return;
+            }
+
+            // Show loading
+            const modal = document.getElementById('courseModal');
+            const content = document.getElementById('course-content');
+            content.innerHTML = `
+                <div class="flex items-center justify-center py-8">
+                    <div class="loading-spinner mr-3"></div>
+                    <span>AI正在生成课程讲义，请稍候...</span>
+                </div>
+            `;
+            modal.style.display = 'block';
+
+            // Simulate API call
+            setTimeout(() => {
+                const template = courseTemplates[type];
+                const generatedContent = generateCourseContent(topic, type, hours, template);
+                content.innerHTML = generatedContent;
+            }, 3000);
+        }
+
+        // Generate course content based on template
+        function generateCourseContent(topic, type, hours, template) {
+            const typeNames = {
+                'theory': '理论课程',
+                'experiment': '实验课程',
+                'project': '项目制学习'
+            };
+
+            return `
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-blue-800 mb-2">课程基本信息</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><strong>课程名称：</strong>${topic}</div>
+                            <div><strong>课程类型：</strong>${typeNames[type]}</div>
+                            <div><strong>计划学时：</strong>${hours}学时</div>
+                            <div><strong>生成时间：</strong>${new Date().toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-green-800 mb-2">AI生成配置</h3>
+                        <pre class="text-sm bg-white p-3 rounded border overflow-x-auto">${JSON.stringify(template, null, 2)}</pre>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-yellow-800 mb-2">课程大纲</h3>
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-bold text-gray-800 mb-2">第一章：${topic}基础理论</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                    <li>基本概念与定义</li>
+                                    <li>理论基础与数学模型</li>
+                                    <li>发展历史与应用现状</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-bold text-gray-800 mb-2">第二章：${topic}核心原理</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                    <li>核心算法与方法</li>
+                                    <li>系统设计与实现</li>
+                                    <li>性能分析与优化</li>
+                                </ul>
+                            </div>
+                            <div class="bg-white p-4 rounded border">
+                                <h4 class="font-bold text-gray-800 mb-2">第三章：${topic}实践应用</h4>
+                                <ul class="list-disc list-inside text-sm text-gray-600 space-y-1">
+                                    <li>典型应用案例分析</li>
+                                    <li>工程实现方法</li>
+                                    <li>故障诊断与处理</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-purple-800 mb-2">教学建议</h3>
+                        <div class="text-sm text-gray-700 space-y-2">
+                            <p><strong>教学重点：</strong>重点讲解${topic}的核心原理和实际应用</p>
+                            <p><strong>教学难点：</strong>理论与实践的结合，复杂系统的分析方法</p>
+                            <p><strong>教学方法：</strong>理论讲解 + 案例分析 + 实验验证</p>
+                            <p><strong>考核方式：</strong>平时作业(30%) + 实验报告(30%) + 期末考试(40%)</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate course for specific topic
+        function generateCourse(topic) {
+            document.getElementById('course-topic').value = topic;
+            generateCourseOutline();
+        }
+
+        // Close course modal
+        function closeCourseModal() {
+            document.getElementById('courseModal').style.display = 'none';
+        }
+
+        // Download course
+        function downloadCourse() {
+            const content = document.getElementById('course-content').innerHTML;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '课程讲义.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Edit course
+        function editCourse() {
+            alert('编辑功能将在后续版本中提供');
+        }
+
+        // View student details
+        function viewStudentDetails() {
+            const modal = document.getElementById('studentModal');
+            const details = document.getElementById('student-details');
+
+            details.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${sampleData.students.map(student => `
+                        <div class="bg-white p-6 rounded-lg border">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="student-avatar">
+                                    ${student.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">${student.name}</h4>
+                                    <p class="text-sm text-gray-600">学习进度：${student.progress}%</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">掌握知识点：</span>
+                                    <span class="font-medium">${student.knowledgePoints}个</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">完成实验：</span>
+                                    <span class="font-medium">${student.experiments}个</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-600">学习学科：</span>
+                                    <div class="mt-1 flex flex-wrap gap-1">
+                                        ${student.subjects.map(subject =>
+                `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">${subject}</span>`
+            ).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // Close student modal
+        function closeStudentModal() {
+            document.getElementById('studentModal').style.display = 'none';
+        }
+
+        // Export learning report
+        function exportLearningReport() {
+            const reportData = {
+                totalStudents: sampleData.students.length,
+                totalKnowledgePoints: sampleData.students.reduce((sum, student) => sum + student.knowledgePoints, 0),
+                totalExperiments: sampleData.students.reduce((sum, student) => sum + student.experiments, 0),
+                avgProgress: Math.round(sampleData.students.reduce((sum, student) => sum + student.progress, 0) / sampleData.students.length),
+                subjectDistribution: sampleData.subjectDistribution,
+                students: sampleData.students
+            };
+
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '学习报告.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Customize teaching plan
+        function customizeTeachingPlan() {
+            alert('教学计划定制功能正在开发中，敬请期待！');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function (event) {
+            const courseModal = document.getElementById('courseModal');
+            const studentModal = document.getElementById('studentModal');
+
+            if (event.target === courseModal) {
+                courseModal.style.display = 'none';
+            }
+            if (event.target === studentModal) {
+                studentModal.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1224 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师工作台 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for charts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(30px, -30px);
+        }
+        
+        .ai-cube-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .cube-feature {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .cube-feature:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+        }
+        
+        .generation-flow {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 32px;
+        }
+        
+        .flow-step {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .flow-arrow {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 24px;
+        }
+        
+        .resource-card {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            border-left: 4px solid var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        .resource-card:hover {
+            border-left-width: 8px;
+            transform: translateX(4px);
+        }
+        
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+        }
+        
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+            stroke-linecap: round;
+        }
+        
+        .progress-ring .background {
+            stroke: #e5e7eb;
+        }
+        
+        .progress-ring .progress {
+            stroke: var(--accent-color);
+            stroke-dasharray: 283;
+            stroke-dashoffset: 283;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+            transition: stroke-dashoffset 1s ease-in-out;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            background: var(--accent-color);
+            color: white;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 32px;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .close:hover {
+            color: #000;
+        }
+        
+        @media (max-width: 768px) {
+            .ai-cube-section, .generation-flow {
+                padding: 20px;
+            }
+            
+            .modal-content {
+                margin: 10% auto;
+                padding: 20px;
+                width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-12 mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+                <span class="ml-4 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm font-medium">教师工作台</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="/static/teacher-dashboard.html" class="nav-link font-medium text-blue-600">工作台</a>
+                <a href="/static/index.html" class="nav-link font-medium">学生端</a>
+                <a href="/static/projects.html" class="nav-link font-medium">项目管理</a>
+                <a href="/static/answer.html" class="nav-link font-medium">AI问答</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <div class="language-switcher cursor-pointer" onclick="switchLanguage()">
+                    <span class="text-lg">🇺🇸</span>
+                    <span class="text-sm font-medium">English</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+                
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                
+                <div class="relative" id="user-menu">
+                    <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-user-tie text-white"></i>
+                        </div>
+                        <span class="hidden md:inline-block font-medium">张老师</span>
+                        <i class="fas fa-chevron-down text-sm hidden md:inline-block"></i>
+                    </button>
+                    
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="teacher-dropdown">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                            <div class="font-medium">张老师</div>
+                            <div class="text-xs">电子工程系</div>
+                        </div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user-circle mr-2"></i>个人资料
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-cog mr-2"></i>系统设置
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-chart-bar mr-2"></i>教学统计
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-4 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，张老师！</h1>
+            <p class="text-gray-600">AI Cube智能引擎助力您的教学创新</p>
+        </div>
+
+        <!-- AI Cube 智能引擎核心功能 -->
+        <div class="ai-cube-section">
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-4">
+                    <i class="fas fa-cube mr-3"></i>AI Cube 智能引擎
+                </h2>
+                <p class="text-xl opacity-90">知识结构化 • 动态仿真生成 • 智能资源工厂</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- 知识结构化 -->
+                <div class="cube-feature" onclick="openKnowledgeStructure()">
+                    <div class="text-4xl mb-4">
+                        <i class="fas fa-sitemap"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">知识结构化</h3>
+                    <p class="opacity-90 mb-4">自动构建学科知识图谱</p>
+                    <div class="text-sm opacity-75">
+                        <i class="fas fa-arrow-down mb-2"></i><br>
+                        学科知识图谱
+                    </div>
+                </div>
+
+                <!-- 动态仿真生成 -->
+                <div class="cube-feature" onclick="openSimulationGenerator()">
+                    <div class="text-4xl mb-4">
+                        <i class="fas fa-cogs"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">动态仿真生成</h3>
+                    <p class="opacity-90 mb-4">智能生成交互式仿真</p>
+                    <div class="text-sm opacity-75">
+                        <i class="fas fa-arrow-down mb-2"></i><br>
+                        参数交互模型
+                    </div>
+                </div>
+
+                <!-- 智能资源工厂 -->
+                <div class="cube-feature" onclick="openResourceFactory()">
+                    <div class="text-4xl mb-4">
+                        <i class="fas fa-industry"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">智能资源工厂</h3>
+                    <p class="opacity-90 mb-4">批量生成教学资源</p>
+                    <div class="text-sm opacity-75">
+                        <i class="fas fa-arrow-down mb-2"></i><br>
+                        多模态讲义
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 智能生成流程 -->
+        <div class="generation-flow">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl font-bold mb-4">
+                    <i class="fas fa-magic mr-3"></i>智能生成流程
+                </h2>
+                <p class="text-lg opacity-90">基于知识点标签、错误率数据、区域考纲的智能内容生成</p>
+            </div>
+            
+            <!-- 输入阶段 -->
+            <div class="mb-8">
+                <h3 class="text-xl font-bold mb-4 text-center">
+                    <i class="fas fa-download mr-2"></i>输入
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flow-step">
+                        <i class="fas fa-tags text-2xl mb-2"></i>
+                        <h4 class="font-semibold">知识点标签</h4>
+                        <p class="text-sm opacity-80">学科知识点分类标注</p>
+                    </div>
+                    <div class="flow-step">
+                        <i class="fas fa-chart-line text-2xl mb-2"></i>
+                        <h4 class="font-semibold">错误率数据</h4>
+                        <p class="text-sm opacity-80">学生学习数据分析</p>
+                    </div>
+                    <div class="flow-step">
+                        <i class="fas fa-map text-2xl mb-2"></i>
+                        <h4 class="font-semibold">区域考纲</h4>
+                        <p class="text-sm opacity-80">教学大纲要求对接</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 箭头 -->
+            <div class="text-center mb-8">
+                <i class="fas fa-arrow-down text-3xl opacity-80"></i>
+            </div>
+
+            <!-- 生成类型 -->
+            <div>
+                <h3 class="text-xl font-bold mb-4 text-center">
+                    <i class="fas fa-magic mr-2"></i>生成类型
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="flow-step cursor-pointer" onclick="generateTeachingPlan()">
+                        <i class="fas fa-chalkboard-teacher text-2xl mb-2"></i>
+                        <h4 class="font-semibold">智能教案</h4>
+                        <p class="text-sm opacity-80">个性化教学方案</p>
+                    </div>
+                    <div class="flow-step cursor-pointer" onclick="generateLayeredExercises()">
+                        <i class="fas fa-layer-group text-2xl mb-2"></i>
+                        <h4 class="font-semibold">分层习题</h4>
+                        <p class="text-sm opacity-80">难度分级练习题</p>
+                    </div>
+                    <div class="flow-step cursor-pointer" onclick="generateMicroLessons()">
+                        <i class="fas fa-video text-2xl mb-2"></i>
+                        <h4 class="font-semibold">考点微课</h4>
+                        <p class="text-sm opacity-80">重点知识讲解</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计概览 -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">教学班级</h3>
+                        <i class="fas fa-users text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">5</div>
+                    <div class="text-sm opacity-80">本学期授课班级</div>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">学生总数</h3>
+                        <i class="fas fa-user-graduate text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">156</div>
+                    <div class="text-sm opacity-80">活跃学习用户</div>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">生成资源</h3>
+                        <i class="fas fa-file-alt text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">342</div>
+                    <div class="text-sm opacity-80">AI生成教学资源</div>
+                </div>
+            </div>
+
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+                <div class="relative z-10">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-lg font-semibold">平均成绩</h3>
+                        <i class="fas fa-chart-line text-2xl opacity-80"></i>
+                    </div>
+                    <div class="text-3xl font-bold mb-1">85.6</div>
+                    <div class="text-sm opacity-80">较上月提升 +3.2%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主要功能区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- 左侧：快速操作 -->
+            <div class="lg:col-span-2">
+                <!-- 快速生成工具 -->
+                <div class="dashboard-card p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-rocket mr-2 text-blue-500"></i>快速生成工具
+                    </h3>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="resource-card cursor-pointer" onclick="quickGenerateTeachingPlan()">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-chalkboard-teacher text-blue-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">智能教案</h4>
+                                    <p class="text-sm text-gray-600">一键生成个性化教案</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">快速生成</span>
+                            </div>
+                        </div>
+
+                        <div class="resource-card cursor-pointer" onclick="quickGenerateExercises()">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-layer-group text-green-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">分层习题</h4>
+                                    <p class="text-sm text-gray-600">智能生成分级练习</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">批量生成</span>
+                            </div>
+                        </div>
+
+                        <div class="resource-card cursor-pointer" onclick="quickGenerateMicroLesson()">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-video text-purple-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">考点微课</h4>
+                                    <p class="text-sm text-gray-600">重点知识视频讲解</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs bg-purple-100 text-purple-800 px-2 py-1 rounded">AI生成</span>
+                            </div>
+                        </div>
+
+                        <div class="resource-card cursor-pointer" onclick="quickGenerateSimulation()">
+                            <div class="flex items-center mb-3">
+                                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-3">
+                                    <i class="fas fa-cogs text-orange-600 text-xl"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">交互仿真</h4>
+                                    <p class="text-sm text-gray-600">动态仿真实验</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <span class="text-xs bg-orange-100 text-orange-800 px-2 py-1 rounded">实时生成</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 班级管理 -->
+                <div class="dashboard-card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-bold">
+                            <i class="fas fa-users mr-2 text-green-500"></i>班级管理
+                        </h3>
+                        <button class="text-blue-600 hover:text-blue-800" onclick="viewAllClasses()">
+                            查看全部 <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">电1</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">电子工程2021级1班</h4>
+                                    <p class="text-sm text-gray-600">32名学生 • 平均分：87.5</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-green-600 font-medium">活跃度 95%</div>
+                                <button class="text-xs text-blue-600 hover:underline">管理班级</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">电2</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">电子工程2021级2班</h4>
+                                    <p class="text-sm text-gray-600">30名学生 • 平均分：84.2</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-yellow-600 font-medium">活跃度 78%</div>
+                                <button class="text-xs text-blue-600 hover:underline">管理班级</button>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-purple-500 rounded-lg flex items-center justify-center mr-3">
+                                    <span class="text-white font-bold">电3</span>
+                                </div>
+                                <div>
+                                    <h4 class="font-semibold">电子工程2022级1班</h4>
+                                    <p class="text-sm text-gray-600">35名学生 • 平均分：82.8</p>
+                                </div>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-green-600 font-medium">活跃度 92%</div>
+                                <button class="text-xs text-blue-600 hover:underline">管理班级</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：数据分析和工具 -->
+            <div>
+                <!-- 教学效果分析 -->
+                <div class="dashboard-card p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-chart-bar mr-2 text-purple-500"></i>教学效果分析
+                    </h3>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-center mb-4">
+                            <div class="progress-ring">
+                                <svg width="120" height="120">
+                                    <circle class="background" cx="60" cy="60" r="45"></circle>
+                                    <circle class="progress" cx="60" cy="60" r="45" id="progress-circle"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="text-2xl font-bold text-gray-800">85.6%</div>
+                                        <div class="text-sm text-gray-600">平均成绩</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">知识掌握度</span>
+                                <span class="text-sm font-medium">92%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-green-500 h-2 rounded-full" style="width: 92%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">学习活跃度</span>
+                                <span class="text-sm font-medium">88%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-500 h-2 rounded-full" style="width: 88%"></div>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <span class="text-sm text-gray-600">作业完成率</span>
+                                <span class="text-sm font-medium">95%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-purple-500 h-2 rounded-full" style="width: 95%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 最近活动 -->
+                <div class="dashboard-card p-6 mb-6">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-clock mr-2 text-orange-500"></i>最近活动
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-file-alt text-blue-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">生成了新的教案</p>
+                                <p class="text-xs text-gray-500">电路分析基础 - 2小时前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-users text-green-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">班级成绩更新</p>
+                                <p class="text-xs text-gray-500">电子工程2021级1班 - 4小时前</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-video text-purple-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">创建了微课视频</p>
+                                <p class="text-xs text-gray-500">基尔霍夫定律应用 - 昨天</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3">
+                            <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-cogs text-orange-600 text-sm"></i>
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm font-medium">发布了仿真实验</p>
+                                <p class="text-xs text-gray-500">RC电路仿真 - 2天前</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI助手 -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-robot mr-2 text-indigo-500"></i>AI教学助手
+                    </h3>
+                    
+                    <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-4 mb-4">
+                        <div class="flex items-center mb-2">
+                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                            <span class="font-medium text-gray-800">今日建议</span>
+                        </div>
+                        <p class="text-sm text-gray-700">
+                            根据学生错误率分析，建议为"电路分析"章节增加更多基础练习题，
+                            特别是欧姆定律的应用部分。
+                        </p>
+                    </div>
+                    
+                    <button class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-lg transition-colors" onclick="openAIAssistant()">
+                        <i class="fas fa-comments mr-2"></i>与AI助手对话
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 模态框 -->
+    <!-- 知识结构化模态框 -->
+    <div id="knowledgeModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('knowledgeModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">
+                <i class="fas fa-sitemap mr-2 text-blue-600"></i>知识结构化
+            </h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">学科知识图谱构建</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-medium mb-2">电子工程基础</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-circle text-blue-500 mr-2" style="font-size: 8px;"></i>
+                                <span>电路分析</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-green-500 mr-2" style="font-size: 6px;"></i>
+                                <span>基尔霍夫定律</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-green-500 mr-2" style="font-size: 6px;"></i>
+                                <span>欧姆定律</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-yellow-500 mr-2" style="font-size: 6px;"></i>
+                                <span>RC电路</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-medium mb-2">数字电路</h4>
+                        <div class="space-y-2">
+                            <div class="flex items-center text-sm">
+                                <i class="fas fa-circle text-blue-500 mr-2" style="font-size: 8px;"></i>
+                                <span>逻辑门</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-green-500 mr-2" style="font-size: 6px;"></i>
+                                <span>与门</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-green-500 mr-2" style="font-size: 6px;"></i>
+                                <span>或门</span>
+                            </div>
+                            <div class="flex items-center text-sm ml-4">
+                                <i class="fas fa-circle text-red-500 mr-2" style="font-size: 6px;"></i>
+                                <span>非门</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" onclick="generateKnowledgeMap()">
+                    <i class="fas fa-magic mr-2"></i>生成知识图谱
+                </button>
+                <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onclick="exportKnowledgeMap()">
+                    <i class="fas fa-download mr-2"></i>导出图谱
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 仿真生成模态框 -->
+    <div id="simulationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('simulationModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">
+                <i class="fas fa-cogs mr-2 text-green-600"></i>动态仿真生成
+            </h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">选择仿真类型</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="border rounded-lg p-4 cursor-pointer hover:bg-blue-50" onclick="selectSimulationType('circuit')">
+                        <div class="text-center">
+                            <i class="fas fa-microchip text-3xl text-blue-600 mb-2"></i>
+                            <h4 class="font-medium">电路仿真</h4>
+                            <p class="text-sm text-gray-600">模拟电路行为</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4 cursor-pointer hover:bg-green-50" onclick="selectSimulationType('signal')">
+                        <div class="text-center">
+                            <i class="fas fa-wave-square text-3xl text-green-600 mb-2"></i>
+                            <h4 class="font-medium">信号仿真</h4>
+                            <p class="text-sm text-gray-600">信号处理分析</p>
+                        </div>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4 cursor-pointer hover:bg-purple-50" onclick="selectSimulationType('system')">
+                        <div class="text-center">
+                            <i class="fas fa-project-diagram text-3xl text-purple-600 mb-2"></i>
+                            <h4 class="font-medium">系统仿真</h4>
+                            <p class="text-sm text-gray-600">控制系统建模</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">仿真参数设置</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">知识点</label>
+                        <select class="w-full border rounded-lg px-3 py-2">
+                            <option>基尔霍夫定律</option>
+                            <option>欧姆定律</option>
+                            <option>RC电路</option>
+                            <option>运算放大器</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">难度级别</label>
+                        <select class="w-full border rounded-lg px-3 py-2">
+                            <option>基础</option>
+                            <option>中等</option>
+                            <option>高级</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium mb-1">交互参数</label>
+                        <div class="flex space-x-2">
+                            <input type="checkbox" id="voltage" checked>
+                            <label for="voltage" class="text-sm">电压</label>
+                            <input type="checkbox" id="current" checked>
+                            <label for="current" class="text-sm">电流</label>
+                            <input type="checkbox" id="resistance">
+                            <label for="resistance" class="text-sm">电阻</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg" onclick="generateSimulation()">
+                    <i class="fas fa-play mr-2"></i>生成仿真
+                </button>
+                <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" onclick="previewSimulation()">
+                    <i class="fas fa-eye mr-2"></i>预览效果
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 资源工厂模态框 -->
+    <div id="resourceModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('resourceModal')">&times;</span>
+            <h2 class="text-2xl font-bold mb-4">
+                <i class="fas fa-industry mr-2 text-orange-600"></i>智能资源工厂
+            </h2>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">批量生成设置</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <h4 class="font-medium mb-3">内容类型</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" checked>
+                                <span class="text-sm">教学PPT</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2" checked>
+                                <span class="text-sm">练习题库</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2">
+                                <span class="text-sm">实验指导书</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" class="mr-2">
+                                <span class="text-sm">考试试卷</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h4 class="font-medium mb-3">输出格式</h4>
+                        <div class="space-y-2">
+                            <label class="flex items-center">
+                                <input type="radio" name="format" class="mr-2" checked>
+                                <span class="text-sm">PDF文档</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="format" class="mr-2">
+                                <span class="text-sm">Word文档</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="format" class="mr-2">
+                                <span class="text-sm">HTML网页</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="radio" name="format" class="mr-2">
+                                <span class="text-sm">交互式课件</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mb-6">
+                <h3 class="text-lg font-semibold mb-3">生成进度</h3>
+                <div class="space-y-3">
+                    <div class="flex justify-between text-sm">
+                        <span>教学PPT生成</span>
+                        <span class="text-green-600">已完成</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-green-500 h-2 rounded-full" style="width: 100%"></div>
+                    </div>
+                    
+                    <div class="flex justify-between text-sm">
+                        <span>练习题库生成</span>
+                        <span class="text-blue-600">进行中 75%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-2">
+                        <div class="bg-blue-500 h-2 rounded-full" style="width: 75%"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4">
+                <button class="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg" onclick="startBatchGeneration()">
+                    <i class="fas fa-rocket mr-2"></i>开始批量生成
+                </button>
+                <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onclick="downloadResources()">
+                    <i class="fas fa-download mr-2"></i>下载资源包
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeProgressRing();
+            initializeUserMenu();
+        });
+
+        // 初始化进度环
+        function initializeProgressRing() {
+            const circle = document.getElementById('progress-circle');
+            const percentage = 85.6;
+            const circumference = 2 * Math.PI * 45;
+            const offset = circumference - (percentage / 100) * circumference;
+            
+            setTimeout(() => {
+                circle.style.strokeDashoffset = offset;
+            }, 500);
+        }
+
+        // 初始化用户菜单
+        function initializeUserMenu() {
+            const userMenuButton = document.getElementById('user-menu-button');
+            const teacherDropdown = document.getElementById('teacher-dropdown');
+            
+            userMenuButton.addEventListener('click', function() {
+                teacherDropdown.classList.toggle('hidden');
+            });
+            
+            // 点击外部关闭菜单
+            document.addEventListener('click', function(event) {
+                if (!userMenuButton.contains(event.target) && !teacherDropdown.contains(event.target)) {
+                    teacherDropdown.classList.add('hidden');
+                }
+            });
+        }
+
+        // AI Cube 功能
+        function openKnowledgeStructure() {
+            document.getElementById('knowledgeModal').style.display = 'block';
+        }
+
+        function openSimulationGenerator() {
+            document.getElementById('simulationModal').style.display = 'block';
+        }
+
+        function openResourceFactory() {
+            document.getElementById('resourceModal').style.display = 'block';
+        }
+
+        // 智能生成功能
+        function generateTeachingPlan() {
+            showNotification('正在生成智能教案...', 'info');
+            // 模拟AI生成过程
+            setTimeout(() => {
+                showNotification('智能教案生成完成！', 'success');
+            }, 2000);
+        }
+
+        function generateLayeredExercises() {
+            showNotification('正在生成分层习题...', 'info');
+            setTimeout(() => {
+                showNotification('分层习题生成完成！', 'success');
+            }, 2500);
+        }
+
+        function generateMicroLessons() {
+            showNotification('正在生成考点微课...', 'info');
+            setTimeout(() => {
+                showNotification('考点微课生成完成！', 'success');
+            }, 3000);
+        }
+
+        // 快速生成工具
+        function quickGenerateTeachingPlan() {
+            const modal = createQuickGenerateModal('智能教案', 'chalkboard-teacher', [
+                { label: '课程章节', type: 'select', options: ['电路分析基础', '数字电路设计', '模拟电路应用'] },
+                { label: '课时安排', type: 'number', value: 2 },
+                { label: '难度级别', type: 'select', options: ['基础', '中等', '高级'] }
+            ]);
+            document.body.appendChild(modal);
+        }
+
+        function quickGenerateExercises() {
+            const modal = createQuickGenerateModal('分层习题', 'layer-group', [
+                { label: '知识点', type: 'select', options: ['基尔霍夫定律', '欧姆定律', 'RC电路分析'] },
+                { label: '题目数量', type: 'number', value: 20 },
+                { label: '难度分布', type: 'select', options: ['均匀分布', '基础为主', '提高为主'] }
+            ]);
+            document.body.appendChild(modal);
+        }
+
+        function quickGenerateMicroLesson() {
+            const modal = createQuickGenerateModal('考点微课', 'video', [
+                { label: '考点内容', type: 'select', options: ['基尔霍夫定律应用', '电路分析方法', '实验操作步骤'] },
+                { label: '视频时长', type: 'select', options: ['5分钟', '10分钟', '15分钟'] },
+                { label: '讲解风格', type: 'select', options: ['理论讲解', '实例演示', '互动问答'] }
+            ]);
+            document.body.appendChild(modal);
+        }
+
+        function quickGenerateSimulation() {
+            const modal = createQuickGenerateModal('交互仿真', 'cogs', [
+                { label: '仿真类型', type: 'select', options: ['电路仿真', '信号分析', '系统建模'] },
+                { label: '交互级别', type: 'select', options: ['基础交互', '高级交互', '自定义'] },
+                { label: '输出格式', type: 'select', options: ['Web仿真', '可执行文件', '嵌入式代码'] }
+            ]);
+            document.body.appendChild(modal);
+        }
+
+        // 创建快速生成模态框
+        function createQuickGenerateModal(title, icon, fields) {
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.display = 'block';
+            
+            let fieldsHTML = '';
+            fields.forEach(field => {
+                if (field.type === 'select') {
+                    fieldsHTML += `
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">${field.label}</label>
+                            <select class="w-full border rounded-lg px-3 py-2">
+                                ${field.options.map(option => `<option>${option}</option>`).join('')}
+                            </select>
+                        </div>
+                    `;
+                } else if (field.type === 'number') {
+                    fieldsHTML += `
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium mb-1">${field.label}</label>
+                            <input type="number" value="${field.value}" class="w-full border rounded-lg px-3 py-2">
+                        </div>
+                    `;
+                }
+            });
+            
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <span class="close" onclick="this.closest('.modal').remove()">&times;</span>
+                    <h2 class="text-2xl font-bold mb-4">
+                        <i class="fas fa-${icon} mr-2 text-blue-600"></i>快速生成${title}
+                    </h2>
+                    
+                    <div class="mb-6">
+                        ${fieldsHTML}
+                    </div>
+                    
+                    <div class="flex space-x-4">
+                        <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg" onclick="startGeneration('${title}')">
+                            <i class="fas fa-magic mr-2"></i>开始生成
+                        </button>
+                        <button class="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg" onclick="this.closest('.modal').remove()">
+                            取消
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return modal;
+        }
+
+        // 开始生成
+        function startGeneration(type) {
+            showNotification(`正在生成${type}，请稍候...`, 'info');
+            
+            // 关闭模态框
+            document.querySelectorAll('.modal').forEach(modal => modal.remove());
+            
+            // 模拟生成过程
+            setTimeout(() => {
+                showNotification(`${type}生成完成！`, 'success');
+            }, 3000);
+        }
+
+        // 班级管理
+        function viewAllClasses() {
+            window.location.href = '/static/class-management.html';
+        }
+
+        // 模态框控制
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // 知识图谱功能
+        function generateKnowledgeMap() {
+            showNotification('正在生成知识图谱...', 'info');
+            setTimeout(() => {
+                showNotification('知识图谱生成完成！', 'success');
+            }, 2000);
+        }
+
+        function exportKnowledgeMap() {
+            showNotification('正在导出知识图谱...', 'info');
+            setTimeout(() => {
+                showNotification('知识图谱导出完成！', 'success');
+            }, 1500);
+        }
+
+        // 仿真功能
+        function selectSimulationType(type) {
+            document.querySelectorAll('#simulationModal .border').forEach(el => {
+                el.classList.remove('border-blue-500', 'bg-blue-50');
+            });
+            event.currentTarget.classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        function generateSimulation() {
+            showNotification('正在生成仿真实验...', 'info');
+            setTimeout(() => {
+                showNotification('仿真实验生成完成！', 'success');
+                closeModal('simulationModal');
+            }, 2500);
+        }
+
+        function previewSimulation() {
+            showNotification('正在加载预览...', 'info');
+            setTimeout(() => {
+                window.open('/static/simulation-preview.html', '_blank');
+            }, 1000);
+        }
+
+        // 资源工厂功能
+        function startBatchGeneration() {
+            showNotification('开始批量生成资源...', 'info');
+            setTimeout(() => {
+                showNotification('批量生成完成！', 'success');
+            }, 4000);
+        }
+
+        function downloadResources() {
+            showNotification('正在打包下载资源...', 'info');
+            setTimeout(() => {
+                showNotification('资源包下载完成！', 'success');
+            }, 2000);
+        }
+
+        // AI助手
+        function openAIAssistant() {
+            window.open('/static/ai-assistant.html', '_blank', 'width=800,height=600');
+        }
+
+        // 语言切换
+        function switchLanguage() {
+            window.location.href = '/static/teacher-dashboard-en.html';
+        }
+
+        // 通知系统
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'fixed bottom-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+            
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500', 'text-white');
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    break;
+                case 'info':
+                    notification.classList.add('bg-blue-500', 'text-white');
+                    break;
+                default:
+                    notification.classList.add('bg-gray-500', 'text-white');
+            }
+            
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 点击模态框外部关闭
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{
+    "Lingma.DisplayLanguage": "简体中文",
+    "diffEditor.maxComputationTime": 0,
+    "trae.codeCompletionPro": {
+        "enableCodeCompletionPro": true
+    },
+    "terminal.integrated.profiles.windows": {
+        "gitBash": {
+            "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+            "args": [
+                "--login"
+            ],
+            "icon": "terminal-bash",
+            "color": "terminal.ansiGreen"
+        },
+        "PowerShell": {
+            "source": "PowerShell",
+            "icon": "terminal-powershell"
+        },
+        "Command Prompt": {
+            "path": [
+                "${env:windir}\\Sysnative\\cmd.exe",
+                "${env:windir}\\System32\\cmd.exe"
+            ],
+            "args": [],
+            "icon": "terminal-cmd"
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "gitBash",
+    "terminal.integrated.automationProfile.windows": {
+        "path": "C:\\Program Files\\Git\\bin\\bash.exe",
+        "args": [
+            "--login"
+        ]
+    },
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontFamily": "Consolas, 'Courier New', monospace",
+    "terminal.integrated.cursorBlinking": true,
+    "terminal.integrated.cursorStyle": "line",
+    "terminal.integrated.scrollback": 10000,
+    "terminal.integrated.copyOnSelection": true,
+    "terminal.integrated.rightClickBehavior": "copyPaste",
+    "terminal.integrated.confirmOnExit": "hasChildProcesses",
+    "terminal.integrated.enableMultiLinePasteWarning": false
+}

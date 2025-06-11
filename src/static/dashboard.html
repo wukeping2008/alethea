@@ -1,19 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>个人中心 - Alethea</title>
+    <title>个人学习仪表板 - Alethea</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <!-- Custom styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
-        
+
         :root {
             --primary-color: #0a2342;
             --secondary-color: #126872;
@@ -21,359 +22,509 @@
             --light-color: #f8f9fa;
             --dark-color: #212529;
         }
-        
+
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7fa;
+            color: #1f2937;
         }
-        
-        .logo {
-            height: 50px;
-        }
-        
-        .nav-link {
-            position: relative;
-            color: var(--dark-color);
-            transition: all 0.3s ease;
-        }
-        
-        .nav-link:hover {
-            color: var(--primary-color);
-        }
-        
-        .nav-link.active {
-            color: var(--primary-color);
-            font-weight: 600;
-        }
-        
+
         .dashboard-card {
             background: white;
             border-radius: 12px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             transition: all 0.3s ease;
         }
-        
+
         .dashboard-card:hover {
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
             transform: translateY(-2px);
         }
-        
-        .metric-card {
+
+        .stat-card {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border-radius: 12px;
             padding: 24px;
-            position: relative;
-            overflow: hidden;
+            text-align: center;
+            transition: all 0.3s ease;
         }
-        
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            right: 0;
-            width: 100px;
-            height: 100px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(30px, -30px);
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
-        
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
         .progress-ring {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
             transform: rotate(-90deg);
         }
-        
-        .progress-ring-circle {
-            stroke-dasharray: 251.2;
-            stroke-dashoffset: 251.2;
-            transition: stroke-dashoffset 0.5s ease-in-out;
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
         }
-        
-        .skill-bar {
-            background-color: #e2e8f0;
+
+        .progress-ring .bg {
+            stroke: #e5e7eb;
+        }
+
+        .progress-ring .progress {
+            stroke: #667eea;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .achievement-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1f2937;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .subject-progress {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
             border-radius: 10px;
-            overflow: hidden;
             height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
         }
-        
-        .skill-fill {
+
+        .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent-color), #22d3ee);
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
             border-radius: 10px;
-            transition: width 1s ease-in-out;
+            transition: width 0.3s ease;
         }
-        
-        .recommendation-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
+
+        .recent-activity {
+            border-left: 3px solid #667eea;
+            padding-left: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .recent-activity::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 8px;
+            width: 9px;
+            height: 9px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .nav-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .knowledge-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
-        .recommendation-card:hover {
+
+        .knowledge-item:hover {
             border-color: var(--accent-color);
-            box-shadow: 0 4px 12px rgba(44, 165, 141, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        
-        .badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .badge-easy {
-            background-color: #dcfce7;
-            color: #166534;
-        }
-        
-        .badge-medium {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
-        
-        .badge-hard {
-            background-color: #fee2e2;
-            color: #991b1b;
-        }
-        
-        .loading-skeleton {
-            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-            background-size: 200% 100%;
-            animation: loading 1.5s infinite;
-        }
-        
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .tab-button {
-            padding: 12px 24px;
+
+        .experiment-card {
+            background: white;
+            border: 1px solid #e5e7eb;
             border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
             transition: all 0.3s ease;
-            border: 2px solid transparent;
         }
-        
-        .tab-button.active {
-            background-color: var(--accent-color);
+
+        .experiment-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-completed {
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-in-progress {
+            background: #f59e0b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-not-started {
+            background: #6b7280;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .calendar-day {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .calendar-day.active {
+            background: #667eea;
             color: white;
         }
-        
-        .tab-button:not(.active) {
-            color: #6b7280;
-            border-color: #e5e7eb;
+
+        .calendar-day.has-activity {
+            background: #10b981;
+            color: white;
         }
-        
-        .tab-button:not(.active):hover {
-            background-color: #f9fafb;
-            border-color: var(--accent-color);
+
+        .calendar-day:hover {
+            background: #e5e7eb;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
-    <nav class="bg-white shadow-sm py-4">
-        <div class="container mx-auto px-4 flex justify-between items-center">
+    <nav class="nav-header py-4 px-6">
+        <div class="flex justify-between items-center">
             <div class="flex items-center">
-                <img src="/static/logo.png" alt="Alethea Logo" class="logo mr-3">
-                <span class="text-2xl font-bold text-primary">Alethea</span>
-            </div>
-            <div class="hidden md:flex space-x-8">
-                <a href="/static/index.html" class="nav-link font-medium">首页</a>
-                <a href="/static/projects.html" class="nav-link font-medium">项目制学习</a>
-                <a href="/static/answer.html" class="nav-link font-medium">AI问答</a>
-                <a href="/static/dashboard.html" class="nav-link font-medium active">个人中心</a>
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-8 mr-3">
+                <span class="text-xl font-bold text-gray-800">Alethea</span>
             </div>
             <div class="flex items-center space-x-4">
-                <!-- Language Switcher -->
-                <button onclick="switchLanguage()" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span class="text-sm font-medium">🇺🇸 English</span>
-                </button>
-                <div class="relative" id="user-menu">
-                    <button class="flex items-center space-x-2 focus:outline-none" id="user-menu-button">
-                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-                            <i class="fas fa-user text-white text-sm"></i>
-                        </div>
-                        <span class="hidden md:inline-block" id="user-name">加载中...</span>
-                        <i class="fas fa-chevron-down text-sm"></i>
-                    </button>
-                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <i class="fas fa-user mr-2"></i>个人资料
-                        </a>
-                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <i class="fas fa-cog mr-2"></i>设置
-                        </a>
-                        <div class="border-t border-gray-100"></div>
-                        <a href="#" id="logout-btn" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
-                        </a>
+                <a href="/static/index.html" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-home mr-2"></i>返回首页
+                </a>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
                     </div>
+                    <span class="text-gray-700 font-medium">张三</span>
                 </div>
+                <button class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-cog"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <div class="container mx-auto px-4 py-8">
+    <div class="container mx-auto px-6 py-8">
         <!-- Welcome Section -->
         <div class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，<span id="welcome-name">学习者</span>！</h1>
-            <p class="text-gray-600">继续您的学习之旅，探索更多知识</p>
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，张三！</h1>
+            <p class="text-gray-600">继续您的学习之旅，探索更多知识领域</p>
         </div>
 
-        <!-- Metrics Overview -->
+        <!-- Statistics Overview -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="metric-card">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-white/80 text-sm">学习天数</p>
-                        <p class="text-2xl font-bold" id="learning-days">--</p>
-                    </div>
-                    <i class="fas fa-calendar-alt text-2xl text-white/60"></i>
-                </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-knowledge">45</div>
+                <div class="stat-label">掌握知识点</div>
             </div>
-            
-            <div class="metric-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-white/80 text-sm">提问次数</p>
-                        <p class="text-2xl font-bold" id="questions-count">--</p>
-                    </div>
-                    <i class="fas fa-question-circle text-2xl text-white/60"></i>
-                </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-number" id="completed-experiments">12</div>
+                <div class="stat-label">完成实验</div>
             </div>
-            
-            <div class="metric-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-white/80 text-sm">项目参与</p>
-                        <p class="text-2xl font-bold" id="projects-count">--</p>
-                    </div>
-                    <i class="fas fa-project-diagram text-2xl text-white/60"></i>
-                </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-number" id="study-hours">128</div>
+                <div class="stat-label">学习时长(小时)</div>
             </div>
-            
-            <div class="metric-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <p class="text-white/80 text-sm">学习积分</p>
-                        <p class="text-2xl font-bold" id="learning-points">--</p>
-                    </div>
-                    <i class="fas fa-star text-2xl text-white/60"></i>
-                </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-number" id="current-streak">15</div>
+                <div class="stat-label">连续学习天数</div>
             </div>
         </div>
 
-        <!-- Main Dashboard Content -->
+        <!-- Main Content Grid -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column: Digital Portrait & Analytics -->
-            <div class="lg:col-span-2 space-y-8">
-                <!-- Digital Portrait -->
+            <!-- Left Column: Progress & Subjects -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Overall Progress -->
                 <div class="dashboard-card p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">
-                            <i class="fas fa-user-circle text-blue-500 mr-2"></i>
-                            AI数字画像
-                        </h2>
-                        <button id="generate-portrait-btn" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                            <i class="fas fa-sync-alt mr-2"></i>更新画像
-                        </button>
-                    </div>
-                    
-                    <div id="portrait-content">
-                        <div class="text-center py-8">
-                            <div class="loading-skeleton w-full h-4 rounded mb-4"></div>
-                            <div class="loading-skeleton w-3/4 h-4 rounded mb-4"></div>
-                            <div class="loading-skeleton w-1/2 h-4 rounded"></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">学习进度概览</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="progress-ring">
+                            <svg>
+                                <circle class="bg" cx="60" cy="60" r="52"></circle>
+                                <circle class="progress" cx="60" cy="60" r="52" stroke-dasharray="327"
+                                    stroke-dashoffset="81.75"></circle>
+                            </svg>
+                            <div class="progress-text">85%</div>
                         </div>
+                        <div class="flex-1 ml-8">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">6</div>
+                                    <div class="text-sm text-gray-600">学习学科</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">23</div>
+                                    <div class="text-sm text-gray-600">本周学习</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">92%</div>
+                                    <div class="text-sm text-gray-600">作业完成率</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">A-</div>
+                                    <div class="text-sm text-gray-600">平均成绩</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Progress -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学科学习进度</h3>
+                    <div class="space-y-4" id="subject-progress">
+                        <!-- Subject items will be populated by JavaScript -->
                     </div>
                 </div>
 
                 <!-- Learning Analytics -->
                 <div class="dashboard-card p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-6">
-                        <i class="fas fa-chart-line text-green-500 mr-2"></i>
-                        学习分析
-                    </h2>
-                    
-                    <!-- Tab Navigation -->
-                    <div class="flex space-x-2 mb-6">
-                        <button class="tab-button active" data-tab="engagement">参与度</button>
-                        <button class="tab-button" data-tab="subjects">学科分布</button>
-                        <button class="tab-button" data-tab="progress">学习进度</button>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学习分析</h3>
+                    <div class="chart-container">
+                        <canvas id="learningChart"></canvas>
                     </div>
-                    
-                    <!-- Tab Content -->
-                    <div id="analytics-content">
-                        <div id="engagement-tab" class="tab-content">
-                            <canvas id="engagement-chart" width="400" height="200"></canvas>
-                        </div>
-                        <div id="subjects-tab" class="tab-content hidden">
-                            <canvas id="subjects-chart" width="400" height="200"></canvas>
-                        </div>
-                        <div id="progress-tab" class="tab-content hidden">
-                            <div id="progress-content">
-                                <!-- Progress content will be loaded here -->
-                            </div>
-                        </div>
+                </div>
+
+                <!-- Recent Experiments -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最近实验</h3>
+                    <div class="space-y-4" id="recent-experiments">
+                        <!-- Experiment items will be populated by JavaScript -->
                     </div>
                 </div>
             </div>
 
-            <!-- Right Column: Recommendations & Knowledge Map -->
-            <div class="space-y-8">
-                <!-- AI Project Recommendations -->
+            <!-- Right Column: Activities & Recommendations -->
+            <div class="space-y-6">
+                <!-- Achievements -->
                 <div class="dashboard-card p-6">
-                    <div class="flex items-center justify-between mb-6">
-                        <h2 class="text-xl font-bold text-gray-800">
-                            <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
-                            AI推荐项目
-                        </h2>
-                        <button id="refresh-recommendations-btn" class="text-blue-500 hover:text-blue-600">
-                            <i class="fas fa-refresh"></i>
-                        </button>
-                    </div>
-                    
-                    <div id="recommendations-content">
-                        <div class="space-y-4">
-                            <div class="loading-skeleton w-full h-20 rounded"></div>
-                            <div class="loading-skeleton w-full h-20 rounded"></div>
-                            <div class="loading-skeleton w-full h-20 rounded"></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最新成就</h3>
+                    <div class="space-y-4" id="achievements">
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">电路分析专家</h4>
+                                <p class="text-sm text-gray-600">完成所有电路分析实验</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">学习达人</h4>
+                                <p class="text-sm text-gray-600">连续学习15天</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">知识探索者</h4>
+                                <p class="text-sm text-gray-600">掌握45个知识点</p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Knowledge Map -->
+                <!-- AI Recommendations -->
                 <div class="dashboard-card p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-6">
-                        <i class="fas fa-brain text-purple-500 mr-2"></i>
-                        知识图谱
-                    </h2>
-                    
-                    <div id="knowledge-map-content">
-                        <div class="space-y-4">
-                            <!-- Knowledge points will be loaded here -->
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">AI学习建议</h3>
+                    <div class="space-y-4">
+                        <div class="recommendation-card">
+                            <h4 class="font-semibold mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                推荐学习
+                            </h4>
+                            <p class="text-sm mb-3">基于您的学习进度，建议深入学习PID控制系统</p>
+                            <button class="btn-primary" onclick="startRecommendedLearning('PID控制系统')">
+                                开始学习
+                            </button>
+                        </div>
+                        <div class="recommendation-card"
+                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <h4 class="font-semibold mb-2">
+                                <i class="fas fa-flask mr-2"></i>
+                                推荐实验
+                            </h4>
+                            <p class="text-sm mb-3">数字信号处理实验将帮助您巩固理论知识</p>
+                            <button class="btn-primary" onclick="startRecommendedExperiment('数字信号处理')">
+                                开始实验
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
                 <div class="dashboard-card p-6">
-                    <h2 class="text-xl font-bold text-gray-800 mb-6">
-                        <i class="fas fa-history text-indigo-500 mr-2"></i>
-                        最近活动
-                    </h2>
-                    
-                    <div id="recent-activity-content">
-                        <div class="space-y-3">
-                            <div class="loading-skeleton w-full h-12 rounded"></div>
-                            <div class="loading-skeleton w-full h-12 rounded"></div>
-                            <div class="loading-skeleton w-full h-12 rounded"></div>
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最近活动</h3>
+                    <div class="space-y-4" id="recent-activity">
+                        <!-- Activity items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Study Calendar -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学习日历</h3>
+                    <div class="text-center mb-2">
+                        <span class="font-semibold">2025年1月</span>
+                    </div>
+                    <div class="calendar-grid" id="study-calendar">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <div class="flex items-center justify-between">
+                            <span>🟢 有学习活动</span>
+                            <span>🔵 今天</span>
                         </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">快速操作</h3>
+                    <div class="space-y-3">
+                        <button class="w-full btn-primary" onclick="askQuestion()">
+                            <i class="fas fa-question-circle mr-2"></i>
+                            提问AI助手
+                        </button>
+                        <button class="w-full btn-primary" onclick="startExperiment()">
+                            <i class="fas fa-flask mr-2"></i>
+                            开始新实验
+                        </button>
+                        <button class="w-full btn-primary" onclick="reviewKnowledge()">
+                            <i class="fas fa-book mr-2"></i>
+                            复习知识点
+                        </button>
+                        <button class="w-full btn-primary" onclick="viewProgress()">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            查看详细进度
+                        </button>
                     </div>
                 </div>
             </div>
@@ -382,190 +533,187 @@
 
     <!-- JavaScript -->
     <script>
-        // Global variables
-        let currentUser = null;
-        let analyticsData = null;
-        let digitalPortrait = null;
-        let engagementChart = null;
-        let subjectsChart = null;
+        // Sample user data
+        const userData = {
+            name: '张三',
+            totalKnowledge: 45,
+            completedExperiments: 12,
+            studyHours: 128,
+            currentStreak: 15,
+            overallProgress: 85,
+            subjects: [
+                { name: '电工实验', progress: 92, knowledgePoints: 15, experiments: 5 },
+                { name: '电路分析', progress: 88, knowledgePoints: 12, experiments: 3 },
+                { name: '模拟电子技术', progress: 75, knowledgePoints: 8, experiments: 2 },
+                { name: '数字电子技术', progress: 82, knowledgePoints: 6, experiments: 1 },
+                { name: '控制系统', progress: 68, knowledgePoints: 4, experiments: 1 },
+                { name: 'PID控制', progress: 45, knowledgePoints: 0, experiments: 0 }
+            ],
+            recentExperiments: [
+                { name: '基尔霍夫定律验证', subject: '电工实验', status: 'completed', score: 95, date: '2025-01-08' },
+                { name: '运算放大器特性测试', subject: '模拟电子技术', status: 'completed', score: 88, date: '2025-01-06' },
+                { name: '数字逻辑门实验', subject: '数字电子技术', status: 'in-progress', score: null, date: '2025-01-10' },
+                { name: 'RC滤波器设计', subject: '电路分析', status: 'not-started', score: null, date: '2025-01-12' }
+            ],
+            recentActivities: [
+                { type: 'experiment', content: '完成了基尔霍夫定律验证实验', time: '2小时前' },
+                { type: 'knowledge', content: '学习了运算放大器的工作原理', time: '5小时前' },
+                { type: 'question', content: '向AI提问了关于电路分析的问题', time: '1天前' },
+                { type: 'achievement', content: '获得了"电路分析专家"成就', time: '2天前' },
+                { type: 'study', content: '完成了模拟电子技术的章节学习', time: '3天前' }
+            ],
+            learningData: {
+                labels: ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'],
+                knowledgePoints: [5, 8, 12, 18, 25, 32, 38, 45],
+                experiments: [1, 2, 4, 6, 8, 10, 11, 12],
+                studyHours: [8, 12, 16, 20, 24, 28, 32, 36]
+            }
+        };
 
-        // Initialize dashboard
-        document.addEventListener('DOMContentLoaded', function() {
-            checkAuthentication();
-            initializeEventListeners();
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            populateSubjectProgress();
+            populateRecentExperiments();
+            populateRecentActivity();
+            initializeLearningChart();
+            generateStudyCalendar();
         });
 
-        // Check if user is authenticated
-        function checkAuthentication() {
-            const token = localStorage.getItem('auth_token');
-            const userInfo = localStorage.getItem('user_info');
-            
-            if (!token || !userInfo) {
-                window.location.href = '/static/login.html?return=' + encodeURIComponent(window.location.href);
-                return;
-            }
-            
-            try {
-                currentUser = JSON.parse(userInfo);
-                updateUserInfo();
-                loadDashboardData();
-            } catch (error) {
-                console.error('Error parsing user info:', error);
-                logout();
-            }
-        }
+        // Populate subject progress
+        function populateSubjectProgress() {
+            const container = document.getElementById('subject-progress');
+            container.innerHTML = '';
 
-        // Update user information in UI
-        function updateUserInfo() {
-            if (currentUser) {
-                document.getElementById('user-name').textContent = currentUser.full_name || currentUser.username;
-                document.getElementById('welcome-name').textContent = currentUser.full_name || currentUser.username;
-            }
-        }
-
-        // Initialize event listeners
-        function initializeEventListeners() {
-            // User menu toggle
-            document.getElementById('user-menu-button').addEventListener('click', function() {
-                const dropdown = document.getElementById('user-dropdown');
-                dropdown.classList.toggle('hidden');
+            userData.subjects.forEach(subject => {
+                const subjectItem = document.createElement('div');
+                subjectItem.className = 'subject-progress';
+                subjectItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-semibold text-gray-800">${subject.name}</h4>
+                        <span class="text-sm text-gray-600">${subject.progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${subject.progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 mt-2">
+                        <span>${subject.knowledgePoints}个知识点</span>
+                        <span>${subject.experiments}个实验</span>
+                    </div>
+                `;
+                container.appendChild(subjectItem);
             });
+        }
 
-            // Close dropdown when clicking outside
-            document.addEventListener('click', function(event) {
-                const userMenu = document.getElementById('user-menu');
-                const dropdown = document.getElementById('user-dropdown');
-                if (!userMenu.contains(event.target)) {
-                    dropdown.classList.add('hidden');
+        // Populate recent experiments
+        function populateRecentExperiments() {
+            const container = document.getElementById('recent-experiments');
+            container.innerHTML = '';
+
+            userData.recentExperiments.forEach(experiment => {
+                const experimentItem = document.createElement('div');
+                experimentItem.className = 'experiment-card';
+
+                let statusClass = '';
+                let statusText = '';
+                let scoreDisplay = '';
+
+                switch (experiment.status) {
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = '已完成';
+                        scoreDisplay = experiment.score ? `<span class="text-green-600 font-semibold">${experiment.score}分</span>` : '';
+                        break;
+                    case 'in-progress':
+                        statusClass = 'status-in-progress';
+                        statusText = '进行中';
+                        break;
+                    case 'not-started':
+                        statusClass = 'status-not-started';
+                        statusText = '未开始';
+                        break;
                 }
-            });
 
-            // Logout button
-            document.getElementById('logout-btn').addEventListener('click', logout);
-
-            // Generate portrait button
-            document.getElementById('generate-portrait-btn').addEventListener('click', generateDigitalPortrait);
-
-            // Refresh recommendations button
-            document.getElementById('refresh-recommendations-btn').addEventListener('click', refreshRecommendations);
-
-            // Tab navigation
-            document.querySelectorAll('.tab-button').forEach(button => {
-                button.addEventListener('click', function() {
-                    const tabName = this.getAttribute('data-tab');
-                    switchTab(tabName);
-                });
+                experimentItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${experiment.name}</h4>
+                        <span class="${statusClass}">${statusText}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">${experiment.subject}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">${experiment.date}</span>
+                        ${scoreDisplay}
+                    </div>
+                `;
+                container.appendChild(experimentItem);
             });
         }
 
-        // Load all dashboard data
-        async function loadDashboardData() {
-            try {
-                await Promise.all([
-                    loadAnalytics(),
-                    loadDigitalPortrait(),
-                    loadRecommendations(),
-                    loadKnowledgeMap(),
-                    loadRecentActivity()
-                ]);
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-            }
-        }
+        // Populate recent activity
+        function populateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = '';
 
-        // Load analytics data
-        async function loadAnalytics() {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/dashboard?days=30', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+            userData.recentActivities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'recent-activity';
 
-                if (response.ok) {
-                    analyticsData = await response.json();
-                    updateMetrics();
-                    updateCharts();
-                } else {
-                    console.error('Failed to load analytics');
+                let icon = '';
+                switch (activity.type) {
+                    case 'experiment':
+                        icon = '<i class="fas fa-flask text-blue-600"></i>';
+                        break;
+                    case 'knowledge':
+                        icon = '<i class="fas fa-book text-green-600"></i>';
+                        break;
+                    case 'question':
+                        icon = '<i class="fas fa-question-circle text-purple-600"></i>';
+                        break;
+                    case 'achievement':
+                        icon = '<i class="fas fa-trophy text-yellow-600"></i>';
+                        break;
+                    case 'study':
+                        icon = '<i class="fas fa-graduation-cap text-indigo-600"></i>';
+                        break;
                 }
-            } catch (error) {
-                console.error('Error loading analytics:', error);
-            }
-        }
 
-        // Update metrics cards
-        function updateMetrics() {
-            if (!analyticsData) return;
-
-            const engagement = analyticsData.engagement_metrics;
-            const sessions = analyticsData.learning_sessions;
-            
-            // Calculate learning days
-            const uniqueDates = new Set();
-            sessions.forEach(session => {
-                if (session.start_time) {
-                    const date = new Date(session.start_time).toDateString();
-                    uniqueDates.add(date);
-                }
+                activityItem.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="mr-3 mt-1">${icon}</div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">${activity.content}</p>
+                            <p class="text-xs text-gray-500 mt-1">${activity.time}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(activityItem);
             });
-            
-            document.getElementById('learning-days').textContent = uniqueDates.size;
-            document.getElementById('questions-count').textContent = analyticsData.total_actions || 0;
-            document.getElementById('projects-count').textContent = analyticsData.action_breakdown.view_project || 0;
-            document.getElementById('learning-points').textContent = Math.round(engagement.engagement_score * 1000);
         }
 
-        // Update charts
-        function updateCharts() {
-            if (!analyticsData) return;
-
-            // Engagement chart
-            updateEngagementChart();
-            
-            // Subjects chart
-            updateSubjectsChart();
-            
-            // Progress content
-            updateProgressContent();
-        }
-
-        // Update engagement chart
-        function updateEngagementChart() {
-            const ctx = document.getElementById('engagement-chart').getContext('2d');
-            
-            // Prepare data for the last 7 days
-            const last7Days = [];
-            const today = new Date();
-            for (let i = 6; i >= 0; i--) {
-                const date = new Date(today);
-                date.setDate(date.getDate() - i);
-                last7Days.push(date.toISOString().split('T')[0]);
-            }
-            
-            const dailyActivity = analyticsData.daily_activity || {};
-            const activityData = last7Days.map(date => dailyActivity[date] || 0);
-            
-            if (engagementChart) {
-                engagementChart.destroy();
-            }
-            
-            engagementChart = new Chart(ctx, {
+        // Initialize learning chart
+        function initializeLearningChart() {
+            const ctx = document.getElementById('learningChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'line',
                 data: {
-                    labels: last7Days.map(date => {
-                        const d = new Date(date);
-                        return `${d.getMonth() + 1}/${d.getDate()}`;
-                    }),
-                    datasets: [{
-                        label: '每日活动',
-                        data: activityData,
-                        borderColor: '#2ca58d',
-                        backgroundColor: 'rgba(44, 165, 141, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
+                    labels: userData.learningData.labels,
+                    datasets: [
+                        {
+                            label: '知识点掌握',
+                            data: userData.learningData.knowledgePoints,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '完成实验',
+                            data: userData.learningData.experiments,
+                            borderColor: '#f093fb',
+                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
@@ -577,48 +725,6 @@
                     },
                     plugins: {
                         legend: {
-                            display: false
-                        }
-                    }
-                }
-            });
-        }
-
-        // Update subjects chart
-        function updateSubjectsChart() {
-            const ctx = document.getElementById('subjects-chart').getContext('2d');
-            
-            const subjectInterests = analyticsData.subject_interests || {};
-            const subjects = Object.keys(subjectInterests);
-            const values = Object.values(subjectInterests);
-            
-            if (subjectsChart) {
-                subjectsChart.destroy();
-            }
-            
-            subjectsChart = new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: subjects,
-                    datasets: [{
-                        data: values,
-                        backgroundColor: [
-                            '#667eea',
-                            '#764ba2',
-                            '#f093fb',
-                            '#f5576c',
-                            '#4facfe',
-                            '#00f2fe',
-                            '#43e97b',
-                            '#38f9d7'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
                             position: 'bottom'
                         }
                     }
@@ -626,483 +732,78 @@
             });
         }
 
-        // Update progress content
-        function updateProgressContent() {
-            const progressContent = document.getElementById('progress-content');
-            const knowledgePoints = analyticsData.knowledge_points || [];
-            
-            if (knowledgePoints.length === 0) {
-                progressContent.innerHTML = '<p class="text-gray-500 text-center py-8">暂无学习进度数据</p>';
-                return;
-            }
-            
-            // Group by subject and show top skills
-            const subjectSkills = {};
-            knowledgePoints.forEach(kp => {
-                const subject = kp.subject_name || '其他';
-                if (!subjectSkills[subject]) {
-                    subjectSkills[subject] = [];
-                }
-                subjectSkills[subject].push(kp);
+        // Generate study calendar
+        function generateStudyCalendar() {
+            const container = document.getElementById('study-calendar');
+            container.innerHTML = '';
+
+            // Days of week header
+            const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'text-center text-xs font-semibold text-gray-600 py-2';
+                dayHeader.textContent = day;
+                container.appendChild(dayHeader);
             });
-            
-            let html = '';
-            Object.keys(subjectSkills).forEach(subject => {
-                const skills = subjectSkills[subject].slice(0, 3); // Top 3 skills per subject
-                html += `
-                    <div class="mb-6">
-                        <h4 class="font-semibold text-gray-800 mb-3">${subject}</h4>
-                        <div class="space-y-3">
-                `;
-                
-                skills.forEach(skill => {
-                    const percentage = Math.round(skill.mastery_level * 100);
-                    html += `
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-700">${skill.knowledge_point}</span>
-                                <span class="text-gray-500">${percentage}%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-fill" style="width: ${percentage}%"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-                
-                html += '</div></div>';
-            });
-            
-            progressContent.innerHTML = html;
-        }
 
-        // Load digital portrait
-        async function loadDigitalPortrait() {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/portrait', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
+            // Generate calendar days for January 2025
+            const today = new Date();
+            const currentDay = today.getDate();
+            const studyDays = [2, 3, 5, 6, 8, 9, 10, 12, 13, 15, 16, 17, 19, 20, 22, 23, 24, 26, 27, 29, 30];
 
-                if (response.ok) {
-                    digitalPortrait = await response.json();
-                    updateDigitalPortrait();
-                } else if (response.status === 404) {
-                    // Portrait doesn't exist, show generate button
-                    showGeneratePortraitPrompt();
-                } else {
-                    console.error('Failed to load digital portrait');
+            // Generate days for January 2025 (starts on Wednesday)
+            const daysInMonth = 31;
+            const startDay = 3; // January 1, 2025 is a Wednesday (0=Sunday, 3=Wednesday)
+
+            // Add empty cells for days before the 1st
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                container.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                if (day === currentDay) {
+                    dayElement.classList.add('active');
+                } else if (studyDays.includes(day)) {
+                    dayElement.classList.add('has-activity');
                 }
-            } catch (error) {
-                console.error('Error loading digital portrait:', error);
+
+                container.appendChild(dayElement);
             }
         }
 
-        // Update digital portrait display
-        function updateDigitalPortrait() {
-            if (!digitalPortrait) return;
-
-            const content = document.getElementById('portrait-content');
-            
-            let html = `
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-3">学习特征</h4>
-                        <div class="space-y-2">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">学习风格:</span>
-                                <span class="font-medium">${getLearningStyleText(digitalPortrait.learning_style)}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">学习节奏:</span>
-                                <span class="font-medium">${getLearningPaceText(digitalPortrait.learning_pace)}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">置信度:</span>
-                                <span class="font-medium">${Math.round(digitalPortrait.confidence_score * 100)}%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h4 class="font-semibold text-gray-800 mb-3">个性特征</h4>
-                        <div class="space-y-2">
-            `;
-            
-            if (digitalPortrait.personality_traits) {
-                Object.keys(digitalPortrait.personality_traits).forEach(trait => {
-                    const value = digitalPortrait.personality_traits[trait];
-                    const percentage = Math.round(value * 100);
-                    html += `
-                        <div>
-                            <div class="flex justify-between text-sm mb-1">
-                                <span class="text-gray-700">${getTraitText(trait)}</span>
-                                <span class="text-gray-500">${percentage}%</span>
-                            </div>
-                            <div class="skill-bar">
-                                <div class="skill-fill" style="width: ${percentage}%"></div>
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-            
-            html += `
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="mt-6">
-                    <h4 class="font-semibold text-gray-800 mb-3">AI洞察</h4>
-                    <p class="text-gray-600 leading-relaxed">${digitalPortrait.ai_insights || '暂无AI洞察'}</p>
-                </div>
-            `;
-            
-            if (digitalPortrait.strengths && digitalPortrait.strengths.length > 0) {
-                html += `
-                    <div class="mt-6">
-                        <h4 class="font-semibold text-gray-800 mb-3">优势领域</h4>
-                        <div class="flex flex-wrap gap-2">
-                `;
-                digitalPortrait.strengths.forEach(strength => {
-                    html += `<span class="badge badge-easy">${strength}</span>`;
-                });
-                html += '</div></div>';
-            }
-            
-            if (digitalPortrait.improvement_areas && digitalPortrait.improvement_areas.length > 0) {
-                html += `
-                    <div class="mt-6">
-                        <h4 class="font-semibold text-gray-800 mb-3">提升空间</h4>
-                        <div class="flex flex-wrap gap-2">
-                `;
-                digitalPortrait.improvement_areas.forEach(area => {
-                    html += `<span class="badge badge-medium">${area}</span>`;
-                });
-                html += '</div></div>';
-            }
-            
-            content.innerHTML = html;
+        // Quick action functions
+        function askQuestion() {
+            window.open('/static/answer.html', '_blank');
         }
 
-        // Show generate portrait prompt
-        function showGeneratePortraitPrompt() {
-            const content = document.getElementById('portrait-content');
-            content.innerHTML = `
-                <div class="text-center py-8">
-                    <i class="fas fa-user-circle text-6xl text-gray-300 mb-4"></i>
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">还没有数字画像</h3>
-                    <p class="text-gray-600 mb-4">AI将分析您的学习行为，生成个性化的数字画像</p>
-                    <button onclick="generateDigitalPortrait()" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                        <i class="fas fa-magic mr-2"></i>生成我的数字画像
-                    </button>
-                </div>
-            `;
+        function startExperiment() {
+            alert('实验功能正在开发中，敬请期待！');
         }
 
-        // Generate digital portrait
-        async function generateDigitalPortrait() {
-            try {
-                const btn = document.getElementById('generate-portrait-btn');
-                const originalText = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>生成中...';
-                btn.disabled = true;
-
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/portrait/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    digitalPortrait = data.portrait;
-                    updateDigitalPortrait();
-                } else {
-                    console.error('Failed to generate digital portrait');
-                    alert('生成数字画像失败，请稍后重试');
-                }
-            } catch (error) {
-                console.error('Error generating digital portrait:', error);
-                alert('生成数字画像时发生错误');
-            } finally {
-                const btn = document.getElementById('generate-portrait-btn');
-                btn.innerHTML = '<i class="fas fa-sync-alt mr-2"></i>更新画像';
-                btn.disabled = false;
-            }
+        function reviewKnowledge() {
+            alert('知识点复习功能正在开发中，敬请期待！');
         }
 
-        // Load recommendations
-        async function loadRecommendations() {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/recommendations', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const recommendations = await response.json();
-                    updateRecommendations(recommendations);
-                } else {
-                    console.error('Failed to load recommendations');
-                }
-            } catch (error) {
-                console.error('Error loading recommendations:', error);
-            }
+        function viewProgress() {
+            alert('详细进度查看功能正在开发中，敬请期待！');
         }
 
-        // Update recommendations display
-        function updateRecommendations(recommendations) {
-            const content = document.getElementById('recommendations-content');
-            
-            if (!recommendations || recommendations.length === 0) {
-                content.innerHTML = `
-                    <div class="text-center py-8">
-                        <i class="fas fa-lightbulb text-4xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-600">暂无推荐项目</p>
-                        <button onclick="refreshRecommendations()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors">
-                            生成推荐
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = '';
-            recommendations.slice(0, 3).forEach(rec => {
-                const difficultyClass = getDifficultyClass(rec.difficulty_match);
-                const score = Math.round(rec.recommendation_score * 100);
-                
-                html += `
-                    <div class="recommendation-card p-4 bg-white border" onclick="viewProject('${rec.project_id}')">
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-semibold text-gray-800">${rec.project_title}</h4>
-                            <span class="text-xs text-gray-500">${score}%匹配</span>
-                        </div>
-                        <p class="text-sm text-gray-600 mb-3">${rec.recommendation_reason}</p>
-                        <div class="flex justify-between items-center">
-                            <span class="badge ${difficultyClass}">
-                                ${getDifficultyText(rec.difficulty_match)}
-                            </span>
-                            <i class="fas fa-arrow-right text-gray-400"></i>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            content.innerHTML = html;
+        function startRecommendedLearning(topic) {
+            const question = `请详细介绍${topic}的相关知识和学习要点`;
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
         }
 
-        // Refresh recommendations
-        async function refreshRecommendations() {
-            try {
-                const btn = document.getElementById('refresh-recommendations-btn');
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/recommendations/generate', {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    updateRecommendations(data.recommendations);
-                } else {
-                    console.error('Failed to refresh recommendations');
-                }
-            } catch (error) {
-                console.error('Error refreshing recommendations:', error);
-            } finally {
-                const btn = document.getElementById('refresh-recommendations-btn');
-                btn.innerHTML = '<i class="fas fa-refresh"></i>';
-            }
-        }
-
-        // Load knowledge map
-        async function loadKnowledgeMap() {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/analytics/knowledge-points', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const knowledgePoints = await response.json();
-                    updateKnowledgeMap(knowledgePoints);
-                } else {
-                    console.error('Failed to load knowledge map');
-                }
-            } catch (error) {
-                console.error('Error loading knowledge map:', error);
-            }
-        }
-
-        // Update knowledge map display
-        function updateKnowledgeMap(knowledgePoints) {
-            const content = document.getElementById('knowledge-map-content');
-            
-            if (!knowledgePoints || Object.keys(knowledgePoints).length === 0) {
-                content.innerHTML = '<p class="text-gray-500 text-center py-8">暂无知识点数据</p>';
-                return;
-            }
-
-            let html = '';
-            Object.keys(knowledgePoints).forEach(subject => {
-                const points = knowledgePoints[subject].slice(0, 5); // Top 5 per subject
-                html += `
-                    <div class="mb-4">
-                        <h4 class="font-semibold text-gray-800 mb-2">${subject}</h4>
-                        <div class="space-y-2">
-                `;
-                
-                points.forEach(point => {
-                    const percentage = Math.round(point.mastery_level * 100);
-                    const color = percentage > 70 ? 'text-green-600' : percentage > 40 ? 'text-yellow-600' : 'text-red-600';
-                    
-                    html += `
-                        <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-700">${point.knowledge_point}</span>
-                            <span class="${color} font-medium">${percentage}%</span>
-                        </div>
-                    `;
-                });
-                
-                html += '</div></div>';
-            });
-            
-            content.innerHTML = html;
-        }
-
-        // Load recent activity
-        async function loadRecentActivity() {
-            try {
-                const token = localStorage.getItem('auth_token');
-                const response = await fetch('/api/user/questions?limit=5', {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
-                });
-
-                if (response.ok) {
-                    const questions = await response.json();
-                    updateRecentActivity(questions);
-                } else {
-                    console.error('Failed to load recent activity');
-                }
-            } catch (error) {
-                console.error('Error loading recent activity:', error);
-            }
-        }
-
-        // Update recent activity display
-        function updateRecentActivity(questions) {
-            const content = document.getElementById('recent-activity-content');
-            
-            if (!questions || questions.length === 0) {
-                content.innerHTML = '<p class="text-gray-500 text-center py-8">暂无最近活动</p>';
-                return;
-            }
-
-            let html = '';
-            questions.forEach(question => {
-                const date = new Date(question.created_at).toLocaleDateString();
-                html += `
-                    <div class="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                        <i class="fas fa-question-circle text-blue-500 mt-1"></i>
-                        <div class="flex-1">
-                            <p class="text-sm text-gray-800 line-clamp-2">${question.content}</p>
-                            <p class="text-xs text-gray-500 mt-1">${date}</p>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            content.innerHTML = html;
-        }
-
-        // Switch tabs
-        function switchTab(tabName) {
-            // Update tab buttons
-            document.querySelectorAll('.tab-button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
-            
-            // Update tab content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.add('hidden');
-            });
-            document.getElementById(`${tabName}-tab`).classList.remove('hidden');
-        }
-
-        // View project
-        function viewProject(projectId) {
-            window.location.href = `/static/project-detail.html?id=${projectId}`;
-        }
-
-        // Logout function
-        function logout() {
-            localStorage.removeItem('auth_token');
-            localStorage.removeItem('user_info');
-            window.location.href = '/static/login.html';
-        }
-
-        // Language switching function
-        function switchLanguage() {
-            window.location.href = '/static/dashboard-en.html';
-        }
-
-        // Helper functions
-        function getLearningStyleText(style) {
-            const styles = {
-                'visual': '视觉型',
-                'auditory': '听觉型',
-                'kinesthetic': '动手型',
-                'mixed': '混合型'
-            };
-            return styles[style] || '未知';
-        }
-
-        function getLearningPaceText(pace) {
-            const paces = {
-                'slow': '稳步型',
-                'medium': '适中型',
-                'fast': '快速型'
-            };
-            return paces[pace] || '未知';
-        }
-
-        function getTraitText(trait) {
-            const traits = {
-                'curiosity': '好奇心',
-                'persistence': '坚持性',
-                'methodical': '条理性'
-            };
-            return traits[trait] || trait;
-        }
-
-        function getDifficultyClass(difficulty) {
-            if (difficulty > 0.7) return 'badge-easy';
-            if (difficulty > 0.4) return 'badge-medium';
-            return 'badge-hard';
-        }
-
-        function getDifficultyText(difficulty) {
-            if (difficulty > 0.7) return '简单';
-            if (difficulty > 0.4) return '中等';
-            return '困难';
+        function startRecommendedExperiment(topic) {
+            const question = `请推荐${topic}相关的实验项目和实践方法`;
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
         }
     </script>
 </body>
+
 </html>

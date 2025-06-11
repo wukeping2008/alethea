@@ -1,0 +1,15 @@
+{
+    "ollama": {
+        "apiUrl": "http://localhost:11434/api/generate",
+        "model": "deepseek-r1:7b",
+        "systemPrompt": "你是简仪科技的AI助手，专门解答关于开源测控解决方案的问题。你拥有丰富的测控技术知识，可以为用户提供专业、准确的解答。请用友好的语气回答，确保回答的实用性和可操作性。如果问题超出你的知识范围，请诚实地告知用户。",
+        "knowledgeBase": "简仪科技是一家专注于开源测控解决方案的技术公司。我们提供各种开源测控软硬件产品和技术支持。我们的产品包括数据采集卡、信号发生器、数字万用表等硬件设备，以及配套的开发软件和SDK。",
+        "settings": {
+            "temperature": 0.7,
+            "top_p": 0.95,
+            "num_predict": 4000,
+            "stop": ["\n\nHuman:", "\n\nAssistant:"],
+            "stream": false
+        }
+    }
+}

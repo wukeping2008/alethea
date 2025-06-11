@@ -1,0 +1,178 @@
+{
+    "corpus_metadata": {
+        "version": "1.0.0",
+        "created_date": "2025-01-11",
+        "description": "Alethea教育语料库 - 多模态教育资源管理系统",
+        "supported_languages": [
+            "zh-CN",
+            "en-US"
+        ],
+        "default_language": "zh-CN"
+    },
+    "knowledge_domains": {
+        "electrical_engineering": {
+            "name": "电工电子工程",
+            "description": "电工电子技术相关知识体系",
+            "subdirectories": {
+                "basic_concepts": "基础概念",
+                "circuit_analysis": "电路分析",
+                "electronics": "电子技术",
+                "control_systems": "控制系统"
+            },
+            "difficulty_levels": [
+                "beginner",
+                "intermediate",
+                "advanced"
+            ],
+            "assessment_types": [
+                "theoretical",
+                "practical",
+                "simulation"
+            ]
+        },
+        "physics": {
+            "name": "物理学",
+            "description": "物理学基础理论与应用",
+            "subdirectories": {
+                "mechanics": "力学",
+                "thermodynamics": "热力学",
+                "electromagnetism": "电磁学",
+                "quantum_physics": "量子物理"
+            },
+            "difficulty_levels": [
+                "beginner",
+                "intermediate",
+                "advanced"
+            ],
+            "assessment_types": [
+                "theoretical",
+                "experimental",
+                "computational"
+            ]
+        },
+        "mathematics": {
+            "name": "数学",
+            "description": "数学基础理论与工程应用",
+            "subdirectories": {
+                "calculus": "微积分",
+                "linear_algebra": "线性代数",
+                "differential_equations": "微分方程",
+                "statistics": "统计学"
+            },
+            "difficulty_levels": [
+                "beginner",
+                "intermediate",
+                "advanced"
+            ],
+            "assessment_types": [
+                "theoretical",
+                "computational",
+                "applied"
+            ]
+        },
+        "chemistry": {
+            "name": "化学",
+            "description": "化学基础理论与实验",
+            "subdirectories": {
+                "general_chemistry": "普通化学",
+                "organic_chemistry": "有机化学",
+                "physical_chemistry": "物理化学",
+                "analytical_chemistry": "分析化学"
+            },
+            "difficulty_levels": [
+                "beginner",
+                "intermediate",
+                "advanced"
+            ],
+            "assessment_types": [
+                "theoretical",
+                "experimental",
+                "analytical"
+            ]
+        }
+    },
+    "multimedia_types": {
+        "videos": {
+            "supported_formats": [
+                "mp4",
+                "webm",
+                "avi"
+            ],
+            "max_file_size": "500MB",
+            "quality_levels": [
+                "720p",
+                "1080p",
+                "4K"
+            ]
+        },
+        "animations": {
+            "supported_formats": [
+                "gif",
+                "webm",
+                "svg"
+            ],
+            "max_file_size": "50MB",
+            "interactive": true
+        },
+        "simulations": {
+            "supported_formats": [
+                "html",
+                "js",
+                "wasm"
+            ],
+            "platforms": [
+                "web",
+                "desktop",
+                "mobile"
+            ],
+            "real_time": true
+        },
+        "documents": {
+            "supported_formats": [
+                "pdf",
+                "docx",
+                "html",
+                "md"
+            ],
+            "max_file_size": "100MB",
+            "searchable": true
+        }
+    },
+    "assessment_framework": {
+        "bloom_taxonomy": {
+            "remember": "记忆",
+            "understand": "理解",
+            "apply": "应用",
+            "analyze": "分析",
+            "evaluate": "评价",
+            "create": "创造"
+        },
+        "competency_levels": {
+            "novice": "新手",
+            "advanced_beginner": "高级初学者",
+            "competent": "胜任者",
+            "proficient": "熟练者",
+            "expert": "专家"
+        },
+        "assessment_methods": {
+            "formative": "形成性评价",
+            "summative": "总结性评价",
+            "peer": "同伴评价",
+            "self": "自我评价",
+            "ai_assisted": "AI辅助评价"
+        }
+    },
+    "quality_standards": {
+        "content_accuracy": "内容准确性检查",
+        "pedagogical_alignment": "教学目标对齐",
+        "accessibility": "可访问性标准",
+        "cultural_sensitivity": "文化敏感性",
+        "age_appropriateness": "年龄适宜性"
+    },
+    "version_control": {
+        "enable_versioning": true,
+        "max_versions": 10,
+        "auto_backup": true,
+        "change_tracking": true
+    }
+}

@@ -218,6 +218,39 @@ def enhanced_qa():
             'message': 'An error occurred while processing your question'
         }), 500
 
+@llm_bp.route('/generate-experiment', methods=['POST'])
+def generate_experiment():
+    """
+    生成实验内容 - 基于问题生成相关的实验设计
+    
+    Request body:
+    {
+        "question": "用户的问题",
+        "subject": "学科领域（可选）",
+        "difficulty": "难度级别（可选）"
+    }
+    """
+    try:
+        data = request.json
+        
+        if not data or 'question' not in data:
+            return jsonify({
+                'error': 'Missing required parameter: question'
+            }), 400
+        
+        question = data['question']
+        subject = data.get('subject', '')
+        difficulty = data.get('difficulty', 'medium')
+        
+        # 使用AI生成实验内容
+        return generate_experiment_content(question, subject, difficulty)
+    
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'An error occurred while generating experiment'
+        }), 500
+
 def generate_ai_related_content(question, answer):
     """使用AI生成相关知识点、实验和仿真内容"""
     import asyncio
@@ -1501,4 +1534,272 @@ def generate_general_content(question, answer, analysis):
         'experiments': experiments,
         'simulation': simulation,
         'success': True
+    })
+
+def generate_experiment_content(question, subject, difficulty):
+    """生成实验内容"""
+    import asyncio
+    
+    try:
+        # 构建实验生成的提示词
+        experiment_prompt = f"""
+基于以下信息生成详细的实验设计：
+
+问题：{question}
+学科领域：{subject}
+难度级别：{difficulty}
+
+请按照以下JSON格式返回实验内容：
+
+{{
+    "experiment": {{
+        "title": "实验标题",
+        "objective": "实验目的",
+        "theory": "理论基础",
+        "materials": ["实验器材1", "实验器材2"],
+        "procedure": [
+            {{
+                "step": 1,
+                "description": "步骤描述",
+                "note": "注意事项"
+            }}
+        ],
+        "expected_results": "预期结果",
+        "analysis": "结果分析方法",
+        "safety_notes": ["安全注意事项1", "安全注意事项2"],
+        "simulation_url": "第三方仿真平台URL",
+        "difficulty": "{difficulty}",
+        "duration": "实验时长"
+    }},
+    "related_concepts": [
+        {{
+            "concept": "相关概念",
+            "explanation": "概念解释"
+        }}
+    ],
+    "extensions": [
+        {{
+            "title": "扩展实验标题",
+            "description": "扩展实验描述"
+        }}
+    ]
+}}
+
+要求：
+1. 实验设计要科学合理，符合教学要求
+2. 步骤要详细清晰，便于学生操作
+3. 根据难度级别调整实验复杂度
+4. 提供相关的理论背景
+5. 包含安全注意事项
+6. 推荐合适的第三方仿真平台
+7. 确保所有内容都是中文
+8. 只返回JSON格式，不要其他文字
+"""
+
+        # 使用AI生成实验内容
+        response = asyncio.run(llm_manager.generate_response(
+            prompt=experiment_prompt,
+            provider=None,
+            temperature=0.7,
+            max_tokens=2000
+        ))
+        
+        if 'error' in response:
+            # 使用备用方案
+            return generate_fallback_experiment(question, subject, difficulty)
+        
+        # 尝试解析AI返回的JSON
+        try:
+            import json
+            ai_content = response['content']
+            
+            # 提取JSON部分
+            start_idx = ai_content.find('{')
+            end_idx = ai_content.rfind('}') + 1
+            
+            if start_idx != -1 and end_idx != -1:
+                json_str = ai_content[start_idx:end_idx]
+                parsed_content = json.loads(json_str)
+                
+                return jsonify({
+                    **parsed_content,
+                    'success': True,
+                    'generated_by': 'ai'
+                })
+            else:
+                raise ValueError("No valid JSON found in AI response")
+                
+        except (json.JSONDecodeError, ValueError) as e:
+            print(f"JSON parsing error: {e}")
+            return generate_fallback_experiment(question, subject, difficulty)
+    
+    except Exception as e:
+        print(f"Experiment generation error: {e}")
+        return generate_fallback_experiment(question, subject, difficulty)
+
+def generate_fallback_experiment(question, subject, difficulty):
+    """备用实验生成方案"""
+    
+    # 分析问题类型
+    question_lower = question.lower()
+    
+    # 根据问题内容确定实验类型
+    if any(keyword in question_lower for keyword in ['电路', '电阻', '电容', '电压', '电流']):
+        return generate_circuit_experiment(question, difficulty)
+    elif any(keyword in question_lower for keyword in ['物理', '力学', '运动', '重力']):
+        return generate_physics_experiment(question, difficulty)
+    elif any(keyword in question_lower for keyword in ['化学', '反应', '溶液', '酸碱']):
+        return generate_chemistry_experiment(question, difficulty)
+    else:
+        return generate_general_experiment(question, subject, difficulty)
+
+def generate_circuit_experiment(question, difficulty):
+    """生成电路实验"""
+    
+    base_experiment = {
+        "title": "基础电路实验",
+        "objective": "验证电路基本定律，测量电路参数",
+        "theory": "根据欧姆定律和基尔霍夫定律，分析电路中的电压、电流关系",
+        "materials": ["面包板", "电阻器", "万用表", "导线", "直流电源"],
+        "procedure": [
+            {"step": 1, "description": "准备实验器材，检查万用表功能", "note": "确保万用表电池充足"},
+            {"step": 2, "description": "在面包板上搭建简单电路", "note": "注意电路连接的正确性"},
+            {"step": 3, "description": "使用万用表测量各点电压", "note": "测量时注意表笔极性"},
+            {"step": 4, "description": "记录实验数据并分析", "note": "多次测量取平均值"}
+        ],
+        "expected_results": "测量值应符合理论计算值，误差在允许范围内",
+        "analysis": "比较实测值与理论值，分析误差来源",
+        "safety_notes": ["注意用电安全", "避免短路", "正确使用万用表"],
+        "simulation_url": "https://www.falstad.com/circuit/circuitjs.html",
+        "difficulty": difficulty,
+        "duration": "2小时"
+    }
+    
+    # 根据难度调整实验复杂度
+    if difficulty == "hard":
+        base_experiment["materials"].extend(["示波器", "信号发生器", "电容器"])
+        base_experiment["procedure"].append(
+            {"step": 5, "description": "使用示波器观察波形", "note": "调节示波器参数"}
+        )
+    
+    return jsonify({
+        "experiment": base_experiment,
+        "related_concepts": [
+            {"concept": "欧姆定律", "explanation": "电压、电流、电阻之间的关系"},
+            {"concept": "基尔霍夫定律", "explanation": "电路分析的基本定律"}
+        ],
+        "extensions": [
+            {"title": "RC电路分析", "description": "分析RC电路的充放电过程"},
+            {"title": "交流电路测量", "description": "测量交流电路的有效值"}
+        ],
+        "success": True,
+        "generated_by": "fallback"
+    })
+
+def generate_physics_experiment(question, difficulty):
+    """生成物理实验"""
+    
+    base_experiment = {
+        "title": "物理测量实验",
+        "objective": "验证物理定律，测量物理量",
+        "theory": "基于牛顿运动定律和能量守恒定律进行分析",
+        "materials": ["秒表", "米尺", "天平", "小球", "斜面"],
+        "procedure": [
+            {"step": 1, "description": "准备实验装置", "note": "确保装置稳定"},
+            {"step": 2, "description": "测量相关物理量", "note": "多次测量提高精度"},
+            {"step": 3, "description": "记录实验数据", "note": "注意有效数字"},
+            {"step": 4, "description": "数据处理和分析", "note": "使用图表分析"}
+        ],
+        "expected_results": "实验结果符合理论预期",
+        "analysis": "通过图表分析验证物理定律",
+        "safety_notes": ["注意实验安全", "小心器材损坏"],
+        "simulation_url": "https://phet.colorado.edu/zh_CN/",
+        "difficulty": difficulty,
+        "duration": "1.5小时"
+    }
+    
+    return jsonify({
+        "experiment": base_experiment,
+        "related_concepts": [
+            {"concept": "运动学", "explanation": "描述物体运动的规律"},
+            {"concept": "动力学", "explanation": "研究力与运动的关系"}
+        ],
+        "extensions": [
+            {"title": "自由落体实验", "description": "测量重力加速度"},
+            {"title": "单摆实验", "description": "验证单摆周期公式"}
+        ],
+        "success": True,
+        "generated_by": "fallback"
+    })
+
+def generate_chemistry_experiment(question, difficulty):
+    """生成化学实验"""
+    
+    base_experiment = {
+        "title": "化学反应实验",
+        "objective": "观察化学反应现象，验证化学原理",
+        "theory": "基于化学反应原理和化学平衡理论",
+        "materials": ["试管", "烧杯", "滴管", "化学试剂", "pH试纸"],
+        "procedure": [
+            {"step": 1, "description": "准备实验试剂", "note": "注意试剂的安全使用"},
+            {"step": 2, "description": "按步骤进行反应", "note": "控制反应条件"},
+            {"step": 3, "description": "观察反应现象", "note": "详细记录现象"},
+            {"step": 4, "description": "分析实验结果", "note": "结合理论分析"}
+        ],
+        "expected_results": "观察到预期的化学反应现象",
+        "analysis": "根据反应现象验证化学原理",
+        "safety_notes": ["佩戴防护用品", "注意通风", "正确处理废液"],
+        "simulation_url": "https://molview.org/",
+        "difficulty": difficulty,
+        "duration": "2小时"
+    }
+    
+    return jsonify({
+        "experiment": base_experiment,
+        "related_concepts": [
+            {"concept": "化学反应", "explanation": "原子重新组合形成新物质"},
+            {"concept": "化学平衡", "explanation": "可逆反应的平衡状态"}
+        ],
+        "extensions": [
+            {"title": "酸碱滴定", "description": "定量分析酸碱浓度"},
+            {"title": "氧化还原反应", "description": "观察电子转移反应"}
+        ],
+        "success": True,
+        "generated_by": "fallback"
+    })
+
+def generate_general_experiment(question, subject, difficulty):
+    """生成通用实验"""
+    
+    base_experiment = {
+        "title": "综合实验",
+        "objective": "通过实验验证相关理论，培养实验技能",
+        "theory": "基于相关学科的基础理论",
+        "materials": ["基础实验器材", "测量工具", "记录表格"],
+        "procedure": [
+            {"step": 1, "description": "实验准备", "note": "检查器材完整性"},
+            {"step": 2, "description": "实验操作", "note": "按照规范操作"},
+            {"step": 3, "description": "数据记录", "note": "准确记录数据"},
+            {"step": 4, "description": "结果分析", "note": "结合理论分析"}
+        ],
+        "expected_results": "获得符合理论预期的实验结果",
+        "analysis": "通过数据分析验证理论",
+        "safety_notes": ["遵守实验室安全规则", "正确使用实验器材"],
+        "simulation_url": "https://www.geogebra.org/",
+        "difficulty": difficulty,
+        "duration": "2小时"
+    }
+    
+    return jsonify({
+        "experiment": base_experiment,
+        "related_concepts": [
+            {"concept": "实验方法", "explanation": "科学实验的基本方法"},
+            {"concept": "数据分析", "explanation": "实验数据的处理方法"}
+        ],
+        "extensions": [
+            {"title": "参数优化实验", "description": "优化实验参数提高精度"},
+            {"title": "误差分析实验", "description": "分析实验误差来源"}
+        ],
+        "success": True,
+        "generated_by": "fallback"
     })

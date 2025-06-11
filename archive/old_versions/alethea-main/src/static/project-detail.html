@@ -1,0 +1,2344 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目详情 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            height: 60px;
+            margin-right: 10px;
+        }
+        
+        .nav-link {
+            position: relative;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+        
+        .module-card {
+            border-radius: 12px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+        
+        .module-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .progress-bar {
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            background: linear-gradient(90deg, var(--accent-color), #22d3ee);
+            height: 8px;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+        
+        .step-card {
+            border-left: 4px solid var(--accent-color);
+            background: white;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        
+        .step-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .step-number {
+            background: var(--accent-color);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+        }
+        
+        .knowledge-tag {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .knowledge-tag:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+        
+        .difficulty-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .difficulty-easy {
+            background-color: #dcfce7;
+            color: #166534;
+        }
+        
+        .difficulty-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .difficulty-hard {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .back-btn {
+            background: linear-gradient(135deg, #6b7280, #9ca3af);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(107, 114, 128, 0.3);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, var(--accent-color), #22d3ee);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 165, 141, 0.3);
+        }
+        
+        /* Animation effects */
+        @keyframes fadeInUp {
+            from { 
+                opacity: 0; 
+                transform: translateY(30px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+        
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .logo {
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-12 mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="/static/index.html" class="nav-link font-medium">首页</a>
+                <a href="/static/index.html#subjects" class="nav-link font-medium">学科</a>
+                <a href="/static/projects.html" class="nav-link font-medium active">项目制学习</a>
+                <a href="/static/answer.html" class="nav-link font-medium">AI问答</a>
+                <a href="#about" class="nav-link font-medium">关于我们</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <div class="language-switcher" onclick="switchLanguage()">
+                    <span class="text-lg">🇺🇸</span>
+                    <span class="text-sm font-medium">English</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+                
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100" title="切换主题">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="relative" id="user-menu">
+                    <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <span class="hidden md:inline-block" id="user-menu-text">登录/注册</span>
+                        <i class="fas fa-chevron-down text-sm hidden md:inline-block" id="user-menu-arrow"></i>
+                    </button>
+                    <!-- 未登录状态的菜单 -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="guest-dropdown">
+                        <a href="/static/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-in-alt mr-2"></i>登录
+                        </a>
+                        <a href="/static/register.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user-plus mr-2"></i>注册
+                        </a>
+                    </div>
+                    <!-- 已登录状态的菜单 -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="user-dropdown">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                            <div class="font-medium" id="user-name">用户名</div>
+                            <div class="text-xs" id="user-email">user@example.com</div>
+                        </div>
+                        <a href="/static/dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-tachometer-alt mr-2"></i>个人仪表板
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="profile-link">
+                            <i class="fas fa-user-circle mr-2"></i>个人资料
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="settings-link">
+                            <i class="fas fa-cog mr-2"></i>设置
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="logout-link">
+                            <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                        </a>
+                    </div>
+                </div>
+                <button class="md:hidden focus:outline-none" id="mobile-menu-button" title="菜单">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-white shadow-sm mt-2 py-3" id="mobile-menu">
+            <div class="container mx-auto px-4 flex flex-col space-y-3">
+                <a href="/static/index.html" class="block py-2 px-4 hover:bg-gray-100 rounded">首页</a>
+                <a href="/static/index.html#subjects" class="block py-2 px-4 hover:bg-gray-100 rounded">学科</a>
+                <a href="/static/projects.html" class="block py-2 px-4 hover:bg-gray-100 rounded">项目制学习</a>
+                <a href="/static/answer.html" class="block py-2 px-4 hover:bg-gray-100 rounded">AI问答</a>
+                <a href="#about" class="block py-2 px-4 hover:bg-gray-100 rounded">关于我们</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Project Header -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                <div class="flex-1">
+                    <div class="flex items-center mb-4">
+                        <div id="project-icon" class="project-icon bg-blue-500 mr-4">
+                            <i class="fas fa-car"></i>
+                        </div>
+                        <div>
+                            <h1 id="project-title" class="text-3xl font-bold text-gray-800 mb-2">加载中...</h1>
+                            <span id="project-difficulty" class="difficulty-badge difficulty-medium">加载中</span>
+                        </div>
+                    </div>
+                    <p id="project-description" class="text-gray-600 text-lg mb-6">
+                        正在加载项目信息...
+                    </p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                        <div class="flex items-center">
+                            <i class="fas fa-clock text-blue-500 mr-3"></i>
+                            <div>
+                                <div class="text-sm text-gray-500">预计时间</div>
+                                <div id="project-duration" class="font-semibold">2-3周</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-users text-green-500 mr-3"></i>
+                            <div>
+                                <div class="text-sm text-gray-500">适合人数</div>
+                                <div class="font-semibold">1-3人</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <i class="fas fa-star text-yellow-500 mr-3"></i>
+                            <div>
+                                <div class="text-sm text-gray-500">项目评分</div>
+                                <div class="font-semibold">4.8/5.0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="lg:ml-8">
+                    <button class="start-btn w-full lg:w-auto">
+                        <i class="fas fa-play mr-2"></i>开始项目
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Assistant Chat -->
+    <div id="ai-assistant-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-robot text-blue-500 mr-2"></i>
+                        AI项目助手
+                    </h3>
+                    <button id="close-ai-assistant" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm">您好！我是您的AI项目助手。有什么关于项目的问题需要帮助吗？</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t">
+                    <div class="flex space-x-3">
+                        <input type="text" id="ai-question-input" placeholder="请输入您的问题..." 
+                               class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="send-ai-question" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modules -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">项目模块</h2>
+            <button id="open-ai-assistant" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center">
+                <i class="fas fa-robot mr-2"></i>
+                AI助手
+            </button>
+        </div>
+        <div id="project-modules" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <!-- Modules will be dynamically loaded here -->
+        </div>
+    </section>
+
+    <!-- Project Steps -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">实施步骤</h2>
+        <div id="project-steps" class="space-y-6 mb-12">
+            <!-- Steps will be dynamically loaded here -->
+        </div>
+    </section>
+
+    <!-- Required Skills -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">所需技能</h2>
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-12">
+            <div id="project-skills" class="flex flex-wrap gap-3">
+                <!-- Skills will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Knowledge Points -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">相关知识点</h2>
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div id="knowledge-points" class="flex flex-wrap gap-3">
+                <!-- Knowledge points will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Alethea</h3>
+                    <p class="text-gray-400">高等教育知识问答平台</p>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">快速链接</h3>
+                    <ul class="space-y-2">
+                        <li><a href="/" class="text-gray-400 hover:text-white">首页</a></li>
+                        <li><a href="/#subjects" class="text-gray-400 hover:text-white">学科</a></li>
+                        <li><a href="/static/projects.html" class="text-gray-400 hover:text-white">项目制学习</a></li>
+                        <li><a href="/#about" class="text-gray-400 hover:text-white">关于我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">支持</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">帮助中心</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">常见问题</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">联系我们</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold mb-4">法律</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">隐私政策</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">使用条款</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Alethea. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 项目数据
+        const projectsData = {
+            'smart-car': {
+                title: '智能小车',
+                description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-car',
+                color: 'bg-blue-500'
+            },
+            'image-classifier': {
+                title: '图像分类器',
+                description: '训练卷积神经网络进行图像分类和物体识别',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-images',
+                color: 'bg-purple-600'
+            },
+            'smart-home': {
+                title: '智能家居系统',
+                description: '构建物联网智能家居系统，实现远程控制和环境监测',
+                difficulty: 'medium',
+                duration: '3-4周',
+                icon: 'fas fa-home',
+                color: 'bg-teal-500'
+            },
+            'led-matrix': {
+                title: 'LED点阵显示屏',
+                description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示等功能',
+                difficulty: 'easy',
+                duration: '1-2周',
+                icon: 'fas fa-tv',
+                color: 'bg-green-500'
+            },
+            'line-follower': {
+                title: '循迹机器人',
+                description: '制作能够自动循迹的机器人，使用红外传感器检测路径',
+                difficulty: 'medium',
+                duration: '2周',
+                icon: 'fas fa-route',
+                color: 'bg-yellow-500'
+            },
+            'robotic-arm': {
+                title: '机械臂控制系统',
+                description: '设计多自由度机械臂，实现精确的位置控制和路径规划',
+                difficulty: 'hard',
+                duration: '4-6周',
+                icon: 'fas fa-robot',
+                color: 'bg-red-500'
+            },
+            'drone-basic': {
+                title: '四旋翼无人机',
+                description: '组装并编程四旋翼无人机，实现稳定飞行和基本控制',
+                difficulty: 'hard',
+                duration: '3-4周',
+                icon: 'fas fa-helicopter',
+                color: 'bg-indigo-500'
+            },
+            'weather-station': {
+                title: '气象监测站',
+                description: '制作能够实时监测温湿度、气压等环境参数的气象站',
+                difficulty: 'easy',
+                duration: '1-2周',
+                icon: 'fas fa-cloud-sun',
+                color: 'bg-cyan-500'
+            },
+            'smart-garden': {
+                title: '智能花园',
+                description: '设计自动浇水和环境监控的智能花园系统',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-seedling',
+                color: 'bg-green-600'
+            },
+            'face-recognition': {
+                title: '人脸识别系统',
+                description: '基于深度学习的人脸识别系统，实现身份验证功能',
+                difficulty: 'hard',
+                duration: '4-5周',
+                icon: 'fas fa-user-check',
+                color: 'bg-pink-500'
+            },
+            'chatbot': {
+                title: '智能聊天机器人',
+                description: '开发基于自然语言处理的智能聊天机器人',
+                difficulty: 'medium',
+                duration: '3周',
+                icon: 'fas fa-comments',
+                color: 'bg-blue-600'
+            },
+            'plc-control': {
+                title: 'PLC控制系统',
+                description: '设计工业自动化PLC控制系统，实现生产线自动化',
+                difficulty: 'hard',
+                duration: '4-6周',
+                icon: 'fas fa-industry',
+                color: 'bg-gray-600'
+            },
+            'motor-control': {
+                title: '电机调速系统',
+                description: '实现直流电机和步进电机的精确调速控制',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-cog',
+                color: 'bg-orange-500'
+            },
+            'conveyor-system': {
+                title: '传送带控制系统',
+                description: '设计自动化传送带系统，包含物料检测和分拣功能',
+                difficulty: 'medium',
+                duration: '3周',
+                icon: 'fas fa-conveyor-belt',
+                color: 'bg-amber-500'
+            },
+            'digital-clock': {
+                title: '数字时钟',
+                description: '设计制作带闹钟功能的数字时钟，包含RTC模块和LCD显示',
+                difficulty: 'easy',
+                duration: '1周',
+                icon: 'fas fa-clock',
+                color: 'bg-purple-500'
+            }
+        };
+
+        // 获取难度标签样式
+        function getDifficultyClass(difficulty) {
+            const classes = {
+                'easy': 'difficulty-easy',
+                'medium': 'difficulty-medium',
+                'hard': 'difficulty-hard'
+            };
+            return classes[difficulty] || 'difficulty-easy';
+        }
+
+        // 获取难度文本
+        function getDifficultyText(difficulty) {
+            const texts = {
+                'easy': '入门',
+                'medium': '中级',
+                'hard': '高级'
+            };
+            return texts[difficulty] || '入门';
+        }
+
+        // 加载项目信息
+        function loadProject() {
+            const projectId = getUrlParameter('id') || 'smart-car';
+            const project = projectsData[projectId];
+            
+            if (project) {
+                document.getElementById('project-title').textContent = project.title;
+                document.getElementById('project-description').textContent = project.description;
+                document.getElementById('project-duration').textContent = project.duration;
+                
+                const difficultyElement = document.getElementById('project-difficulty');
+                difficultyElement.textContent = getDifficultyText(project.difficulty);
+                difficultyElement.className = `difficulty-badge ${getDifficultyClass(project.difficulty)}`;
+                
+                const iconElement = document.getElementById('project-icon');
+                iconElement.innerHTML = `<i class="${project.icon}"></i>`;
+                iconElement.className = `module-icon ${project.color} mr-4`;
+                
+                // 显示AI生成状态
+                showAIGenerating();
+            }
+        }
+
+        // 显示AI生成状态
+        function showAIGenerating() {
+            document.getElementById('project-modules').innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">AI正在生成项目详细内容...</p>
+                </div>
+            `;
+            
+            document.getElementById('project-steps').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-pulse bg-gray-200 h-4 w-3/4 mx-auto mb-2 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-4 w-1/2 mx-auto rounded"></div>
+                </div>
+            `;
+            
+            document.getElementById('project-skills').innerHTML = `
+                <div class="flex space-x-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                </div>
+            `;
+            
+            document.getElementById('knowledge-points').innerHTML = `
+                <div class="flex flex-wrap gap-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded-full"></div>
+                </div>
+            `;
+
+            // 3秒后显示生成的内容
+            setTimeout(showGeneratedContent, 3000);
+        }
+
+        // 显示生成的内容
+        function showGeneratedContent() {
+            const projectId = getUrlParameter('id') || 'smart-car';
+            const project = getBasicProjectInfo(projectId);
+            
+            if (project) {
+                // 根据项目类型生成对应的内容
+                const projectDetail = generateProjectSpecificContent(project);
+                
+                // 渲染内容
+                renderModules(projectDetail.modules);
+                renderSteps(projectDetail.steps);
+                renderSkills(projectDetail.skills);
+                renderKnowledgePoints(projectDetail.knowledgePoints);
+            }
+        }
+
+        // 渲染项目模块
+        function renderModules(modules) {
+            const container = document.getElementById('project-modules');
+            container.innerHTML = modules.map((module, index) => `
+                <div class="module-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 4) + 1}" 
+                     onclick="openModuleDetail('${module.title}')">
+                    <div class="module-icon ${module.color}">
+                        <i class="${module.icon}"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${module.title}</h3>
+                    <p class="text-gray-600 mb-4">${module.description}</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${module.knowledgePoints.slice(0, 2).map(point => 
+                            `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${point}</span>`
+                        ).join('')}
+                        ${module.knowledgePoints.length > 2 ? 
+                            `<span class="text-gray-500 text-xs">+${module.knowledgePoints.length - 2}</span>` : ''
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染项目步骤
+        function renderSteps(steps) {
+            const container = document.getElementById('project-steps');
+            container.innerHTML = steps.map((step, index) => `
+                <div class="step-card p-6 fade-in-up stagger-${(index % 4) + 1}">
+                    <div class="flex items-start">
+                        <div class="step-number mr-4 mt-1">
+                            ${index + 1}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-3">
+                                <h3 class="text-xl font-bold text-gray-800">${step.title}</h3>
+                                <span class="text-sm text-gray-500 mt-1 lg:mt-0">
+                                    <i class="fas fa-clock mr-1"></i>${step.duration}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 mb-4">${step.description}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                ${step.tasks.map(task => 
+                                    `<div class="flex items-center text-sm text-gray-700">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        ${task}
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染技能标签
+        function renderSkills(skills) {
+            const container = document.getElementById('project-skills');
+            container.innerHTML = skills.map(skill => 
+                `<span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">${skill}</span>`
+            ).join('');
+        }
+
+        // 渲染知识点
+        function renderKnowledgePoints(points) {
+            const container = document.getElementById('knowledge-points');
+            container.innerHTML = points.map(point => 
+                `<span class="knowledge-tag" onclick="searchKnowledge('${point}')">${point}</span>`
+            ).join('');
+        }
+
+        // 打开模块详情
+        function openModuleDetail(moduleTitle) {
+            alert(`打开模块详情：${moduleTitle}`);
+            // 这里可以实现跳转到模块详情页面或显示模态框
+        }
+
+        // 搜索知识点
+        function searchKnowledge(point) {
+            // 跳转到问答页面搜索相关知识点
+            window.location.href = `/static/answer.html?q=${encodeURIComponent(point)}`;
+        }
+
+        // 根据项目类型生成特定内容
+        function generateProjectSpecificContent(project) {
+            const contentTemplates = {
+                'smart-home': {
+                    modules: [
+                        {
+                            title: '传感器网络搭建',
+                            description: '部署温湿度、光照、烟雾等环境传感器',
+                            icon: 'fas fa-thermometer-half',
+                            color: 'bg-blue-500',
+                            knowledgePoints: ['传感器原理', '数据采集', '网络通信']
+                        },
+                        {
+                            title: 'WiFi通信模块',
+                            description: '实现设备间的无线通信和数据传输',
+                            icon: 'fas fa-wifi',
+                            color: 'bg-green-500',
+                            knowledgePoints: ['WiFi协议', '无线通信', 'TCP/IP']
+                        },
+                        {
+                            title: '云平台集成',
+                            description: '连接云服务实现远程监控和控制',
+                            icon: 'fas fa-cloud',
+                            color: 'bg-purple-500',
+                            knowledgePoints: ['云计算', 'API接口', '数据存储']
+                        },
+                        {
+                            title: '移动应用开发',
+                            description: '开发手机APP实现远程控制功能',
+                            icon: 'fas fa-mobile-alt',
+                            color: 'bg-orange-500',
+                            knowledgePoints: ['移动开发', '用户界面', '实时通信']
+                        }
+                    ],
+                    steps: [
+                        {
+                            title: '系统架构设计',
+                            description: '设计智能家居系统的整体架构和通信方案',
+                            duration: '2-3天',
+                            tasks: ['需求分析', '架构设计', '技术选型', '通信协议设计']
+                        },
+                        {
+                            title: '传感器部署',
+                            description: '安装和配置各类环境监测传感器',
+                            duration: '3-4天',
+                            tasks: ['传感器选型', '硬件安装', '数据校准', '网络配置']
+                        },
+                        {
+                            title: '云平台开发',
+                            description: '搭建云端数据处理和存储系统',
+                            duration: '1-2周',
+                            tasks: ['服务器搭建', '数据库设计', 'API开发', '安全配置']
+                        },
+                        {
+                            title: '移动应用开发',
+                            description: '开发用户控制界面和实时监控功能',
+                            duration: '1-2周',
+                            tasks: ['界面设计', '功能开发', '数据同步', '用户测试']
+                        }
+                    ],
+                    skills: ['WiFi通信', '传感器网络', '移动应用', '云平台', '物联网协议', '数据分析'],
+                    knowledgePoints: [
+                        '物联网架构', 'WiFi通信协议', '传感器技术', '云计算平台',
+                        '移动应用开发', '数据库设计', '网络安全', '实时数据处理'
+                    ]
+                },
+                'image-classifier': {
+                    modules: [
+                        {
+                            title: '数据集准备',
+                            description: '收集和预处理图像训练数据',
+                            icon: 'fas fa-database',
+                            color: 'bg-blue-500',
+                            knowledgePoints: ['数据收集', '图像预处理', '数据增强']
+                        },
+                        {
+                            title: 'CNN模型设计',
+                            description: '设计卷积神经网络架构',
+                            icon: 'fas fa-brain',
+                            color: 'bg-purple-500',
+                            knowledgePoints: ['卷积神经网络', '模型架构', '参数设计']
+                        },
+                        {
+                            title: '模型训练',
+                            description: '训练深度学习模型并优化参数',
+                            icon: 'fas fa-cogs',
+                            color: 'bg-green-500',
+                            knowledgePoints: ['模型训练', '损失函数', '优化算法']
+                        },
+                        {
+                            title: '模型部署',
+                            description: '将训练好的模型部署到生产环境',
+                            icon: 'fas fa-rocket',
+                            color: 'bg-orange-500',
+                            knowledgePoints: ['模型部署', 'API开发', '性能优化']
+                        }
+                    ],
+                    steps: [
+                        {
+                            title: '数据准备',
+                            description: '收集、清洗和预处理图像数据集',
+                            duration: '3-5天',
+                            tasks: ['数据收集', '数据清洗', '标签标注', '数据划分']
+                        },
+                        {
+                            title: '模型设计',
+                            description: '设计CNN网络架构和训练策略',
+                            duration: '2-3天',
+                            tasks: ['网络设计', '损失函数选择', '优化器配置', '评估指标设计']
+                        },
+                        {
+                            title: '模型训练',
+                            description: '训练模型并进行参数调优',
+                            duration: '1-2周',
+                            tasks: ['模型训练', '参数调优', '验证测试', '性能评估']
+                        },
+                        {
+                            title: '部署应用',
+                            description: '部署模型并开发应用接口',
+                            duration: '3-5天',
+                            tasks: ['模型导出', 'API开发', '前端界面', '性能测试']
+                        }
+                    ],
+                    skills: ['CNN', '图像处理', 'TensorFlow', '数据预处理', 'Python编程', '模型部署'],
+                    knowledgePoints: [
+                        '深度学习', '卷积神经网络', '图像处理', '数据科学',
+                        'TensorFlow框架', '模型优化', '计算机视觉', '机器学习'
+                    ]
+                },
+                'line-follower': {
+                    modules: [
+                        {
+                            title: '传感器系统',
+                            description: '集成红外传感器阵列实现路径检测',
+                            icon: 'fas fa-eye',
+                            color: 'bg-red-500',
+                            knowledgePoints: ['红外传感器', '信号调理', '阈值设定']
+                        },
+                        {
+                            title: '运动控制',
+                            description: '设计差速驱动系统实现精确转向',
+                            icon: 'fas fa-cogs',
+                            color: 'bg-blue-500',
+                            knowledgePoints: ['差速控制', '电机驱动', 'PWM调速']
+                        },
+                        {
+                            title: '控制算法',
+                            description: '实现PID控制算法优化循迹性能',
+                            icon: 'fas fa-brain',
+                            color: 'bg-green-500',
+                            knowledgePoints: ['PID控制', '反馈系统', '参数调优']
+                        },
+                        {
+                            title: '系统集成',
+                            description: '整合硬件和软件实现完整功能',
+                            icon: 'fas fa-puzzle-piece',
+                            color: 'bg-purple-500',
+                            knowledgePoints: ['系统调试', '性能优化', '故障诊断']
+                        }
+                    ],
+                    steps: [
+                        {
+                            title: '硬件搭建',
+                            description: '组装机器人底盘和传感器系统',
+                            duration: '2-3天',
+                            tasks: ['底盘组装', '传感器安装', '电路连接', '基础测试']
+                        },
+                        {
+                            title: '传感器调试',
+                            description: '校准红外传感器并测试检测效果',
+                            duration: '1-2天',
+                            tasks: ['传感器校准', '阈值设定', '检测测试', '信号优化']
+                        },
+                        {
+                            title: '基础循迹',
+                            description: '实现简单的循迹功能',
+                            duration: '2-3天',
+                            tasks: ['基础算法', '转向逻辑', '速度控制', '路径测试']
+                        },
+                        {
+                            title: 'PID优化',
+                            description: '引入PID控制提升循迹精度',
+                            duration: '2-3天',
+                            tasks: ['PID实现', '参数调优', '性能测试', '稳定性验证']
+                        }
+                    ],
+                    skills: ['传感器融合', 'PID控制', '路径跟踪', '机器人导航', '嵌入式编程'],
+                    knowledgePoints: [
+                        '红外传感器原理', 'PID控制理论', '差速驱动', '反馈控制',
+                        '信号处理', '机器人运动学', '控制系统', '嵌入式系统'
+                    ]
+                }
+            };
+
+            // 如果有预定义模板，使用模板；否则使用通用模板
+            if (contentTemplates[project.id]) {
+                return contentTemplates[project.id];
+            }
+
+            // 通用模板（根据项目类别生成）
+            return generateGenericContent(project);
+        }
+
+        // 生成通用内容
+        function generateGenericContent(project) {
+            const categoryTemplates = {
+                'electronics': {
+                    moduleTypes: ['硬件设计', '电路分析', '信号处理', '系统测试'],
+                    skills: ['电路设计', '信号处理', '嵌入式编程', '硬件调试'],
+                    knowledge: ['电路原理', '模拟电路', '数字电路', '信号处理']
+                },
+                'robotics': {
+                    moduleTypes: ['机械设计', '传感器集成', '控制算法', '系统集成'],
+                    skills: ['机械设计', '传感器应用', '控制算法', '系统集成'],
+                    knowledge: ['机器人学', '控制理论', '传感器技术', '运动学']
+                },
+                'iot': {
+                    moduleTypes: ['设备连接', '数据传输', '云平台', '应用开发'],
+                    skills: ['物联网协议', '云计算', '数据分析', '移动开发'],
+                    knowledge: ['物联网架构', '无线通信', '云计算', '数据分析']
+                },
+                'ai': {
+                    moduleTypes: ['数据处理', '模型设计', '训练优化', '部署应用'],
+                    skills: ['机器学习', '深度学习', '数据科学', '模型部署'],
+                    knowledge: ['机器学习', '深度学习', '数据科学', '算法优化']
+                },
+                'automation': {
+                    moduleTypes: ['系统设计', '控制逻辑', '设备集成', '监控调试'],
+                    skills: ['自动控制', 'PLC编程', '系统集成', '故障诊断'],
+                    knowledge: ['自动控制', '工业控制', 'PLC编程', '系统集成']
+                }
+            };
+
+            const template = categoryTemplates[project.category] || categoryTemplates['electronics'];
+            const icons = ['fas fa-cogs', 'fas fa-microchip', 'fas fa-brain', 'fas fa-rocket'];
+            const colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-orange-500'];
+
+            return {
+                modules: template.moduleTypes.map((type, index) => ({
+                    title: type,
+                    description: `${project.title}项目的${type}模块`,
+                    icon: icons[index],
+                    color: colors[index],
+                    knowledgePoints: template.skills.slice(index * 2, (index + 1) * 2).concat([template.knowledge[index]])
+                })),
+                steps: [
+                    {
+                        title: '项目规划',
+                        description: `制定${project.title}的详细实施计划`,
+                        duration: '1-2天',
+                        tasks: ['需求分析', '技术调研', '方案设计', '资源准备']
+                    },
+                    {
+                        title: '核心开发',
+                        description: `开发${project.title}的核心功能`,
+                        duration: '1-2周',
+                        tasks: ['架构设计', '核心实现', '功能测试', '性能优化']
+                    },
+                    {
+                        title: '系统集成',
+                        description: `集成${project.title}的各个模块`,
+                        duration: '3-5天',
+                        tasks: ['模块集成', '系统测试', '问题修复', '文档编写']
+                    }
+                ],
+                skills: template.skills.concat(['项目管理', '问题解决']),
+                knowledgePoints: template.knowledge.concat(['项目管理', '系统设计', '问题解决', '团队协作'])
+            };
+        }
+
+        // AI助手功能
+        function openAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.remove('hidden');
+            document.getElementById('ai-question-input').focus();
+        }
+
+        function closeAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.add('hidden');
+        }
+
+        function sendAIQuestion() {
+            const input = document.getElementById('ai-question-input');
+            const question = input.value.trim();
+            
+            if (!question) return;
+
+            // 添加用户消息
+            addChatMessage(question, 'user');
+            input.value = '';
+
+            // 模拟AI回答
+            setTimeout(() => {
+                const projectTitle = document.getElementById('project-title').textContent;
+                addChatMessage(`这是一个很好的问题！关于${projectTitle}项目，我建议您首先了解相关的基础概念，然后逐步学习核心技术。您可以从简单的基础实验开始，逐步过渡到复杂的系统集成。`, 'ai');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center ml-auto">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div class="bg-blue-100 rounded-lg p-3 max-w-xs ml-auto">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                messageDiv.classList.add('flex-row-reverse');
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 从项目列表数据中获取基本项目信息
+        function getBasicProjectInfo(projectId) {
+            // 完整的项目数据，包含所有项目列表页面的项目
+            const projectsData = {
+                // 电子工程项目
+                'smart-car': {
+                    id: 'smart-car',
+                    title: '智能小车',
+                    description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['Arduino编程', '传感器应用', '电机控制', '电路设计'],
+                    icon: 'fas fa-car',
+                    color: 'bg-blue-500',
+                    category: 'electronics'
+                },
+                'led-matrix': {
+                    id: 'led-matrix',
+                    title: 'LED点阵显示屏',
+                    description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示等功能',
+                    difficulty: 'easy',
+                    duration: '1-2周',
+                    skills: ['数字电路', 'LED驱动', '单片机编程', '显示原理'],
+                    icon: 'fas fa-tv',
+                    color: 'bg-green-500',
+                    category: 'electronics'
+                },
+                'digital-clock': {
+                    id: 'digital-clock',
+                    title: '数字时钟',
+                    description: '设计制作带闹钟功能的数字时钟，包含RTC模块和LCD显示',
+                    difficulty: 'easy',
+                    duration: '1周',
+                    skills: ['时钟电路', 'LCD显示', 'RTC应用', '按键控制'],
+                    icon: 'fas fa-clock',
+                    color: 'bg-purple-500',
+                    category: 'electronics'
+                },
+                
+                // 机器人项目
+                'robotic-arm': {
+                    id: 'robotic-arm',
+                    title: '机械臂控制系统',
+                    description: '设计多自由度机械臂，实现精确的位置控制和路径规划',
+                    difficulty: 'hard',
+                    duration: '4-6周',
+                    skills: ['机械设计', '伺服控制', '运动学', '编程控制'],
+                    icon: 'fas fa-robot',
+                    color: 'bg-red-500',
+                    category: 'robotics'
+                },
+                'line-follower': {
+                    id: 'line-follower',
+                    title: '循迹机器人',
+                    description: '制作能够自动循迹的机器人，使用红外传感器检测路径',
+                    difficulty: 'medium',
+                    duration: '2周',
+                    skills: ['传感器融合', 'PID控制', '路径跟踪', '机器人导航'],
+                    icon: 'fas fa-route',
+                    color: 'bg-yellow-500',
+                    category: 'robotics'
+                },
+                'drone-basic': {
+                    id: 'drone-basic',
+                    title: '四旋翼无人机',
+                    description: '组装并编程四旋翼无人机，实现稳定飞行和基本控制',
+                    difficulty: 'hard',
+                    duration: '3-4周',
+                    skills: ['飞行控制', '姿态传感器', '电机调速', '无线通信'],
+                    icon: 'fas fa-helicopter',
+                    color: 'bg-indigo-500',
+                    category: 'robotics'
+                },
+                
+                // 物联网项目
+                'smart-home': {
+                    id: 'smart-home',
+                    title: '智能家居系统',
+                    description: '构建物联网智能家居系统，实现远程控制和环境监测',
+                    difficulty: 'medium',
+                    duration: '3-4周',
+                    skills: ['WiFi通信', '传感器网络', '移动应用', '云平台'],
+                    icon: 'fas fa-home',
+                    color: 'bg-teal-500',
+                    category: 'iot'
+                },
+                'weather-station': {
+                    id: 'weather-station',
+                    title: '气象监测站',
+                    description: '制作能够实时监测温湿度、气压等环境参数的气象站',
+                    difficulty: 'easy',
+                    duration: '1-2周',
+                    skills: ['环境传感器', '数据采集', '无线传输', '数据可视化'],
+                    icon: 'fas fa-cloud-sun',
+                    color: 'bg-cyan-500',
+                    category: 'iot'
+                },
+                'smart-garden': {
+                    id: 'smart-garden',
+                    title: '智能花园',
+                    description: '设计自动浇水和环境监控的智能花园系统',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['土壤传感器', '自动控制', '定时系统', '移动监控'],
+                    icon: 'fas fa-seedling',
+                    color: 'bg-green-600',
+                    category: 'iot'
+                },
+                
+                // 人工智能项目
+                'face-recognition': {
+                    id: 'face-recognition',
+                    title: '人脸识别系统',
+                    description: '基于深度学习的人脸识别系统，实现身份验证功能',
+                    difficulty: 'hard',
+                    duration: '4-5周',
+                    skills: ['深度学习', '计算机视觉', 'Python编程', '模型训练'],
+                    icon: 'fas fa-user-check',
+                    color: 'bg-pink-500',
+                    category: 'ai'
+                },
+                'chatbot': {
+                    id: 'chatbot',
+                    title: '智能聊天机器人',
+                    description: '开发基于自然语言处理的智能聊天机器人',
+                    difficulty: 'medium',
+                    duration: '3周',
+                    skills: ['NLP', '机器学习', '对话系统', 'API开发'],
+                    icon: 'fas fa-comments',
+                    color: 'bg-blue-600',
+                    category: 'ai'
+                },
+                'image-classifier': {
+                    id: 'image-classifier',
+                    title: '图像分类器',
+                    description: '训练卷积神经网络进行图像分类和物体识别',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['CNN', '图像处理', 'TensorFlow', '数据预处理'],
+                    icon: 'fas fa-images',
+                    color: 'bg-purple-600',
+                    category: 'ai'
+                },
+                
+                // 自动化项目
+                'plc-control': {
+                    id: 'plc-control',
+                    title: 'PLC控制系统',
+                    description: '设计工业自动化PLC控制系统，实现生产线自动化',
+                    difficulty: 'hard',
+                    duration: '4-6周',
+                    skills: ['PLC编程', '工业控制', '传感器应用', '人机界面'],
+                    icon: 'fas fa-industry',
+                    color: 'bg-gray-600',
+                    category: 'automation'
+                },
+                'motor-control': {
+                    id: 'motor-control',
+                    title: '电机调速系统',
+                    description: '实现直流电机和步进电机的精确调速控制',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['电机原理', 'PWM控制', '反馈控制', '驱动电路'],
+                    icon: 'fas fa-cog',
+                    color: 'bg-orange-500',
+                    category: 'automation'
+                },
+                'conveyor-system': {
+                    id: 'conveyor-system',
+                    title: '传送带控制系统',
+                    description: '设计自动化传送带系统，包含物料检测和分拣功能',
+                    difficulty: 'medium',
+                    duration: '3周',
+                    skills: ['传感器应用', '逻辑控制', '机械设计', '系统集成'],
+                    icon: 'fas fa-conveyor-belt',
+                    color: 'bg-amber-500',
+                    category: 'automation'
+                }
+            };
+            
+            return projectsData[projectId] || null;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProject();
+
+            // AI助手事件监听
+            document.getElementById('open-ai-assistant').addEventListener('click', openAIAssistant);
+            document.getElementById('close-ai-assistant').addEventListener('click', closeAIAssistant);
+            document.getElementById('send-ai-question').addEventListener('click', sendAIQuestion);
+            
+            // 回车发送消息
+            document.getElementById('ai-question-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendAIQuestion();
+                }
+            });
+
+            // 点击模态框外部关闭
+            document.getElementById('ai-assistant-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAIAssistant();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
+                title: '智能小车',
+                description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块，实现自主导航和避障功能',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-car',
+                color: 'bg-blue-500',
+                modules: [
+                    {
+                        title: '硬件平台搭建',
+                        description: '选择合适的硬件平台，搭建小车基础结构',
+                        icon: 'fas fa-microchip',
+                        color: 'bg-purple-500',
+                        knowledgePoints: ['Arduino基础', '电机驱动原理', '传感器接口']
+                    },
+                    {
+                        title: '传感器集成',
+                        description: '集成超声波传感器实现距离检测',
+                        icon: 'fas fa-radar',
+                        color: 'bg-green-500',
+                        knowledgePoints: ['超声波原理', '信号处理', '数据滤波']
+                    },
+                    {
+                        title: '控制算法',
+                        description: '编写避障和路径规划算法',
+                        icon: 'fas fa-brain',
+                        color: 'bg-red-500',
+                        knowledgePoints: ['PID控制', '路径规划', '决策算法']
+                    },
+                    {
+                        title: '代码实现',
+                        description: '使用Arduino IDE编写控制程序',
+                        icon: 'fas fa-code',
+                        color: 'bg-blue-600',
+                        knowledgePoints: ['C++编程', 'Arduino库', '中断处理']
+                    },
+                    {
+                        title: '调试优化',
+                        description: '测试系统性能并进行参数优化',
+                        icon: 'fas fa-tools',
+                        color: 'bg-orange-500',
+                        knowledgePoints: ['系统调试', '性能优化', '故障排除']
+                    },
+                    {
+                        title: '功能扩展',
+                        description: '添加蓝牙控制、摄像头等高级功能',
+                        icon: 'fas fa-plus-circle',
+                        color: 'bg-teal-500',
+                        knowledgePoints: ['无线通信', '图像处理', '模块化设计']
+                    }
+                ],
+                steps: [
+                    {
+                        title: '需求分析与设计',
+                        description: '明确项目目标，设计系统架构和硬件选型',
+                        duration: '1-2天',
+                        tasks: ['功能需求分析', '硬件选型', '系统架构设计', '成本预算']
+                    },
+                    {
+                        title: '硬件采购与组装',
+                        description: '采购所需硬件并完成小车机械结构组装',
+                        duration: '2-3天',
+                        tasks: ['硬件采购', '机械组装', '电路连接', '基础测试']
+                    },
+                    {
+                        title: '基础功能开发',
+                        description: '实现电机控制和传感器数据读取功能',
+                        duration: '3-4天',
+                        tasks: ['电机驱动程序', '传感器接口', '基础移动控制', '数据采集']
+                    },
+                    {
+                        title: '避障算法实现',
+                        description: '开发智能避障算法并进行测试',
+                        duration: '4-5天',
+                        tasks: ['避障逻辑设计', '算法编程实现', '参数调优', '场景测试']
+                    },
+                    {
+                        title: '系统集成测试',
+                        description: '整合所有功能模块并进行综合测试',
+                        duration: '2-3天',
+                        tasks: ['模块集成', '功能测试', '性能评估', '问题修复']
+                    },
+                    {
+                        title: '优化与扩展',
+                        description: '优化系统性能并添加额外功能',
+                        duration: '2-3天',
+                        tasks: ['性能优化', '功能扩展', '用户界面', '文档编写']
+                    }
+                ],
+                skills: ['Arduino编程', '传感器应用', '电机控制', '电路设计', 'C++编程', '系统调试'],
+                knowledgePoints: [
+                    '单片机原理', 'PWM控制', '传感器技术', '电机驱动', 
+                    '嵌入式编程', '控制算法', '信号处理', '系统集成'
+                ]
+            },
+            'led-matrix': {
+                title: 'LED点阵显示屏',
+                description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示等功能',
+                difficulty: 'easy',
+                duration: '1-2周',
+                icon: 'fas fa-tv',
+                color: 'bg-green-500',
+                modules: [
+                    {
+                        title: 'LED矩阵原理',
+                        description: '学习LED点阵显示原理和驱动方法',
+                        icon: 'fas fa-lightbulb',
+                        color: 'bg-yellow-500',
+                        knowledgePoints: ['LED原理', '矩阵扫描', '显示驱动']
+                    },
+                    {
+                        title: '硬件电路设计',
+                        description: '设计LED驱动电路和控制接口',
+                        icon: 'fas fa-circuit-board',
+                        color: 'bg-blue-500',
+                        knowledgePoints: ['电路设计', '驱动芯片', 'PCB布局']
+                    },
+                    {
+                        title: '显示程序编写',
+                        description: '编写字符显示和动画效果程序',
+                        icon: 'fas fa-code',
+                        color: 'bg-purple-500',
+                        knowledgePoints: ['字符编码', '动画算法', '定时控制']
+                    }
+                ],
+                steps: [
+                    {
+                        title: '原理学习',
+                        description: '学习LED点阵显示原理',
+                        duration: '1天',
+                        tasks: ['LED原理', '矩阵扫描', '驱动方法']
+                    },
+                    {
+                        title: '电路设计',
+                        description: '设计并搭建驱动电路',
+                        duration: '2-3天',
+                        tasks: ['电路设计', '元件选型', '电路搭建']
+                    },
+                    {
+                        title: '程序开发',
+                        description: '编写显示控制程序',
+                        duration: '3-4天',
+                        tasks: ['基础显示', '字符库', '动画效果']
+                    }
+                ],
+                skills: ['数字电路', 'LED驱动', '单片机编程', '显示原理'],
+                knowledgePoints: ['数字电路', 'LED技术', '显示驱动', '嵌入式编程']
+            },
+            'line-follower': {
+                title: '循迹机器人',
+                description: '制作能够自动循迹的机器人，使用红外传感器检测路径',
+                difficulty: 'medium',
+                duration: '2周',
+                icon: 'fas fa-route',
+                color: 'bg-yellow-500',
+                modules: [
+                    {
+                        title: '传感器系统',
+                        description: '集成红外传感器阵列实现路径检测',
+                        icon: 'fas fa-eye',
+                        color: 'bg-red-500',
+                        knowledgePoints: ['红外传感器', '信号调理', '阈值设定']
+                    },
+                    {
+                        title: '运动控制',
+                        description: '设计差速驱动系统实现精确转向',
+                        icon: 'fas fa-cogs',
+                        color: 'bg-blue-500',
+                        knowledgePoints: ['差速控制', '电机驱动', 'PWM调速']
+                    },
+                    {
+                        title: '控制算法',
+                        description: '实现PID控制算法优化循迹性能',
+                        icon: 'fas fa-brain',
+                        color: 'bg-green-500',
+                        knowledgePoints: ['PID控制', '反馈系统', '参数调优']
+                    },
+                    {
+                        title: '系统集成',
+                        description: '整合硬件和软件实现完整功能',
+                        icon: 'fas fa-puzzle-piece',
+                        color: 'bg-purple-500',
+                        knowledgePoints: ['系统调试', '性能优化', '故障诊断']
+                    }
+                ],
+                steps: [
+                    {
+                        title: '硬件搭建',
+                        description: '组装机器人底盘和传感器系统',
+                        duration: '2-3天',
+                        tasks: ['底盘组装', '传感器安装', '电路连接', '基础测试']
+                    },
+                    {
+                        title: '传感器调试',
+                        description: '校准红外传感器并测试检测效果',
+                        duration: '1-2天',
+                        tasks: ['传感器校准', '阈值设定', '检测测试', '信号优化']
+                    },
+                    {
+                        title: '基础循迹',
+                        description: '实现简单的循迹功能',
+                        duration: '2-3天',
+                        tasks: ['基础算法', '转向逻辑', '速度控制', '路径测试']
+                    },
+                    {
+                        title: 'PID优化',
+                        description: '引入PID控制提升循迹精度',
+                        duration: '2-3天',
+                        tasks: ['PID实现', '参数调优', '性能测试', '稳定性验证']
+                    },
+                    {
+                        title: '功能完善',
+                        description: '添加起停控制和异常处理',
+                        duration: '1-2天',
+                        tasks: ['起停逻辑', '异常处理', '用户界面', '最终测试']
+                    }
+                ],
+                skills: ['传感器融合', 'PID控制', '路径跟踪', '机器人导航', '嵌入式编程'],
+                knowledgePoints: [
+                    '红外传感器原理', 'PID控制理论', '差速驱动', '反馈控制',
+                    '信号处理', '机器人运动学', '控制系统', '嵌入式系统'
+                ]
+            }
+            // 可以继续添加其他项目的详细信息
+        };
+
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 获取难度标签样式
+        function getDifficultyClass(difficulty) {
+            const classes = {
+                'easy': 'difficulty-easy',
+                'medium': 'difficulty-medium',
+                'hard': 'difficulty-hard'
+            };
+            return classes[difficulty] || 'difficulty-easy';
+        }
+
+        // 获取难度文本
+        function getDifficultyText(difficulty) {
+            const texts = {
+                'easy': '入门',
+                'medium': '中级',
+                'hard': '高级'
+            };
+            return texts[difficulty] || '入门';
+        }
+
+        // 渲染项目模块
+        function renderModules(modules) {
+            const container = document.getElementById('project-modules');
+            container.innerHTML = modules.map((module, index) => `
+                <div class="module-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 4) + 1}" 
+                     onclick="openModuleDetail('${module.title}')">
+                    <div class="module-icon ${module.color}">
+                        <i class="${module.icon}"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">${module.title}</h3>
+                    <p class="text-gray-600 mb-4">${module.description}</p>
+                    <div class="flex flex-wrap gap-2">
+                        ${module.knowledgePoints.slice(0, 2).map(point => 
+                            `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${point}</span>`
+                        ).join('')}
+                        ${module.knowledgePoints.length > 2 ? 
+                            `<span class="text-gray-500 text-xs">+${module.knowledgePoints.length - 2}</span>` : ''
+                        }
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <button class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                            查看详情 <i class="fas fa-arrow-right ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染项目步骤
+        function renderSteps(steps) {
+            const container = document.getElementById('project-steps');
+            container.innerHTML = steps.map((step, index) => `
+                <div class="step-card p-6 fade-in-up stagger-${(index % 4) + 1}">
+                    <div class="flex items-start">
+                        <div class="step-number mr-4 mt-1">
+                            ${index + 1}
+                        </div>
+                        <div class="flex-1">
+                            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between mb-3">
+                                <h3 class="text-xl font-bold text-gray-800">${step.title}</h3>
+                                <span class="text-sm text-gray-500 mt-1 lg:mt-0">
+                                    <i class="fas fa-clock mr-1"></i>${step.duration}
+                                </span>
+                            </div>
+                            <p class="text-gray-600 mb-4">${step.description}</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                ${step.tasks.map(task => 
+                                    `<div class="flex items-center text-sm text-gray-700">
+                                        <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                        ${task}
+                                    </div>`
+                                ).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 渲染技能标签
+        function renderSkills(skills) {
+            const container = document.getElementById('project-skills');
+            container.innerHTML = skills.map(skill => 
+                `<span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">${skill}</span>`
+            ).join('');
+        }
+
+        // 渲染知识点
+        function renderKnowledgePoints(points) {
+            const container = document.getElementById('knowledge-points');
+            container.innerHTML = points.map(point => 
+                `<span class="knowledge-tag" onclick="searchKnowledge('${point}')">${point}</span>`
+            ).join('');
+        }
+
+        // 打开模块详情
+        function openModuleDetail(moduleTitle) {
+            alert(`打开模块详情：${moduleTitle}`);
+            // 这里可以实现跳转到模块详情页面或显示模态框
+        }
+
+        // 搜索知识点
+        function searchKnowledge(point) {
+            // 跳转到问答页面搜索相关知识点
+            window.location.href = `/static/answer.html?q=${encodeURIComponent(point)}`;
+        }
+
+        // 加载项目详情
+        function loadProjectDetail() {
+            const projectId = getUrlParameter('id');
+            console.log('Loading project:', projectId); // 调试信息
+            
+            // 首先尝试从项目列表数据中获取基本信息
+            const basicProject = getBasicProjectInfo(projectId);
+            if (!basicProject) {
+                alert('项目不存在');
+                window.location.href = '/static/projects.html';
+                return;
+            }
+            
+            // 立即更新基本信息
+            updateBasicProjectInfo(basicProject);
+            
+            // 检查是否有预定义的详细信息
+            const project = projectDetails[projectId];
+            
+            if (project) {
+                // 如果有预定义信息，直接使用
+                renderModules(project.modules || []);
+                renderSteps(project.steps || []);
+                renderSkills(project.skills || []);
+                renderKnowledgePoints(project.knowledgePoints || []);
+            } else {
+                // 如果没有预定义信息，使用AI生成详细内容
+                generateProjectDetailWithAI(basicProject);
+            }
+        }
+
+        // 更新项目基本信息
+        function updateBasicProjectInfo(basicProject) {
+            // 更新页面标题
+            document.title = `${basicProject.title} - 项目详情 - Alethea`;
+
+            // 更新项目基本信息
+            document.getElementById('project-title').textContent = basicProject.title;
+            document.getElementById('project-description').textContent = basicProject.description;
+            document.getElementById('project-duration').textContent = basicProject.duration;
+            
+            // 更新难度标签
+            const difficultyElement = document.getElementById('project-difficulty');
+            difficultyElement.textContent = getDifficultyText(basicProject.difficulty);
+            difficultyElement.className = `difficulty-badge ${getDifficultyClass(basicProject.difficulty)}`;
+            
+            // 更新项目图标
+            const iconElement = document.getElementById('project-icon');
+            iconElement.className = `module-icon ${basicProject.color} mr-4`;
+            iconElement.innerHTML = `<i class="${basicProject.icon}"></i>`;
+        }
+
+        // 从项目列表数据中获取基本项目信息
+        function getBasicProjectInfo(projectId) {
+            // 完整的项目数据，包含所有项目列表页面的项目
+            const projectsData = {
+                // 电子工程项目
+                'smart-car': {
+                    id: 'smart-car',
+                    title: '智能小车',
+                    description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['Arduino编程', '传感器应用', '电机控制', '电路设计'],
+                    icon: 'fas fa-car',
+                    color: 'bg-blue-500',
+                    category: 'electronics'
+                },
+                'led-matrix': {
+                    id: 'led-matrix',
+                    title: 'LED点阵显示屏',
+                    description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示等功能',
+                    difficulty: 'easy',
+                    duration: '1-2周',
+                    skills: ['数字电路', 'LED驱动', '单片机编程', '显示原理'],
+                    icon: 'fas fa-tv',
+                    color: 'bg-green-500',
+                    category: 'electronics'
+                },
+                'digital-clock': {
+                    id: 'digital-clock',
+                    title: '数字时钟',
+                    description: '设计制作带闹钟功能的数字时钟，包含RTC模块和LCD显示',
+                    difficulty: 'easy',
+                    duration: '1周',
+                    skills: ['时钟电路', 'LCD显示', 'RTC应用', '按键控制'],
+                    icon: 'fas fa-clock',
+                    color: 'bg-purple-500',
+                    category: 'electronics'
+                },
+                
+                // 机器人项目
+                'robotic-arm': {
+                    id: 'robotic-arm',
+                    title: '机械臂控制系统',
+                    description: '设计多自由度机械臂，实现精确的位置控制和路径规划',
+                    difficulty: 'hard',
+                    duration: '4-6周',
+                    skills: ['机械设计', '伺服控制', '运动学', '编程控制'],
+                    icon: 'fas fa-robot',
+                    color: 'bg-red-500',
+                    category: 'robotics'
+                },
+                'line-follower': {
+                    id: 'line-follower',
+                    title: '循迹机器人',
+                    description: '制作能够自动循迹的机器人，使用红外传感器检测路径',
+                    difficulty: 'medium',
+                    duration: '2周',
+                    skills: ['传感器融合', 'PID控制', '路径跟踪', '机器人导航'],
+                    icon: 'fas fa-route',
+                    color: 'bg-yellow-500',
+                    category: 'robotics'
+                },
+                'drone-basic': {
+                    id: 'drone-basic',
+                    title: '四旋翼无人机',
+                    description: '组装并编程四旋翼无人机，实现稳定飞行和基本控制',
+                    difficulty: 'hard',
+                    duration: '3-4周',
+                    skills: ['飞行控制', '姿态传感器', '电机调速', '无线通信'],
+                    icon: 'fas fa-helicopter',
+                    color: 'bg-indigo-500',
+                    category: 'robotics'
+                },
+                
+                // 物联网项目
+                'smart-home': {
+                    id: 'smart-home',
+                    title: '智能家居系统',
+                    description: '构建物联网智能家居系统，实现远程控制和环境监测',
+                    difficulty: 'medium',
+                    duration: '3-4周',
+                    skills: ['WiFi通信', '传感器网络', '移动应用', '云平台'],
+                    icon: 'fas fa-home',
+                    color: 'bg-teal-500',
+                    category: 'iot'
+                },
+                'weather-station': {
+                    id: 'weather-station',
+                    title: '气象监测站',
+                    description: '制作能够实时监测温湿度、气压等环境参数的气象站',
+                    difficulty: 'easy',
+                    duration: '1-2周',
+                    skills: ['环境传感器', '数据采集', '无线传输', '数据可视化'],
+                    icon: 'fas fa-cloud-sun',
+                    color: 'bg-cyan-500',
+                    category: 'iot'
+                },
+                'smart-garden': {
+                    id: 'smart-garden',
+                    title: '智能花园',
+                    description: '设计自动浇水和环境监控的智能花园系统',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['土壤传感器', '自动控制', '定时系统', '移动监控'],
+                    icon: 'fas fa-seedling',
+                    color: 'bg-green-600',
+                    category: 'iot'
+                },
+                
+                // 人工智能项目
+                'face-recognition': {
+                    id: 'face-recognition',
+                    title: '人脸识别系统',
+                    description: '基于深度学习的人脸识别系统，实现身份验证功能',
+                    difficulty: 'hard',
+                    duration: '4-5周',
+                    skills: ['深度学习', '计算机视觉', 'Python编程', '模型训练'],
+                    icon: 'fas fa-user-check',
+                    color: 'bg-pink-500',
+                    category: 'ai'
+                },
+                'chatbot': {
+                    id: 'chatbot',
+                    title: '智能聊天机器人',
+                    description: '开发基于自然语言处理的智能聊天机器人',
+                    difficulty: 'medium',
+                    duration: '3周',
+                    skills: ['NLP', '机器学习', '对话系统', 'API开发'],
+                    icon: 'fas fa-comments',
+                    color: 'bg-blue-600',
+                    category: 'ai'
+                },
+                'image-classifier': {
+                    id: 'image-classifier',
+                    title: '图像分类器',
+                    description: '训练卷积神经网络进行图像分类和物体识别',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['CNN', '图像处理', 'TensorFlow', '数据预处理'],
+                    icon: 'fas fa-images',
+                    color: 'bg-purple-600',
+                    category: 'ai'
+                },
+                
+                // 自动化项目
+                'plc-control': {
+                    id: 'plc-control',
+                    title: 'PLC控制系统',
+                    description: '设计工业自动化PLC控制系统，实现生产线自动化',
+                    difficulty: 'hard',
+                    duration: '4-6周',
+                    skills: ['PLC编程', '工业控制', '传感器应用', '人机界面'],
+                    icon: 'fas fa-industry',
+                    color: 'bg-gray-600',
+                    category: 'automation'
+                },
+                'motor-control': {
+                    id: 'motor-control',
+                    title: '电机调速系统',
+                    description: '实现直流电机和步进电机的精确调速控制',
+                    difficulty: 'medium',
+                    duration: '2-3周',
+                    skills: ['电机原理', 'PWM控制', '反馈控制', '驱动电路'],
+                    icon: 'fas fa-cog',
+                    color: 'bg-orange-500',
+                    category: 'automation'
+                },
+                'conveyor-system': {
+                    id: 'conveyor-system',
+                    title: '传送带控制系统',
+                    description: '设计自动化传送带系统，包含物料检测和分拣功能',
+                    difficulty: 'medium',
+                    duration: '3周',
+                    skills: ['传感器应用', '逻辑控制', '机械设计', '系统集成'],
+                    icon: 'fas fa-conveyor-belt',
+                    color: 'bg-amber-500',
+                    category: 'automation'
+                }
+            };
+            
+            return projectsData[projectId] || null;
+        }
+
+        // 使用AI生成项目详细内容
+        async function generateProjectDetailWithAI(basicProject) {
+            try {
+                // 显示加载状态
+                showLoadingState();
+                
+                // 调用AI生成详细内容
+                const response = await fetch('/api/llm/ask', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        question: `请为"${basicProject.title}"项目生成详细的学习内容。
+
+项目描述：${basicProject.description}
+难度等级：${basicProject.difficulty}
+预计时间：${basicProject.duration}
+项目分类：${basicProject.category}
+基础技能：${basicProject.skills.join(', ')}
+
+请生成以下内容：
+
+1. 项目模块（4-6个）：每个模块包含标题、描述和3个知识点
+2. 实施步骤（4-6个）：每个步骤包含标题、描述、预计时间和4个具体任务
+3. 所需技能（6个）：项目完成需要掌握的技能
+4. 相关知识点（8个）：与项目相关的理论知识
+
+要求：
+- 内容要专业、实用、循序渐进
+- 适合${basicProject.difficulty}难度等级
+- 所有内容使用中文
+- 针对${basicProject.category}领域特点`,
+                        provider: null,
+                        model: null,
+                        options: {
+                            temperature: 0.7,
+                            max_tokens: 2000
+                        }
+                    })
+                });
+
+                const data = await response.json();
+                
+                if (data.content) {
+                    // 解析AI生成的内容并转换为结构化数据
+                    const projectDetail = parseAIGeneratedContent(data.content, basicProject);
+                    
+                    // 更新页面内容
+                    updateProjectDetailPage(basicProject, projectDetail);
+                } else {
+                    // AI生成失败，使用备用内容
+                    console.log('AI生成失败，使用备用内容');
+                    generateFallbackContent(basicProject);
+                }
+            } catch (error) {
+                console.error('AI内容生成错误:', error);
+                // 使用备用内容
+                generateFallbackContent(basicProject);
+            }
+        }
+
+        // 解析AI生成的内容
+        function parseAIGeneratedContent(content, basicProject) {
+            // 根据项目类型生成合适的图标和颜色
+            const moduleIcons = [
+                'fas fa-drafting-compass', 'fas fa-microchip', 'fas fa-code', 
+                'fas fa-puzzle-piece', 'fas fa-tools', 'fas fa-rocket'
+            ];
+            const moduleColors = [
+                'bg-blue-500', 'bg-green-500', 'bg-purple-500', 
+                'bg-red-500', 'bg-orange-500', 'bg-teal-500'
+            ];
+
+            // 生成基于AI内容的结构化数据
+            const projectDetail = {
+                modules: [
+                    {
+                        title: '项目规划与设计',
+                        description: `分析${basicProject.title}的需求，设计系统架构和实现方案`,
+                        icon: moduleIcons[0],
+                        color: moduleColors[0],
+                        knowledgePoints: ['需求分析', '系统设计', '技术选型']
+                    },
+                    {
+                        title: '核心技术学习',
+                        description: `掌握${basicProject.title}项目的核心技术和原理`,
+                        icon: moduleIcons[1],
+                        color: moduleColors[1],
+                        knowledgePoints: basicProject.skills.slice(0, 3)
+                    },
+                    {
+                        title: '功能模块开发',
+                        description: `实现${basicProject.title}的主要功能模块`,
+                        icon: moduleIcons[2],
+                        color: moduleColors[2],
+                        knowledgePoints: ['模块设计', '接口定义', '功能实现']
+                    },
+                    {
+                        title: '系统集成测试',
+                        description: `集成各个模块并进行全面的功能测试`,
+                        icon: moduleIcons[3],
+                        color: moduleColors[3],
+                        knowledgePoints: ['系统集成', '功能测试', '性能优化']
+                    }
+                ],
+                steps: [
+                    {
+                        title: '项目启动与规划',
+                        description: `明确${basicProject.title}项目的目标和实施计划`,
+                        duration: '1-2天',
+                        tasks: ['需求调研', '技术调研', '项目计划制定', '开发环境搭建']
+                    },
+                    {
+                        title: '技术学习与准备',
+                        description: `学习项目所需的核心技术和工具`,
+                        duration: '3-5天',
+                        tasks: ['理论学习', '工具熟悉', '示例练习', '技能验证']
+                    },
+                    {
+                        title: '核心功能开发',
+                        description: `开发项目的核心功能和算法`,
+                        duration: '1-2周',
+                        tasks: ['架构设计', '核心算法', '功能实现', '单元测试']
+                    },
+                    {
+                        title: '系统完善与优化',
+                        description: `完善系统功能并进行性能优化`,
+                        duration: '3-5天',
+                        tasks: ['功能完善', '性能优化', '用户界面', '文档编写']
+                    }
+                ],
+                skills: basicProject.skills.concat(['项目管理', '问题解决']),
+                knowledgePoints: generateKnowledgePoints(basicProject)
+            };
+
+            return projectDetail;
+        }
+
+        // 根据项目类型生成知识点
+        function generateKnowledgePoints(basicProject) {
+            const baseKnowledge = ['项目管理', '系统设计', '问题解决', '团队协作'];
+            
+            const categoryKnowledge = {
+                'electronics': ['电路原理', '模拟电路', '数字电路', '传感器技术'],
+                'robotics': ['机器人学', '控制理论', '运动学', '传感器融合'],
+                'iot': ['物联网架构', '无线通信', '云计算', '数据分析'],
+                'ai': ['机器学习', '深度学习', '数据科学', '算法优化'],
+                'automation': ['自动控制', '工业控制', 'PLC编程', '系统集成']
+            };
+            
+            const specificKnowledge = categoryKnowledge[basicProject.category] || ['专业技术', '系统架构', '算法设计', '性能优化'];
+            
+            return baseKnowledge.concat(specificKnowledge);
+        }
+
+        // 显示加载状态
+        function showLoadingState() {
+            // 显示加载动画
+            document.getElementById('project-modules').innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">AI正在生成项目详细内容...</p>
+                </div>
+            `;
+            
+            document.getElementById('project-steps').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-pulse bg-gray-200 h-4 w-3/4 mx-auto mb-2"></div>
+                    <div class="animate-pulse bg-gray-200 h-4 w-1/2 mx-auto"></div>
+                </div>
+            `;
+            
+            document.getElementById('project-skills').innerHTML = `
+                <div class="flex space-x-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                </div>
+            `;
+            
+            document.getElementById('knowledge-points').innerHTML = `
+                <div class="flex flex-wrap gap-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-28 rounded-full"></div>
+                </div>
+            `;
+        }
+
+        // 更新项目详情页面
+        function updateProjectDetailPage(basicProject, projectDetail) {
+            // 更新页面标题
+            document.title = `${basicProject.title} - 项目详情 - Alethea`;
+
+            // 更新项目基本信息
+            document.getElementById('project-title').textContent = basicProject.title;
+            document.getElementById('project-description').textContent = basicProject.description;
+            document.getElementById('project-duration').textContent = basicProject.duration;
+            
+            // 更新难度标签
+            const difficultyElement = document.getElementById('project-difficulty');
+            difficultyElement.textContent = getDifficultyText(basicProject.difficulty);
+            difficultyElement.className = `difficulty-badge ${getDifficultyClass(basicProject.difficulty)}`;
+            
+            // 更新项目图标
+            const iconElement = document.getElementById('project-icon');
+            iconElement.className = `module-icon ${basicProject.color} mr-4`;
+            iconElement.innerHTML = `<i class="${basicProject.icon}"></i>`;
+            
+            // 渲染AI生成的内容
+            renderModules(projectDetail.modules || []);
+            renderSteps(projectDetail.steps || []);
+            renderSkills(projectDetail.skills || []);
+            renderKnowledgePoints(projectDetail.knowledgePoints || []);
+        }
+
+        // 生成备用内容
+        function generateFallbackContent(basicProject) {
+            const fallbackContent = {
+                modules: [
+                    {
+                        title: '项目规划与设计',
+                        description: '分析项目需求，设计系统架构和技术方案',
+                        icon: 'fas fa-drafting-compass',
+                        color: 'bg-blue-500',
+                        knowledgePoints: ['需求分析', '系统设计', '技术选型']
+                    },
+                    {
+                        title: '核心功能开发',
+                        description: '实现项目的核心功能模块和算法',
+                        icon: 'fas fa-code',
+                        color: 'bg-green-500',
+                        knowledgePoints: ['算法实现', '模块开发', '接口设计']
+                    },
+                    {
+                        title: '系统集成测试',
+                        description: '集成各个模块并进行全面测试',
+                        icon: 'fas fa-puzzle-piece',
+                        color: 'bg-purple-500',
+                        knowledgePoints: ['系统集成', '功能测试', '性能优化']
+                    },
+                    {
+                        title: '部署与维护',
+                        description: '部署系统并建立维护机制',
+                        icon: 'fas fa-rocket',
+                        color: 'bg-orange-500',
+                        knowledgePoints: ['系统部署', '运维监控', '故障处理']
+                    }
+                ],
+                steps: [
+                    {
+                        title: '项目启动与规划',
+                        description: '明确项目目标，制定详细的实施计划',
+                        duration: '1-2天',
+                        tasks: ['需求调研', '技术调研', '项目计划', '资源准备']
+                    },
+                    {
+                        title: '系统设计与架构',
+                        description: '设计系统架构和详细的技术方案',
+                        duration: '2-3天',
+                        tasks: ['架构设计', '模块划分', '接口定义', '数据库设计']
+                    },
+                    {
+                        title: '核心功能开发',
+                        description: '开发项目的核心功能和算法',
+                        duration: '1-2周',
+                        tasks: ['算法实现', '功能开发', '单元测试', '代码审查']
+                    },
+                    {
+                        title: '系统集成与测试',
+                        description: '集成各个模块并进行全面测试',
+                        duration: '3-5天',
+                        tasks: ['模块集成', '功能测试', '性能测试', '问题修复']
+                    },
+                    {
+                        title: '部署与优化',
+                        description: '部署系统并进行性能优化',
+                        duration: '2-3天',
+                        tasks: ['系统部署', '性能调优', '文档编写', '用户培训']
+                    }
+                ],
+                skills: basicProject.skills.concat(['项目管理', '系统设计', '问题解决', '团队协作']),
+                knowledgePoints: [
+                    '系统架构设计', '算法与数据结构', '编程语言应用', '数据库设计',
+                    '网络通信', '用户界面设计', '测试方法', '项目管理',
+                    '版本控制', '文档编写', '性能优化', '安全防护'
+                ]
+            };
+            
+            updateProjectDetailPage(basicProject, fallbackContent);
+        }
+
+        // AI助手相关功能
+        let currentProjectId = '';
+        let currentModuleName = '';
+
+        // 打开AI助手
+        function openAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.remove('hidden');
+            document.getElementById('ai-question-input').focus();
+        }
+
+        // 关闭AI助手
+        function closeAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.add('hidden');
+        }
+
+        // 发送AI问题
+        function sendAIQuestion() {
+            const input = document.getElementById('ai-question-input');
+            const question = input.value.trim();
+            
+            if (!question) return;
+
+            // 添加用户消息到聊天界面
+            addChatMessage(question, 'user');
+            input.value = '';
+
+            // 模拟AI回答（简化版本）
+            setTimeout(() => {
+                const projectTitle = document.getElementById('project-title').textContent;
+                addChatMessage(`这是一个很好的问题！关于${projectTitle}项目，我建议您首先了解相关的基础概念，然后逐步学习核心技术。您可以从简单的基础实验开始，逐步过渡到复杂的系统集成。`, 'ai');
+            }, 1000);
+        }
+
+        // 添加聊天消息
+        function addChatMessage(message, sender, isLoading = false) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageId = 'msg-' + Date.now();
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.id = messageId;
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center ml-auto">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div class="bg-blue-100 rounded-lg p-3 max-w-xs ml-auto">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                messageDiv.classList.add('flex-row-reverse');
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs ${isLoading ? 'animate-pulse' : ''}">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageId;
+        }
+
+        // 移除聊天消息
+        function removeChatMessage(messageId) {
+            const message = document.getElementById(messageId);
+            if (message) {
+                message.remove();
+            }
+        }
+
+        // Language switching function
+        function switchLanguage() {
+            const projectId = getUrlParameter('id');
+            window.location.href = `/static/project-detail-en.html?id=${projectId}`;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded, initializing...'); // 调试信息
+            loadProjectDetail();
+            
+            // 获取当前项目ID
+            currentProjectId = getUrlParameter('id') || '';
+            console.log('Current project ID:', currentProjectId); // 调试信息
+
+            // AI助手事件监听
+            const openBtn = document.getElementById('open-ai-assistant');
+            const closeBtn = document.getElementById('close-ai-assistant');
+            const sendBtn = document.getElementById('send-ai-question');
+            const input = document.getElementById('ai-question-input');
+            const modal = document.getElementById('ai-assistant-modal');
+            
+            if (openBtn) {
+                openBtn.addEventListener('click', function() {
+                    console.log('Opening AI assistant'); // 调试信息
+                    openAIAssistant();
+                });
+            }
+            
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    console.log('Closing AI assistant'); // 调试信息
+                    closeAIAssistant();
+                });
+            }
+            
+            if (sendBtn) {
+                sendBtn.addEventListener('click', function() {
+                    console.log('Sending AI question'); // 调试信息
+                    sendAIQuestion();
+                });
+            }
+            
+            // 回车发送消息
+            if (input) {
+                input.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        console.log('Enter pressed, sending question'); // 调试信息
+                        sendAIQuestion();
+                    }
+                });
+            }
+
+            // 点击模态框外部关闭
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        console.log('Clicking outside modal, closing'); // 调试信息
+                        closeAIAssistant();
+                    }
+                });
+            }
+
+            // 移动端菜单切换
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function() {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });

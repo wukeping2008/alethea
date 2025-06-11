@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - 开源测控解决方案</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>开源测控解决方案</h1>
+        </header>
+        
+        <main class="login-interface">
+            <div class="login-box">
+                <h2>管理员登录</h2>
+                <form id="loginForm" onsubmit="return false;">
+                    <div class="form-group">
+                        <label for="username">用户名</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">密码</label>
+                        <input type="password" id="password" required>
+                    </div>
+                    <button type="submit" id="loginButton">登录</button>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 简仪科技 - 开源测控解决方案</p>
+        </footer>
+    </div>
+    <script src="js/login.js"></script>
+</body>
+</html>

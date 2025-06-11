@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - 开源测控解决方案</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>开源测控解决方案</h1>
+            <nav>
+                <a href="index.html">AI问答</a>
+                <a href="admin.html" class="active">管理后台</a>
+                <a href="#" id="logoutButton" class="logout-btn">退出登录</a>
+            </nav>
+        </header>
+        
+        <main class="admin-interface">
+            <div class="upload-section">
+                <h2>知识库管理</h2>
+                <div class="upload-box">
+                    <h3>上传文档</h3>
+                    <input type="file" id="documentUpload" multiple accept=".pdf,.doc,.docx,.txt">
+                    <button id="uploadButton">上传文件</button>
+                </div>
+                
+                <div class="documents-list">
+                    <h3>已上传文档</h3>
+                    <div id="documentsList" class="documents-container">
+                        <!-- 文档列表将通过JavaScript动态加载 -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="knowledge-base-section">
+                <h2>知识库状态</h2>
+                <div class="status-box">
+                    <div class="status-item">
+                        <span>文档总数：</span>
+                        <span id="totalDocuments">0</span>
+                    </div>
+                    <div class="status-item">
+                        <span>最后更新：</span>
+                        <span id="lastUpdate">-</span>
+                    </div>
+                </div>
+                <button id="updateKnowledgeBase">更新知识库</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 简仪科技 - 开源测控解决方案</p>
+        </footer>
+    </div>
+    <script src="js/admin.js"></script>
+</body>
+</html>

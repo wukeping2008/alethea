@@ -126,26 +126,69 @@ def login():
         data = request.get_json()
         
         # Validate required fields
-        if 'username_or_email' not in data or 'password' not in data:
-            return jsonify({'error': 'Missing username/email or password'}), 400
+        if 'username' not in data or 'password' not in data:
+            return jsonify({'success': False, 'error': 'Missing username or password'}), 400
         
         # Get user manager
         user_manager = get_managers()['user_manager']
         
         # Authenticate user
         success, result = user_manager.authenticate_user(
-            username_or_email=data['username_or_email'],
+            username_or_email=data['username'],
             password=data['password']
         )
         
         if not success:
-            return jsonify({'error': result}), 401
+            return jsonify({'success': False, 'error': result}), 401
         
-        return jsonify(result), 200
+        # Add success flag and include permissions
+        user_data = result['user']
+        
+        return jsonify({
+            'success': True,
+            'token': result['token'],
+            'user': user_data
+        }), 200
         
     except Exception as e:
         logger.error(f"Error in login: {str(e)}")
-        return jsonify({'error': 'Internal server error'}), 500
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
+
+@user_bp.route('/verify', methods=['POST'])
+def verify_token():
+    """Verify authentication token"""
+    try:
+        token = None
+        
+        # Get token from header
+        if 'Authorization' in request.headers:
+            auth_header = request.headers['Authorization']
+            if auth_header.startswith('Bearer '):
+                token = auth_header.split(' ')[1]
+        
+        if not token:
+            return jsonify({'success': False, 'error': 'Token is missing'}), 401
+        
+        # Get user manager
+        user_manager = get_managers()['user_manager']
+        
+        # Verify token
+        success, user_or_error = user_manager.verify_token(token)
+        
+        if not success:
+            return jsonify({'success': False, 'error': user_or_error}), 401
+        
+        # Include permissions in user data
+        user_data = user_or_error.to_dict(include_sensitive=True)
+        
+        return jsonify({
+            'success': True,
+            'user': user_data
+        }), 200
+        
+    except Exception as e:
+        logger.error(f"Error in verify_token: {str(e)}")
+        return jsonify({'success': False, 'error': 'Internal server error'}), 500
 
 @user_bp.route('/profile', methods=['GET'])
 @token_required

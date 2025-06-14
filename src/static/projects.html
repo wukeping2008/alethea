@@ -85,9 +85,19 @@
             background: white;
         }
 
+        .dark-mode .project-card {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+        }
+
         .project-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            border-color: var(--accent-color);
+        }
+
+        .dark-mode .project-card:hover {
+            box-shadow: 0 20px 40px var(--shadow-hover);
             border-color: var(--accent-color);
         }
 
@@ -140,8 +150,21 @@
             cursor: pointer;
         }
 
+        .dark-mode .category-filter {
+            background: var(--bg-tertiary);
+            border-color: var(--border-color);
+            color: var(--text-secondary);
+        }
+
         .category-filter:hover,
         .category-filter.active {
+            border-color: var(--accent-color);
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .dark-mode .category-filter:hover,
+        .dark-mode .category-filter.active {
             border-color: var(--accent-color);
             background-color: var(--accent-color);
             color: white;
@@ -152,6 +175,12 @@
             border-radius: 16px;
             overflow: hidden;
             position: relative;
+            color: white;
+        }
+
+        .dark-mode .featured-project {
+            background: linear-gradient(135deg, #2d3748 0%, #4a5568 100%);
+            color: var(--text-primary);
         }
 
         .featured-project::before {
@@ -163,6 +192,60 @@
             bottom: 0;
             background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
             pointer-events: none;
+        }
+
+        /* 确保推荐项目中的文字在浅色主题下可见 */
+        .featured-project h2,
+        .featured-project p,
+        .featured-project span {
+            color: white !important;
+        }
+
+        .dark-mode .featured-project h2,
+        .dark-mode .featured-project p,
+        .dark-mode .featured-project span {
+            color: var(--text-primary) !important;
+        }
+
+        /* 推荐项目中的按钮样式 */
+        .featured-project button {
+            transition: all 0.3s ease;
+        }
+
+        .featured-project .bg-white {
+            background-color: white !important;
+            color: #667eea !important;
+        }
+
+        .featured-project .bg-white:hover {
+            background-color: #f7fafc !important;
+        }
+
+        .dark-mode .featured-project .bg-white {
+            background-color: var(--bg-primary) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .dark-mode .featured-project .bg-white:hover {
+            background-color: var(--bg-secondary) !important;
+        }
+
+        .featured-project .bg-white.bg-opacity-20 {
+            background-color: rgba(255, 255, 255, 0.2) !important;
+            color: white !important;
+        }
+
+        .featured-project .bg-white.bg-opacity-20:hover {
+            background-color: rgba(255, 255, 255, 0.3) !important;
+        }
+
+        .dark-mode .featured-project .bg-white.bg-opacity-20 {
+            background-color: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-primary) !important;
+        }
+
+        .dark-mode .featured-project .bg-white.bg-opacity-20:hover {
+            background-color: rgba(255, 255, 255, 0.2) !important;
         }
 
         /* Animation effects */

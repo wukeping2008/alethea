@@ -1,0 +1,30 @@
+{
+  "name": "alethea",
+  "version": "1.0.0",
+  "description": "Alethea AI教学平台",
+  "scripts": {
+    "build": "echo '准备部署Alethea项目...'",
+    "deploy": "echo '开始部署到阿里云...'",
+    "start": "echo '项目已部署到服务器'"
+  },
+  "keywords": [
+    "ai",
+    "education",
+    "flask",
+    "python"
+  ],
+  "author": "Alethea Team",
+  "license": "MIT",
+  "main": "index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wukeping2008/alethea.git"
+  },
+  "bugs": {
+    "url": "https://github.com/wukeping2008/alethea/issues"
+  },
+  "homepage": "https://github.com/wukeping2008/alethea#readme",
+  "dependencies": {
+    "@mermaid-js/mermaid-cli": "^11.4.3"
+  }
+}

@@ -142,36 +142,26 @@ function initializeUI() {
         });
     }
 
-    // 暗黑模式切换
+    // 主题切换功能已在index.html中实现，这里不再重复
+    // 如果需要获取主题状态，可以通过检查body的class来判断
     const themeToggle = document.getElementById('theme-toggle');
-
     if (themeToggle) {
-        // 检查本地存储中的主题偏好
-        darkMode = localStorage.getItem('darkMode') === 'true';
+        // 主题切换逻辑已在index.html的内联脚本中处理
+        // 这里只需要同步darkMode变量的状态
+        darkMode = document.body.classList.contains('dark-mode');
 
-        // 应用主题
-        if (darkMode) {
-            document.body.classList.add('dark-mode');
-            themeToggle.querySelector('i').classList.remove('fa-moon');
-            themeToggle.querySelector('i').classList.add('fa-sun');
-        }
+        // 监听主题变化，同步darkMode变量
+        const observer = new MutationObserver(function (mutations) {
+            mutations.forEach(function (mutation) {
+                if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                    darkMode = document.body.classList.contains('dark-mode');
+                }
+            });
+        });
 
-        themeToggle.addEventListener('click', function () {
-            document.body.classList.toggle('dark-mode');
-            const icon = this.querySelector('i');
-
-            if (icon.classList.contains('fa-moon')) {
-                icon.classList.remove('fa-moon');
-                icon.classList.add('fa-sun');
-                darkMode = true;
-            } else {
-                icon.classList.remove('fa-sun');
-                icon.classList.add('fa-moon');
-                darkMode = false;
-            }
-
-            // 保存主题偏好到本地存储
-            localStorage.setItem('darkMode', darkMode);
+        observer.observe(document.body, {
+            attributes: true,
+            attributeFilter: ['class']
         });
     }
 }
@@ -233,8 +223,8 @@ function updateUserUI(user) {
             if (userName) userName.textContent = user.username;
             if (userEmail) userEmail.textContent = user.email;
 
-            // 显示用户下拉菜单，隐藏访客下拉菜单
-            if (userDropdown) userDropdown.classList.remove('hidden');
+            // 确保两个下拉菜单都是隐藏的（默认状态）
+            if (userDropdown) userDropdown.classList.add('hidden');
             if (guestDropdown) guestDropdown.classList.add('hidden');
 
             // 添加退出登录事件
@@ -250,8 +240,8 @@ function updateUserUI(user) {
             // 用户未登录
             userMenuText.textContent = '登录/注册';
 
-            // 显示访客下拉菜单，隐藏用户下拉菜单
-            if (guestDropdown) guestDropdown.classList.remove('hidden');
+            // 确保两个下拉菜单都是隐藏的（默认状态）
+            if (guestDropdown) guestDropdown.classList.add('hidden');
             if (userDropdown) userDropdown.classList.add('hidden');
         }
     }
@@ -2198,3 +2188,207 @@ function initBlackboardFormulas() {
         subjectExplorer.appendChild(formulaElement);
     });
 }
+
+// 全局变量：个性化AI开关状态
+let aiPersonalizationEnabled = localStorage.getItem('aiPersonalizationEnabled') !== 'false';
+
+/**
+ * 初始化个性化AI开关
+ */
+function initAIPersonalizationToggle() {
+    const aiToggle = document.getElementById('ai-personalization-toggle');
+
+    if (aiToggle) {
+        // 设置初始状态
+        updateAIToggleUI();
+
+        // 添加点击事件
+        aiToggle.addEventListener('click', function () {
+            toggleAIPersonalization();
+        });
+    }
+}
+
+/**
+ * 切换个性化AI状态
+ */
+function toggleAIPersonalization() {
+    aiPersonalizationEnabled = !aiPersonalizationEnabled;
+    localStorage.setItem('aiPersonalizationEnabled', aiPersonalizationEnabled);
+
+    updateAIToggleUI();
+
+    // 显示状态通知
+    const status = aiPersonalizationEnabled ? '已开启' : '已关闭';
+    showNotification(`个性化AI ${status}`, aiPersonalizationEnabled ? 'success' : 'info');
+
+    // 显示详细说明
+    showAIPersonalizationModal();
+}
+
+/**
+ * 更新AI开关按钮UI
+ */
+function updateAIToggleUI() {
+    const aiToggle = document.getElementById('ai-personalization-toggle');
+    if (!aiToggle) return;
+
+    const icon = aiToggle.querySelector('i');
+
+    if (aiPersonalizationEnabled) {
+        icon.className = 'fas fa-user-cog text-blue-600';
+        aiToggle.title = '个性化AI已开启 - 点击关闭';
+        aiToggle.style.backgroundColor = '#dbeafe';
+    } else {
+        icon.className = 'fas fa-user-cog text-gray-400';
+        aiToggle.title = '个性化AI已关闭 - 点击开启';
+        aiToggle.style.backgroundColor = '#f3f4f6';
+    }
+}
+
+/**
+ * 显示AI个性化说明模态框
+ */
+function showAIPersonalizationModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-xl z-10 w-full max-w-2xl p-6 relative">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="close-ai-modal">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full ${aiPersonalizationEnabled ? 'bg-blue-100' : 'bg-gray-100'} flex items-center justify-center">
+                    <i class="fas fa-user-cog text-2xl ${aiPersonalizationEnabled ? 'text-blue-600' : 'text-gray-400'}"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">个性化AI ${aiPersonalizationEnabled ? '已开启' : '已关闭'}</h2>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="bg-${aiPersonalizationEnabled ? 'blue' : 'gray'}-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-${aiPersonalizationEnabled ? 'blue' : 'gray'}-800 mb-2">
+                        ${aiPersonalizationEnabled ? '✅ 个性化功能已激活' : '❌ 个性化功能已禁用'}
+                    </h3>
+                    <p class="text-${aiPersonalizationEnabled ? 'blue' : 'gray'}-700 text-sm">
+                        ${aiPersonalizationEnabled
+            ? 'AI将根据您的偏好和知识库提供个性化回答'
+            : 'AI将使用默认设置，不会访问您的个人偏好和知识库'}
+                    </p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">🎯 回答风格</h4>
+                        <p class="text-sm text-gray-600">
+                            ${aiPersonalizationEnabled
+            ? '根据您设置的风格（详细/简洁/学术/轻松）调整回答'
+            : '使用标准回答风格'}
+                        </p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">📚 知识库集成</h4>
+                        <p class="text-sm text-gray-600">
+                            ${aiPersonalizationEnabled
+            ? '自动搜索您的个人文档，提供相关引用'
+            : '不会访问您的个人知识库'}
+                        </p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">🤖 AI模型选择</h4>
+                        <p class="text-sm text-gray-600">
+                            ${aiPersonalizationEnabled
+            ? '使用您偏好的AI模型和参数设置'
+            : '使用系统默认AI模型'}
+                        </p>
+                    </div>
+                    
+                    <div class="border rounded-lg p-4">
+                        <h4 class="font-semibold text-gray-800 mb-2">📏 回答长度</h4>
+                        <p class="text-sm text-gray-600">
+                            ${aiPersonalizationEnabled
+            ? '根据您设置的偏好调整回答详细程度'
+            : '使用标准回答长度'}
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <button onclick="testAIPersonalization()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">
+                    <i class="fas fa-flask mr-2"></i>测试个性化效果
+                </button>
+                <button onclick="openPersonalKnowledge()" class="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg">
+                    <i class="fas fa-cog mr-2"></i>个性化设置
+                </button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 关闭模态框
+    document.getElementById('close-ai-modal').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+
+    // 点击背景关闭
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+
+/**
+ * 测试AI个性化效果
+ */
+function testAIPersonalization() {
+    // 关闭当前模态框
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+
+    // 生成测试问题
+    const testQuestions = [
+        '请解释电路中的基尔霍夫定律',
+        '什么是运算放大器的虚短虚断',
+        '如何分析RC电路的频率响应',
+        '请介绍数字电路中的逻辑门',
+        '什么是控制系统的稳定性'
+    ];
+
+    const randomQuestion = testQuestions[Math.floor(Math.random() * testQuestions.length)];
+
+    // 在问题输入框中填入测试问题
+    const questionInput = document.getElementById('question-input');
+    if (questionInput) {
+        questionInput.value = randomQuestion;
+        questionInput.focus();
+    }
+
+    showNotification(`已填入测试问题，点击"搜索答案"查看${aiPersonalizationEnabled ? '个性化' : '标准'}效果`, 'info');
+}
+
+/**
+ * 打开个人知识库设置
+ */
+function openPersonalKnowledge() {
+    window.open('/static/personal-knowledge.html', '_blank');
+}
+
+/**
+ * 获取AI个性化状态（供其他模块使用）
+ */
+function getAIPersonalizationStatus() {
+    return aiPersonalizationEnabled;
+}
+
+// 在DOM加载完成后初始化个性化开关
+document.addEventListener('DOMContentLoaded', function () {
+    initAIPersonalizationToggle();
+});

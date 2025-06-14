@@ -9,6 +9,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Chart.js for data visualization -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom styles -->
@@ -688,7 +690,7 @@
 
             // Simulate user inputs based on course type
             const userInputs = generateUserInputs(topic, type, hours);
-            
+
             // Generate content progressively using template prompts
             const progressiveContent = generateProgressiveContent(template, userInputs, topic);
 
@@ -710,9 +712,9 @@
                             <p><strong>模板名称：</strong>${template.name}</p>
                             <p><strong>输入参数：</strong></p>
                             <ul class="list-disc list-inside ml-4">
-                                ${Object.entries(template.adminInputs).map(([key, label]) => 
-                                    `<li>${label}: ${userInputs[key]}</li>`
-                                ).join('')}
+                                ${Object.entries(template.adminInputs).map(([key, label]) =>
+                `<li>${label}: ${userInputs[key]}</li>`
+            ).join('')}
                             </ul>
                             <p><strong>生成阶段：</strong>${template.promptBlocks.length}个递进阶段</p>
                         </div>
@@ -736,7 +738,7 @@
         // Generate user inputs based on course type
         function generateUserInputs(topic, type, hours) {
             const inputs = {};
-            
+
             if (type === 'experiment') {
                 inputs.inputB1 = `掌握${topic}的基本原理和实验方法`;
                 inputs.inputB2 = `${topic.includes('控制') ? '控制系统' : topic.includes('电路') ? '电路系统' : '通用系统'}`;
@@ -750,14 +752,14 @@
                 inputs.inputB2 = hours <= 32 ? '4周' : hours <= 64 ? '8周' : '12周';
                 inputs.inputB3 = '3-4人';
             }
-            
+
             return inputs;
         }
 
         // Generate progressive content using template prompts
         function generateProgressiveContent(template, userInputs, topic) {
             const stages = [];
-            
+
             // Stage 1: Basic framework
             const stage1Content = generateStage1Content(template, userInputs, topic);
             stages.push({
@@ -1400,6 +1402,8 @@ double PID_Update(PIDController* pid, double setpoint, double feedback) {
             }
         }
     </script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
 </body>
 
 </html>

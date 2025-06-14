@@ -7,6 +7,8 @@
     <title>Alethea - 高等教育知识问答平台</title>
     <!-- Tailwind CSS -->
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
     <!-- MathJax for LaTeX rendering -->
     <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
     <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
@@ -194,6 +196,250 @@
 
         .fade-in {
             animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #1a1a2e;
+            color: #eee;
+        }
+
+        .dark-mode .nav-link {
+            color: #eee;
+        }
+
+        .dark-mode .nav-link:hover {
+            color: var(--accent-color);
+        }
+
+        .dark-mode .hero-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #eee;
+        }
+
+        .dark-mode .hero-section h1 {
+            color: #fff;
+        }
+
+        .dark-mode .hero-section p {
+            color: #ccc;
+        }
+
+        .dark-mode .question-input {
+            background-color: #2d2d44;
+            border-color: #444;
+            color: #eee;
+        }
+
+        .dark-mode .question-input::placeholder {
+            color: #999;
+        }
+
+        .dark-mode .question-input:focus {
+            border-color: var(--accent-color);
+            background-color: #353553;
+        }
+
+        .dark-mode .subject-card {
+            background-color: #2d2d44;
+            border: 1px solid #444;
+            color: #eee;
+        }
+
+        .dark-mode .subject-card:hover {
+            background-color: #353553;
+            border-color: var(--accent-color);
+        }
+
+        .dark-mode .subject-card h3 {
+            color: #fff;
+        }
+
+        .dark-mode .subject-card p {
+            color: #ccc;
+        }
+
+        .dark-mode .feature-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #eee;
+        }
+
+        .dark-mode .feature-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode .feature-card h3 {
+            color: #fff;
+        }
+
+        .dark-mode .feature-card p {
+            color: #ccc;
+        }
+
+        .dark-mode .about-section {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #eee;
+        }
+
+        .dark-mode .about-section h2 {
+            color: #fff;
+        }
+
+        .dark-mode .about-section p {
+            color: #ccc;
+        }
+
+        .dark-mode .footer-dark {
+            background: rgba(0, 0, 0, 0.9);
+        }
+
+        /* Dark mode navigation */
+        .dark-mode nav {
+            background-color: #16213e;
+            border-bottom: 1px solid #2d2d44;
+        }
+
+        .dark-mode .logo-container span {
+            color: #fff;
+        }
+
+        .dark-mode .language-switcher {
+            background-color: #2d2d44;
+            border-color: #444;
+            color: #eee;
+        }
+
+        .dark-mode .language-switcher:hover {
+            border-color: var(--accent-color);
+            background-color: #353553;
+        }
+
+        .dark-mode #theme-toggle {
+            background-color: #2d2d44;
+            color: #eee;
+        }
+
+        .dark-mode #theme-toggle:hover {
+            background-color: #353553;
+        }
+
+        .dark-mode #ai-personalization-toggle {
+            background-color: #2d2d44;
+            color: #eee;
+        }
+
+        .dark-mode #ai-personalization-toggle:hover {
+            background-color: #353553;
+        }
+
+        .dark-mode #user-menu-button {
+            color: #eee;
+        }
+
+        .dark-mode #user-menu-button .w-8 {
+            background-color: #2d2d44;
+        }
+
+        .dark-mode #user-menu-button .fa-user {
+            color: #eee;
+        }
+
+        /* Dark mode dropdowns */
+        .dark-mode #guest-dropdown,
+        .dark-mode #user-dropdown {
+            background-color: #2d2d44;
+            border: 1px solid #444;
+        }
+
+        .dark-mode #guest-dropdown a,
+        .dark-mode #user-dropdown a {
+            color: #eee;
+        }
+
+        .dark-mode #guest-dropdown a:hover,
+        .dark-mode #user-dropdown a:hover {
+            background-color: #353553;
+        }
+
+        .dark-mode #user-dropdown .border-b {
+            border-color: #444;
+        }
+
+        .dark-mode #user-dropdown .border-t {
+            border-color: #444;
+        }
+
+        /* Dark mode mobile menu */
+        .dark-mode #mobile-menu {
+            background-color: #16213e;
+            border-top: 1px solid #2d2d44;
+        }
+
+        .dark-mode #mobile-menu a:hover {
+            background-color: #2d2d44;
+        }
+
+        /* Dark mode section headers */
+        .dark-mode h2 {
+            color: #fff;
+        }
+
+        .dark-mode h3 {
+            color: #fff;
+        }
+
+        /* Dark mode form elements */
+        .dark-mode .bg-white {
+            background-color: #2d2d44 !important;
+            border: 1px solid #444;
+        }
+
+        .dark-mode .shadow-lg {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dark mode text colors */
+        .dark-mode .text-gray-800 {
+            color: #fff !important;
+        }
+
+        .dark-mode .text-gray-700 {
+            color: #ccc !important;
+        }
+
+        .dark-mode .text-gray-600 {
+            color: #999 !important;
+        }
+
+        .dark-mode .text-gray-400 {
+            color: #666 !important;
+        }
+
+        /* Dark mode background sections */
+        .dark-mode .bg-gray-50 {
+            background-color: #1e1e3f !important;
+        }
+
+        /* Smooth transitions for theme switching */
+        body,
+        nav,
+        .hero-section,
+        .subject-card,
+        .feature-card,
+        .about-section,
+        .question-input,
+        .language-switcher,
+        #theme-toggle,
+        #ai-personalization-toggle,
+        #guest-dropdown,
+        #user-dropdown,
+        #mobile-menu {
+            transition: all 0.3s ease;
         }
 
         /* 网格化学科卡片 */
@@ -683,6 +929,7 @@
                 <a href="#subjects" class="nav-link font-medium">学科</a>
                 <a href="/static/projects.html" class="nav-link font-medium">项目制学习</a>
                 <a href="/static/experiments.html" class="nav-link font-medium">实验仿真</a>
+                <a href="/static/personal-knowledge.html" class="nav-link font-medium">个人知识库</a>
                 <a href="/static/teacher-dashboard.html" class="nav-link font-medium">教师助手</a>
                 <a href="#about" class="nav-link font-medium">关于我们</a>
             </div>
@@ -696,6 +943,10 @@
 
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100" title="切换主题">
                     <i class="fas fa-moon"></i>
+                </button>
+                <!-- 个性化AI开关 -->
+                <button id="ai-personalization-toggle" class="p-2 rounded-full hover:bg-gray-100" title="个性化AI开关">
+                    <i class="fas fa-user-cog text-blue-600"></i>
                 </button>
                 <div class="relative" id="user-menu">
                     <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
@@ -750,6 +1001,7 @@
                 <a href="#subjects" class="block py-2 px-4 hover:bg-gray-100 rounded">学科</a>
                 <a href="/static/projects.html" class="block py-2 px-4 hover:bg-gray-100 rounded">项目制学习</a>
                 <a href="/static/experiments.html" class="block py-2 px-4 hover:bg-gray-100 rounded">实验仿真</a>
+                <a href="/static/personal-knowledge.html" class="block py-2 px-4 hover:bg-gray-100 rounded">个人知识库</a>
                 <a href="#about" class="block py-2 px-4 hover:bg-gray-100 rounded">关于我们</a>
             </div>
         </div>
@@ -779,182 +1031,30 @@
     <!-- Subjects Section -->
     <section id="subjects" class="container mx-auto px-4 py-16">
         <h2 class="text-3xl font-bold text-center mb-12 text-gray-800">学科分类</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- 电工电子 -->
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('电工实验')">
-                <div class="text-4xl text-blue-600 mb-4">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">电工实验</h3>
-                <p class="text-gray-600 mb-4">电路分析、模拟电路、数字电路实验</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
-            </div>
 
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('电路分析')">
-                <div class="text-4xl text-green-600 mb-4">
-                    <i class="fas fa-project-diagram"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">电路分析</h3>
-                <p class="text-gray-600 mb-4">直流电路、交流电路、三相电路理论</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
+        <!-- 分页控制器 -->
+        <div class="flex justify-center items-center mb-8">
+            <button id="prev-page"
+                class="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-l-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-chevron-left mr-2"></i>
+                上一页
+            </button>
+            <div class="flex items-center px-6 py-2 bg-blue-600 text-white">
+                <span id="current-page">1</span>
+                <span class="mx-2">/</span>
+                <span id="total-pages">3</span>
             </div>
+            <button id="next-page"
+                class="flex items-center px-4 py-2 bg-white border border-gray-300 rounded-r-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                下一页
+                <i class="fas fa-chevron-right ml-2"></i>
+            </button>
+        </div>
 
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('模拟电子技术')">
-                <div class="text-4xl text-purple-600 mb-4">
-                    <i class="fas fa-wave-square"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">模拟电子技术</h3>
-                <p class="text-gray-600 mb-4">放大器、滤波器、振荡器、模拟电路设计</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('数字电子技术')">
-                <div class="text-4xl text-red-600 mb-4">
-                    <i class="fas fa-microchip"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">数字电子技术</h3>
-                <p class="text-gray-600 mb-4">逻辑门、触发器、计数器、数字电路设计</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('电力电子技术')">
-                <div class="text-4xl text-yellow-600 mb-4">
-                    <i class="fas fa-plug"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">电力电子技术</h3>
-                <p class="text-gray-600 mb-4">整流器、逆变器、变换器、电力应用</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg"
-                onclick="askSubjectQuestion('控制系统')">
-                <div class="text-4xl text-indigo-600 mb-4">
-                    <i class="fas fa-sliders-h"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">控制系统</h3>
-                <p class="text-gray-600 mb-4">时域分析、频域分析、状态空间分析</p>
-                <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    AI问答 <i class="fas fa-arrow-right ml-2"></i>
-                </div>
-            </div>
-
-            <!-- 物理 -->
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-blue-500 mb-4">
-                    <i class="fas fa-atom"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">大学物理</h3>
-                <p class="text-gray-600 mb-4">力学、热学、电磁学、光学</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-purple-500 mb-4">
-                    <i class="fas fa-magnet"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">电磁学</h3>
-                <p class="text-gray-600 mb-4">电场、磁场、电磁感应</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-orange-500 mb-4">
-                    <i class="fas fa-wave-square"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">量子力学</h3>
-                <p class="text-gray-600 mb-4">波函数、薛定谔方程、量子态</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <!-- 化学 -->
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-green-500 mb-4">
-                    <i class="fas fa-flask"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">无机化学</h3>
-                <p class="text-gray-600 mb-4">原子结构、化学键、配位化合物</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-emerald-500 mb-4">
-                    <i class="fas fa-leaf"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">有机化学</h3>
-                <p class="text-gray-600 mb-4">有机化合物、反应机理、合成</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <!-- 计算机科学 -->
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-blue-700 mb-4">
-                    <i class="fas fa-laptop-code"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">程序设计基础</h3>
-                <p class="text-gray-600 mb-4">C/C++、Python、Java编程语言</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-green-700 mb-4">
-                    <i class="fas fa-database"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">数据结构与算法</h3>
-                <p class="text-gray-600 mb-4">线性结构、树、图、排序算法</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <!-- AI与机器学习 -->
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-indigo-600 mb-4">
-                    <i class="fas fa-robot"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">机器学习</h3>
-                <p class="text-gray-600 mb-4">监督学习、无监督学习、强化学习</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
-
-            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
-                <div class="text-4xl text-pink-600 mb-4">
-                    <i class="fas fa-brain"></i>
-                </div>
-                <h3 class="text-xl font-bold mb-2 text-gray-800">深度学习</h3>
-                <p class="text-gray-600 mb-4">神经网络、CNN、RNN、Transformer模型</p>
-                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
-                    查看详情 <i class="fas fa-arrow-right ml-2"></i>
-                </a>
-            </div>
+        <!-- 学科卡片容器 -->
+        <div id="subjects-container"
+            class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 min-h-[600px]">
+            <!-- 学科卡片将通过JavaScript动态生成 -->
         </div>
     </section>
 
@@ -1069,14 +1169,99 @@
             window.location.href = '/static/index-en.html';
         }
 
+        // Theme management
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                document.body.classList.add('dark-mode');
+                document.getElementById('theme-toggle').querySelector('i').className = 'fas fa-sun';
+            } else {
+                document.body.classList.remove('dark-mode');
+                document.getElementById('theme-toggle').querySelector('i').className = 'fas fa-moon';
+            }
+        }
+
         // Theme toggle
         document.getElementById('theme-toggle').addEventListener('click', function () {
             document.body.classList.toggle('dark-mode');
             const icon = this.querySelector('i');
-            if (document.body.classList.contains('dark-mode')) {
+            const isDarkMode = document.body.classList.contains('dark-mode');
+
+            if (isDarkMode) {
                 icon.className = 'fas fa-sun';
+                localStorage.setItem('theme', 'dark');
+
+                // 显示切换提示
+                showThemeNotification('已切换到暗黑主题 🌙');
             } else {
                 icon.className = 'fas fa-moon';
+                localStorage.setItem('theme', 'light');
+
+                // 显示切换提示
+                showThemeNotification('已切换到明亮主题 ☀️');
+            }
+        });
+
+        // 主题切换通知
+        function showThemeNotification(message) {
+            // 移除已存在的通知
+            const existingNotification = document.querySelector('.theme-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = 'theme-notification';
+            notification.textContent = message;
+            notification.style.cssText = `
+                position: fixed;
+                top: 100px;
+                right: 20px;
+                background: var(--accent-color);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                font-size: 14px;
+                font-weight: 500;
+                transform: translateX(100%);
+                transition: transform 0.3s ease;
+            `;
+
+            document.body.appendChild(notification);
+
+            // 显示动画
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+
+            // 自动隐藏
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 300);
+            }, 2000);
+        }
+
+        // 监听系统主题变化
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function (e) {
+            const savedTheme = localStorage.getItem('theme');
+            if (!savedTheme) {
+                // 只有在用户没有手动设置主题时才跟随系统
+                if (e.matches) {
+                    document.body.classList.add('dark-mode');
+                    document.getElementById('theme-toggle').querySelector('i').className = 'fas fa-sun';
+                } else {
+                    document.body.classList.remove('dark-mode');
+                    document.getElementById('theme-toggle').querySelector('i').className = 'fas fa-moon';
+                }
             }
         });
 
@@ -1086,14 +1271,7 @@
             mobileMenu.classList.toggle('hidden');
         });
 
-        // User menu toggle
-        document.getElementById('user-menu-button').addEventListener('click', function () {
-            const guestDropdown = document.getElementById('guest-dropdown');
-            const userDropdown = document.getElementById('user-dropdown');
-
-            // Toggle guest dropdown (when not logged in)
-            guestDropdown.classList.toggle('hidden');
-        });
+        // User menu toggle is handled in main.js
 
         // Question submission
         document.getElementById('submit-question').addEventListener('click', function () {
@@ -1140,13 +1318,230 @@
             }
         };
 
+        // 理工科学科数据 - 48个学科，分3页显示，全部支持AI问答
+        const subjectsData = [
+            // 第1页 - 电工电子类 (16个)
+            [
+                { name: '电工实验', icon: 'fas fa-bolt', color: 'blue', description: '电路分析、模拟电路、数字电路实验', hasAI: true },
+                { name: '电路分析', icon: 'fas fa-project-diagram', color: 'green', description: '直流电路、交流电路、三相电路理论', hasAI: true },
+                { name: '模拟电子技术', icon: 'fas fa-wave-square', color: 'purple', description: '放大器、滤波器、振荡器、模拟电路设计', hasAI: true },
+                { name: '数字电子技术', icon: 'fas fa-microchip', color: 'red', description: '逻辑门、触发器、计数器、数字电路设计', hasAI: true },
+                { name: '电力电子技术', icon: 'fas fa-plug', color: 'yellow', description: '整流器、逆变器、变换器、电力应用', hasAI: true },
+                { name: '控制系统', icon: 'fas fa-sliders-h', color: 'indigo', description: '时域分析、频域分析、状态空间分析', hasAI: true },
+                { name: '信号与系统', icon: 'fas fa-signal', color: 'cyan', description: '信号处理、系统分析、傅里叶变换', hasAI: true },
+                { name: '通信原理', icon: 'fas fa-broadcast-tower', color: 'orange', description: '调制解调、信道编码、通信系统', hasAI: true },
+                { name: '电磁场理论', icon: 'fas fa-magnet', color: 'pink', description: '电磁场分析、波导理论、天线原理', hasAI: true },
+                { name: '微波技术', icon: 'fas fa-wifi', color: 'emerald', description: '微波器件、微波电路、射频技术', hasAI: true },
+                { name: '自动控制原理', icon: 'fas fa-cogs', color: 'violet', description: '反馈控制、稳定性分析、控制器设计', hasAI: true },
+                { name: '电机与拖动', icon: 'fas fa-fan', color: 'amber', description: '电机原理、电机控制、传动系统', hasAI: true },
+                { name: '电力系统', icon: 'fas fa-industry', color: 'lime', description: '发电、输电、配电、电网分析', hasAI: true },
+                { name: '嵌入式系统', icon: 'fas fa-memory', color: 'rose', description: 'ARM、单片机、实时系统、物联网', hasAI: true },
+                { name: '传感器技术', icon: 'fas fa-thermometer-half', color: 'sky', description: '传感器原理、信号调理、测量技术', hasAI: true },
+                { name: '光电技术', icon: 'fas fa-lightbulb', color: 'teal', description: '光电器件、激光技术、光纤通信', hasAI: true }
+            ],
+            // 第2页 - 计算机与数学类 (16个)
+            [
+                { name: '程序设计基础', icon: 'fas fa-laptop-code', color: 'blue', description: 'C/C++、Python、Java编程语言', hasAI: true },
+                { name: '数据结构与算法', icon: 'fas fa-database', color: 'green', description: '线性结构、树、图、排序算法', hasAI: true },
+                { name: '计算机组成原理', icon: 'fas fa-desktop', color: 'purple', description: 'CPU设计、存储器、指令系统', hasAI: true },
+                { name: '操作系统', icon: 'fas fa-server', color: 'red', description: '进程管理、内存管理、文件系统', hasAI: true },
+                { name: '计算机网络', icon: 'fas fa-network-wired', color: 'yellow', description: 'TCP/IP、路由协议、网络安全', hasAI: true },
+                { name: '数据库系统', icon: 'fas fa-table', color: 'indigo', description: 'SQL、关系数据库、数据库设计', hasAI: true },
+                { name: '软件工程', icon: 'fas fa-code-branch', color: 'cyan', description: '软件开发流程、项目管理、测试', hasAI: true },
+                { name: '机器学习', icon: 'fas fa-robot', color: 'orange', description: '监督学习、无监督学习、强化学习', hasAI: true },
+                { name: '深度学习', icon: 'fas fa-brain', color: 'pink', description: '神经网络、CNN、RNN、Transformer', hasAI: true },
+                { name: '人工智能', icon: 'fas fa-android', color: 'emerald', description: '知识表示、推理、专家系统', hasAI: true },
+                { name: '高等数学', icon: 'fas fa-square-root-alt', color: 'violet', description: '微积分、级数、多元函数', hasAI: true },
+                { name: '线性代数', icon: 'fas fa-vector-square', color: 'amber', description: '矩阵运算、特征值、线性变换', hasAI: true },
+                { name: '概率论与数理统计', icon: 'fas fa-chart-pie', color: 'lime', description: '概率分布、假设检验、回归分析', hasAI: true },
+                { name: '离散数学', icon: 'fas fa-project-diagram', color: 'rose', description: '集合论、图论、组合数学', hasAI: true },
+                { name: '数值分析', icon: 'fas fa-calculator', color: 'sky', description: '数值计算、插值、数值积分', hasAI: true },
+                { name: '复变函数', icon: 'fas fa-infinity', color: 'teal', description: '复数、解析函数、留数定理', hasAI: true }
+            ],
+            // 第3页 - 物理化学与工程类 (16个)
+            [
+                { name: '大学物理', icon: 'fas fa-atom', color: 'blue', description: '力学、热学、电磁学、光学', hasAI: true },
+                { name: '理论力学', icon: 'fas fa-balance-scale', color: 'green', description: '静力学、运动学、动力学', hasAI: true },
+                { name: '材料力学', icon: 'fas fa-hammer', color: 'purple', description: '应力应变、强度理论、稳定性', hasAI: true },
+                { name: '流体力学', icon: 'fas fa-water', color: 'red', description: '流体静力学、流体动力学、粘性流动', hasAI: true },
+                { name: '热力学', icon: 'fas fa-fire', color: 'yellow', description: '热力学定律、循环、传热学', hasAI: true },
+                { name: '量子力学', icon: 'fas fa-atom', color: 'indigo', description: '波函数、薛定谔方程、量子态', hasAI: true },
+                { name: '无机化学', icon: 'fas fa-flask', color: 'cyan', description: '原子结构、化学键、配位化合物', hasAI: true },
+                { name: '有机化学', icon: 'fas fa-leaf', color: 'orange', description: '有机化合物、反应机理、合成', hasAI: true },
+                { name: '物理化学', icon: 'fas fa-vial', color: 'pink', description: '化学热力学、动力学、电化学', hasAI: true },
+                { name: '分析化学', icon: 'fas fa-search', color: 'emerald', description: '定量分析、仪器分析、色谱法', hasAI: true },
+                { name: '机械设计', icon: 'fas fa-cog', color: 'violet', description: '机械原理、零件设计、传动设计', hasAI: true },
+                { name: '工程制图', icon: 'fas fa-drafting-compass', color: 'amber', description: '技术制图、CAD、三维建模', hasAI: true },
+                { name: '材料科学', icon: 'fas fa-cube', color: 'lime', description: '材料结构、性能、加工工艺', hasAI: true },
+                { name: '工程热力学', icon: 'fas fa-temperature-high', color: 'rose', description: '热力循环、传热传质、能源转换', hasAI: true },
+                { name: '环境工程', icon: 'fas fa-recycle', color: 'sky', description: '污染控制、环境监测、可持续发展', hasAI: true },
+                { name: '生物工程', icon: 'fas fa-dna', color: 'teal', description: '生物技术、发酵工程、生物反应器', hasAI: true }
+            ]
+        ];
+
+        // 当前页面状态
+        let currentPage = 1;
+        const totalPages = subjectsData.length;
+
+        // 渲染学科卡片
+        function renderSubjects(pageIndex) {
+            const container = document.getElementById('subjects-container');
+            const subjects = subjectsData[pageIndex - 1];
+
+            container.innerHTML = '';
+
+            subjects.forEach(subject => {
+                const card = document.createElement('div');
+                card.className = 'subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg';
+
+                if (subject.hasAI) {
+                    card.onclick = () => askSubjectQuestion(subject.name);
+                }
+
+                card.innerHTML = `
+                    <div class="text-4xl text-${subject.color}-600 mb-4">
+                        <i class="${subject.icon}"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2 text-gray-800">${subject.name}</h3>
+                    <p class="text-gray-600 mb-4">${subject.description}</p>
+                    <div class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                        ${subject.hasAI ? 'AI问答' : '查看详情'} <i class="fas fa-arrow-right ml-2"></i>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // 更新分页控制器
+        function updatePagination() {
+            document.getElementById('current-page').textContent = currentPage;
+            document.getElementById('total-pages').textContent = totalPages;
+
+            const prevBtn = document.getElementById('prev-page');
+            const nextBtn = document.getElementById('next-page');
+
+            prevBtn.disabled = currentPage === 1;
+            nextBtn.disabled = currentPage === totalPages;
+
+            if (currentPage === 1) {
+                prevBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                prevBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+
+            if (currentPage === totalPages) {
+                nextBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            } else {
+                nextBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            }
+        }
+
+        // 上一页
+        function prevPage() {
+            if (currentPage > 1) {
+                currentPage--;
+                renderSubjects(currentPage);
+                updatePagination();
+            }
+        }
+
+        // 下一页
+        function nextPage() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderSubjects(currentPage);
+                updatePagination();
+            }
+        }
+
+        // 完整的学科问题库 - 覆盖所有48个学科
+        function askSubjectQuestion(subject) {
+            const questions = {
+                // 第1页 - 电工电子类
+                '电工实验': '请详细介绍电工实验的基本内容，包括电路分析、模拟电路和数字电路实验的主要知识点和实验方法',
+                '电路分析': '请解释电路分析的基本理论，包括直流电路、交流电路和三相电路的分析方法和应用',
+                '模拟电子技术': '请详细说明模拟电子技术的核心概念，包括放大器、滤波器、振荡器的工作原理和设计方法',
+                '数字电子技术': '请介绍数字电子技术的基础知识，包括逻辑门、触发器、计数器的原理和数字电路设计方法',
+                '电力电子技术': '请解释电力电子技术的主要内容，包括整流器、逆变器、变换器的工作原理和电力应用',
+                '控制系统': '请详细介绍控制系统的基本理论，包括时域分析、频域分析和状态空间分析方法',
+                '信号与系统': '请解释信号与系统的基本概念，包括信号处理、系统分析、傅里叶变换的原理和应用',
+                '通信原理': '请详细介绍通信原理的核心内容，包括调制解调、信道编码、通信系统的设计和分析',
+                '电磁场理论': '请解释电磁场理论的基本原理，包括电磁场分析、波导理论、天线原理和电磁波传播',
+                '微波技术': '请介绍微波技术的主要内容，包括微波器件、微波电路、射频技术的原理和应用',
+                '自动控制原理': '请详细说明自动控制原理，包括反馈控制、稳定性分析、控制器设计的理论和方法',
+                '电机与拖动': '请解释电机与拖动的基本概念，包括电机原理、电机控制、传动系统的设计和应用',
+                '电力系统': '请介绍电力系统的组成和运行原理，包括发电、输电、配电、电网分析的基本知识',
+                '嵌入式系统': '请详细介绍嵌入式系统的核心内容，包括ARM、单片机、实时系统、物联网的开发和应用',
+                '传感器技术': '请解释传感器技术的基本原理，包括传感器原理、信号调理、测量技术的理论和实践',
+                '光电技术': '请介绍光电技术的主要内容，包括光电器件、激光技术、光纤通信的原理和应用',
+
+                // 第2页 - 计算机与数学类
+                '程序设计基础': '请详细介绍程序设计基础，包括C/C++、Python、Java编程语言的语法、特性和编程实践',
+                '数据结构与算法': '请解释数据结构与算法的核心概念，包括线性结构、树、图、排序算法的原理和实现',
+                '计算机组成原理': '请介绍计算机组成原理，包括CPU设计、存储器、指令系统的结构和工作原理',
+                '操作系统': '请详细说明操作系统的基本功能，包括进程管理、内存管理、文件系统的设计和实现',
+                '计算机网络': '请解释计算机网络的基本原理，包括TCP/IP、路由协议、网络安全的理论和技术',
+                '数据库系统': '请介绍数据库系统的核心概念，包括SQL、关系数据库、数据库设计的原理和方法',
+                '软件工程': '请详细介绍软件工程的基本内容，包括软件开发流程、项目管理、测试的理论和实践',
+                '机器学习': '请解释机器学习的基本原理，包括监督学习、无监督学习、强化学习的算法和应用',
+                '深度学习': '请介绍深度学习的核心技术，包括神经网络、CNN、RNN、Transformer模型的原理和应用',
+                '人工智能': '请详细说明人工智能的基本概念，包括知识表示、推理、专家系统的理论和技术',
+                '高等数学': '请解释高等数学的主要内容，包括微积分、级数、多元函数的理论和计算方法',
+                '线性代数': '请介绍线性代数的基本概念，包括矩阵运算、特征值、线性变换的理论和应用',
+                '概率论与数理统计': '请详细介绍概率论与数理统计，包括概率分布、假设检验、回归分析的理论和方法',
+                '离散数学': '请解释离散数学的核心内容，包括集合论、图论、组合数学的基本概念和应用',
+                '数值分析': '请介绍数值分析的主要方法，包括数值计算、插值、数值积分的算法和实现',
+                '复变函数': '请详细说明复变函数的基本理论，包括复数、解析函数、留数定理的概念和应用',
+
+                // 第3页 - 物理化学与工程类
+                '大学物理': '请解释大学物理的基本内容，包括力学、热学、电磁学、光学的基本原理和应用',
+                '理论力学': '请介绍理论力学的核心概念，包括静力学、运动学、动力学的基本理论和分析方法',
+                '材料力学': '请详细说明材料力学的基本原理，包括应力应变、强度理论、稳定性的分析和计算',
+                '流体力学': '请解释流体力学的基本概念，包括流体静力学、流体动力学、粘性流动的理论和应用',
+                '热力学': '请介绍热力学的基本定律，包括热力学定律、循环、传热学的原理和工程应用',
+                '量子力学': '请详细介绍量子力学的基本原理，包括波函数、薛定谔方程、量子态的概念和计算',
+                '无机化学': '请解释无机化学的核心内容，包括原子结构、化学键、配位化合物的理论和性质',
+                '有机化学': '请介绍有机化学的基本概念，包括有机化合物、反应机理、合成的原理和方法',
+                '物理化学': '请详细说明物理化学的主要内容，包括化学热力学、动力学、电化学的理论和应用',
+                '分析化学': '请解释分析化学的基本方法，包括定量分析、仪器分析、色谱法的原理和技术',
+                '机械设计': '请介绍机械设计的基本原理，包括机械原理、零件设计、传动设计的理论和方法',
+                '工程制图': '请详细介绍工程制图的基本内容，包括技术制图、CAD、三维建模的标准和技术',
+                '材料科学': '请解释材料科学的核心概念，包括材料结构、性能、加工工艺的理论和应用',
+                '工程热力学': '请介绍工程热力学的基本原理，包括热力循环、传热传质、能源转换的理论和技术',
+                '环境工程': '请详细说明环境工程的主要内容，包括污染控制、环境监测、可持续发展的理论和实践',
+                '生物工程': '请解释生物工程的基本概念，包括生物技术、发酵工程、生物反应器的原理和应用'
+            };
+
+            const question = questions[subject] || `请详细介绍${subject}的相关概念、原理和应用`;
+
+            // Save current question to localStorage
+            localStorage.setItem('currentQuestion', question);
+
+            // Open answer page
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+        }
+
         // Initialize syntax highlighting
         document.addEventListener('DOMContentLoaded', function () {
             if (window.hljs) {
                 hljs.highlightAll();
             }
+
+            // Initialize theme on page load
+            initializeTheme();
+
+            // Initialize subjects
+            renderSubjects(currentPage);
+            updatePagination();
+
+            // Bind pagination events
+            document.getElementById('prev-page').addEventListener('click', prevPage);
+            document.getElementById('next-page').addEventListener('click', nextPage);
         });
     </script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
     <script src="/static/js/main.js"></script>
 </body>
 

@@ -2,7 +2,7 @@
 API routes for LLM integration in Alethea platform
 """
 
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, session
 import json
 import os
 from models.llm_models import llm_manager
@@ -13,17 +13,19 @@ llm_bp = Blueprint('llm', __name__, url_prefix='/api/llm')
 @llm_bp.route('/ask', methods=['POST'])
 def ask_question():
     """
-    Endpoint to ask a question to the selected LLM
+    Endpoint to ask a question to the selected LLM with personalized settings
     
     Request body:
     {
         "question": "Your question here",
-        "provider": "openai", // optional, defaults to system default
+        "provider": "openai", // optional, defaults to user preference or system default
         "model": "gpt-4o",    // optional, defaults to provider default
         "options": {          // optional
             "temperature": 0.7,
             "max_tokens": 1000
-        }
+        },
+        "use_knowledge_base": true, // optional, whether to search personal knowledge base
+        "context": "additional context" // optional
     }
     """
     try:
@@ -38,18 +40,46 @@ def ask_question():
         provider = data.get('provider')
         model = data.get('model')
         options = data.get('options', {})
+        use_knowledge_base = data.get('use_knowledge_base', True)
+        context = data.get('context', '')
+        
+        # Get user personalized settings
+        user_id = session.get('user_id', 1)
+        user_settings = get_user_ai_settings(user_id)
+        
+        # Apply user preferences if not explicitly provided
+        if not provider and user_settings.get('ai_preferences', {}).get('preferred_provider') != 'auto':
+            provider = user_settings.get('ai_preferences', {}).get('preferred_provider')
+        
+        # Adjust options based on user settings
+        response_length = user_settings.get('ai_preferences', {}).get('response_length', 'medium')
+        if response_length == 'short':
+            options['max_tokens'] = options.get('max_tokens', 500)
+        elif response_length == 'long':
+            options['max_tokens'] = options.get('max_tokens', 2000)
+        else:  # medium
+            options['max_tokens'] = options.get('max_tokens', 1000)
         
         # Combine options with model if provided
         if model:
             options['model'] = model
         
+        # Build enhanced prompt with user preferences and knowledge base
+        enhanced_prompt = build_enhanced_prompt(question, user_settings, use_knowledge_base, context, user_id)
+        
         # Generate response from LLM (using asyncio.run for sync compatibility)
         import asyncio
         response = asyncio.run(llm_manager.generate_response(
-            prompt=question,
+            prompt=enhanced_prompt,
             provider=provider,
             **options
         ))
+        
+        # Add knowledge base references if used
+        if use_knowledge_base and response.get('content'):
+            knowledge_refs = get_knowledge_base_references(question, user_id)
+            if knowledge_refs:
+                response['knowledge_base_references'] = knowledge_refs
         
         return jsonify(response)
     
@@ -1695,6 +1725,186 @@ def generate_circuit_experiment(question, difficulty):
         "success": True,
         "generated_by": "fallback"
     })
+
+# 全局AI设置和知识库集成的辅助函数
+def get_user_ai_settings(user_id):
+    """获取用户的AI个性化设置"""
+    settings_key = f'user_settings_{user_id}'
+    
+    # 默认设置
+    default_settings = {
+        'ai_style': 'detailed',
+        'knowledge_scope': 'all',
+        'auto_categorize': True,
+        'smart_tags': True,
+        'language': 'zh-CN',
+        'theme': 'light',
+        'notifications': {
+            'upload_success': True,
+            'ai_response': True,
+            'daily_summary': False
+        },
+        'privacy': {
+            'default_visibility': 'private',
+            'allow_sharing': False
+        },
+        'ai_preferences': {
+            'preferred_provider': 'auto',
+            'response_length': 'medium',
+            'include_sources': True,
+            'explain_reasoning': False
+        }
+    }
+    
+    # 从session获取用户设置
+    return session.get(settings_key, default_settings)
+
+def build_enhanced_prompt(question, user_settings, use_knowledge_base, context, user_id):
+    """构建增强的AI提示词，集成用户设置和知识库"""
+    
+    # 基础提示词
+    prompt_parts = []
+    
+    # 添加用户偏好的回答风格
+    ai_style = user_settings.get('ai_style', 'detailed')
+    style_instructions = {
+        'detailed': '请提供详细、深入的回答，包含充分的解释和分析。',
+        'concise': '请提供简洁明了的回答，直接回答要点。',
+        'academic': '请使用正式的学术语言和表达方式回答。',
+        'casual': '请使用友好、轻松的对话风格回答。'
+    }
+    
+    prompt_parts.append(style_instructions.get(ai_style, style_instructions['detailed']))
+    
+    # 添加知识库上下文
+    if use_knowledge_base:
+        knowledge_context = get_knowledge_base_context(question, user_id, user_settings)
+        if knowledge_context:
+            prompt_parts.append(f"\n基于用户的个人知识库内容：\n{knowledge_context}")
+    
+    # 添加额外上下文
+    if context:
+        prompt_parts.append(f"\n上下文信息：{context}")
+    
+    # 添加用户偏好设置
+    if user_settings.get('ai_preferences', {}).get('include_sources'):
+        prompt_parts.append("\n请在回答中明确标注信息来源。")
+    
+    if user_settings.get('ai_preferences', {}).get('explain_reasoning'):
+        prompt_parts.append("\n请解释你的推理过程和逻辑。")
+    
+    # 构建完整提示词
+    full_prompt = f"""
+{' '.join(prompt_parts)}
+
+用户问题：{question}
+
+请根据上述要求回答用户的问题。使用中文回答。
+"""
+    
+    return full_prompt.strip()
+
+def get_knowledge_base_context(question, user_id, user_settings):
+    """从用户的个人知识库获取相关上下文"""
+    try:
+        # 获取用户文档
+        documents_key = f'user_documents_{user_id}'
+        user_documents = session.get(documents_key, [])
+        
+        if not user_documents:
+            return ""
+        
+        # 根据用户设置确定搜索范围
+        knowledge_scope = user_settings.get('knowledge_scope', 'all')
+        
+        if knowledge_scope == 'recent':
+            # 只搜索最近的文档
+            user_documents = sorted(user_documents, key=lambda x: x.get('upload_time', ''), reverse=True)[:5]
+        elif knowledge_scope == 'category':
+            # 这里可以根据问题内容智能选择分类，暂时使用全部
+            pass
+        
+        # 搜索相关文档
+        relevant_docs = []
+        question_lower = question.lower()
+        
+        for doc in user_documents:
+            score = 0
+            content_lower = doc.get('content', '').lower()
+            filename_lower = doc.get('original_filename', '').lower()
+            
+            # 计算相关性分数
+            words = question_lower.split()
+            for word in words:
+                if len(word) > 2:
+                    score += content_lower.count(word) * 2
+                    score += filename_lower.count(word) * 3
+            
+            if score > 0:
+                doc['relevance_score'] = score
+                relevant_docs.append(doc)
+        
+        # 按相关性排序，取前3个
+        relevant_docs.sort(key=lambda x: x['relevance_score'], reverse=True)
+        top_docs = relevant_docs[:3]
+        
+        if not top_docs:
+            return ""
+        
+        # 构建知识库上下文
+        context_parts = []
+        for i, doc in enumerate(top_docs, 1):
+            content_preview = doc['content'][:300] + "..." if len(doc['content']) > 300 else doc['content']
+            context_parts.append(f"文档{i}：{doc['original_filename']}\n内容：{content_preview}")
+        
+        return "\n\n".join(context_parts)
+        
+    except Exception as e:
+        print(f"获取知识库上下文失败: {e}")
+        return ""
+
+def get_knowledge_base_references(question, user_id):
+    """获取知识库引用信息"""
+    try:
+        # 获取用户文档
+        documents_key = f'user_documents_{user_id}'
+        user_documents = session.get(documents_key, [])
+        
+        if not user_documents:
+            return []
+        
+        # 搜索相关文档
+        relevant_docs = []
+        question_lower = question.lower()
+        
+        for doc in user_documents:
+            score = 0
+            content_lower = doc.get('content', '').lower()
+            filename_lower = doc.get('original_filename', '').lower()
+            
+            # 计算相关性分数
+            words = question_lower.split()
+            for word in words:
+                if len(word) > 2:
+                    score += content_lower.count(word) * 2
+                    score += filename_lower.count(word) * 3
+            
+            if score > 0:
+                relevant_docs.append({
+                    'doc_id': doc['doc_id'],
+                    'filename': doc['original_filename'],
+                    'relevance_score': score,
+                    'category': doc.get('category', 'other'),
+                    'upload_time': doc.get('upload_time', '')
+                })
+        
+        # 按相关性排序，返回前5个
+        relevant_docs.sort(key=lambda x: x['relevance_score'], reverse=True)
+        return relevant_docs[:5]
+        
+    except Exception as e:
+        print(f"获取知识库引用失败: {e}")
+        return []
 
 def generate_physics_experiment(question, difficulty):
     """生成物理实验"""

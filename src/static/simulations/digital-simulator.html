@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字电路仿真器 - Alethea Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .logic-gate {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logic-gate:hover {
+            transform: scale(1.05);
+        }
+
+        .input-pin {
+            fill: #ef4444;
+            cursor: pointer;
+        }
+
+        .input-pin.high {
+            fill: #22c55e;
+        }
+
+        .output-pin {
+            fill: #6b7280;
+        }
+
+        .output-pin.high {
+            fill: #22c55e;
+        }
+
+        .wire {
+            stroke: #374151;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .wire.high {
+            stroke: #22c55e;
+        }
+
+        .truth-table {
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <!-- 标题栏 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">
+                <i class="fas fa-microchip text-blue-600 mr-3"></i>
+                数字电路仿真器
+            </h1>
+            <p class="text-gray-600">交互式数字逻辑门仿真环境 - 支持基本逻辑门、组合逻辑和时序电路</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 左侧：逻辑门选择 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-list text-green-600 mr-2"></i>
+                    逻辑门类型
+                </h2>
+
+                <div class="space-y-3">
+                    <button onclick="selectGate('AND')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-blue-500 mr-2"></i>
+                        <strong>与门 (AND)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = A · B</div>
+                    </button>
+
+                    <button onclick="selectGate('OR')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-green-500 mr-2"></i>
+                        <strong>或门 (OR)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = A + B</div>
+                    </button>
+
+                    <button onclick="selectGate('NOT')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-red-500 mr-2"></i>
+                        <strong>非门 (NOT)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = Ā</div>
+                    </button>
+
+                    <button onclick="selectGate('NAND')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-purple-500 mr-2"></i>
+                        <strong>与非门 (NAND)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = (A · B)̄</div>
+                    </button>
+
+                    <button onclick="selectGate('NOR')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-orange-500 mr-2"></i>
+                        <strong>或非门 (NOR)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = (A + B)̄</div>
+                    </button>
+
+                    <button onclick="selectGate('XOR')"
+                        class="gate-btn w-full p-3 text-left border rounded-lg hover:bg-blue-50 transition-colors">
+                        <i class="fas fa-circle text-indigo-500 mr-2"></i>
+                        <strong>异或门 (XOR)</strong>
+                        <div class="text-sm text-gray-600 ml-6">Y = A ⊕ B</div>
+                    </button>
+                </div>
+
+                <!-- 输入控制 -->
+                <div class="mt-6 pt-6 border-t">
+                    <h3 class="text-lg font-semibold mb-3">输入控制</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <label class="font-medium">输入 A:</label>
+                            <button onclick="toggleInput('A')" id="inputA"
+                                class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold">0</button>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <label class="font-medium">输入 B:</label>
+                            <button onclick="toggleInput('B')" id="inputB"
+                                class="px-4 py-2 rounded-lg bg-red-500 text-white font-bold">0</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 中间：仿真区域 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-play-circle text-blue-600 mr-2"></i>
+                    仿真区域
+                </h2>
+
+                <div class="bg-gray-50 rounded-lg p-4 mb-4">
+                    <svg id="circuitSvg" width="100%" height="300" viewBox="0 0 400 300">
+                        <!-- 背景网格 -->
+                        <defs>
+                            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#e5e7eb" stroke-width="1" />
+                            </pattern>
+                        </defs>
+                        <rect width="100%" height="100%" fill="url(#grid)" />
+
+                        <!-- 逻辑门将在这里动态绘制 -->
+                        <g id="gateGroup"></g>
+                    </svg>
+                </div>
+
+                <!-- 输出显示 -->
+                <div class="bg-gray-900 rounded-lg p-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-white font-medium">输出 Y:</span>
+                        <div id="output" class="px-6 py-3 rounded-lg bg-red-600 text-white font-bold text-xl">0</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：真值表和分析 -->
+            <div class="bg-white rounded-lg shadow-md p-6">
+                <h2 class="text-xl font-semibold mb-4">
+                    <i class="fas fa-table text-purple-600 mr-2"></i>
+                    真值表
+                </h2>
+
+                <div class="truth-table">
+                    <table id="truthTable" class="w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr class="bg-gray-100">
+                                <th class="border border-gray-300 px-3 py-2">A</th>
+                                <th class="border border-gray-300 px-3 py-2">B</th>
+                                <th class="border border-gray-300 px-3 py-2">Y</th>
+                            </tr>
+                        </thead>
+                        <tbody id="truthTableBody">
+                            <!-- 真值表内容将动态生成 -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- 逻辑表达式 -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg">
+                    <h3 class="font-semibold text-blue-800 mb-2">逻辑表达式</h3>
+                    <div id="logicExpression" class="text-lg font-mono text-blue-700">选择逻辑门</div>
+                </div>
+
+                <!-- 特性分析 -->
+                <div class="mt-6 p-4 bg-green-50 rounded-lg">
+                    <h3 class="font-semibold text-green-800 mb-2">门特性</h3>
+                    <div id="gateCharacteristics" class="text-sm text-green-700">
+                        选择一个逻辑门查看其特性
+                    </div>
+                </div>
+
+                <!-- 实验数据记录 -->
+                <div class="mt-6">
+                    <h3 class="font-semibold mb-3">实验记录</h3>
+                    <div class="space-y-2">
+                        <button onclick="recordData()"
+                            class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
+                            <i class="fas fa-plus mr-2"></i>记录当前状态
+                        </button>
+                        <button onclick="exportData()"
+                            class="w-full bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition-colors">
+                            <i class="fas fa-download mr-2"></i>导出实验数据
+                        </button>
+                        <button onclick="clearData()"
+                            class="w-full bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition-colors">
+                            <i class="fas fa-trash mr-2"></i>清除记录
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 实验数据显示 -->
+        <div class="mt-6 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold mb-4">
+                <i class="fas fa-chart-bar text-indigo-600 mr-2"></i>
+                实验数据记录
+            </h2>
+            <div id="dataRecords" class="space-y-2">
+                <p class="text-gray-500">暂无实验数据，点击"记录当前状态"开始记录</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局变量
+        let currentGate = 'AND';
+        let inputA = false;
+        let inputB = false;
+        let experimentData = [];
+
+        // 逻辑门定义
+        const gates = {
+            'AND': {
+                name: '与门',
+                expression: 'Y = A · B',
+                logic: (a, b) => a && b,
+                characteristics: '只有当所有输入都为高电平时，输出才为高电平。常用于条件判断和信号门控。',
+                truthTable: [
+                    [0, 0, 0],
+                    [0, 1, 0],
+                    [1, 0, 0],
+                    [1, 1, 1]
+                ]
+            },
+            'OR': {
+                name: '或门',
+                expression: 'Y = A + B',
+                logic: (a, b) => a || b,
+                characteristics: '只要有一个或多个输入为高电平，输出就为高电平。常用于信号合并和选择。',
+                truthTable: [
+                    [0, 0, 0],
+                    [0, 1, 1],
+                    [1, 0, 1],
+                    [1, 1, 1]
+                ]
+            },
+            'NOT': {
+                name: '非门',
+                expression: 'Y = Ā',
+                logic: (a) => !a,
+                characteristics: '输出与输入相反。是最基本的逻辑门，常用于信号反相和逻辑否定。',
+                truthTable: [
+                    [0, '', 1],
+                    [1, '', 0]
+                ]
+            },
+            'NAND': {
+                name: '与非门',
+                expression: 'Y = (A · B)̄',
+                logic: (a, b) => !(a && b),
+                characteristics: '与门的输出取反。是通用逻辑门，可以实现任何逻辑函数。',
+                truthTable: [
+                    [0, 0, 1],
+                    [0, 1, 1],
+                    [1, 0, 1],
+                    [1, 1, 0]
+                ]
+            },
+            'NOR': {
+                name: '或非门',
+                expression: 'Y = (A + B)̄',
+                logic: (a, b) => !(a || b),
+                characteristics: '或门的输出取反。也是通用逻辑门，可以实现任何逻辑函数。',
+                truthTable: [
+                    [0, 0, 1],
+                    [0, 1, 0],
+                    [1, 0, 0],
+                    [1, 1, 0]
+                ]
+            },
+            'XOR': {
+                name: '异或门',
+                expression: 'Y = A ⊕ B',
+                logic: (a, b) => a !== b,
+                characteristics: '当输入不同时输出为高电平。常用于比较、奇偶校验和加法器。',
+                truthTable: [
+                    [0, 0, 0],
+                    [0, 1, 1],
+                    [1, 0, 1],
+                    [1, 1, 0]
+                ]
+            }
+        };
+
+        // 选择逻辑门
+        function selectGate(gateType) {
+            currentGate = gateType;
+
+            // 更新按钮样式
+            document.querySelectorAll('.gate-btn').forEach(btn => {
+                btn.classList.remove('bg-blue-100', 'border-blue-500');
+            });
+            event.target.closest('.gate-btn').classList.add('bg-blue-100', 'border-blue-500');
+
+            // 更新显示
+            updateCircuit();
+            updateTruthTable();
+            updateLogicExpression();
+            updateCharacteristics();
+        }
+
+        // 切换输入状态
+        function toggleInput(input) {
+            if (input === 'A') {
+                inputA = !inputA;
+                const btn = document.getElementById('inputA');
+                btn.textContent = inputA ? '1' : '0';
+                btn.className = inputA ? 'px-4 py-2 rounded-lg bg-green-500 text-white font-bold' : 'px-4 py-2 rounded-lg bg-red-500 text-white font-bold';
+            } else if (input === 'B') {
+                inputB = !inputB;
+                const btn = document.getElementById('inputB');
+                btn.textContent = inputB ? '1' : '0';
+                btn.className = inputB ? 'px-4 py-2 rounded-lg bg-green-500 text-white font-bold' : 'px-4 py-2 rounded-lg bg-red-500 text-white font-bold';
+            }
+
+            updateCircuit();
+        }
+
+        // 更新电路显示
+        function updateCircuit() {
+            const gate = gates[currentGate];
+            let output;
+
+            if (currentGate === 'NOT') {
+                output = gate.logic(inputA);
+            } else {
+                output = gate.logic(inputA, inputB);
+            }
+
+            // 更新输出显示
+            const outputElement = document.getElementById('output');
+            outputElement.textContent = output ? '1' : '0';
+            outputElement.className = output ? 'px-6 py-3 rounded-lg bg-green-600 text-white font-bold text-xl' : 'px-6 py-3 rounded-lg bg-red-600 text-white font-bold text-xl';
+
+            // 绘制电路图
+            drawGate(currentGate, inputA, inputB, output);
+        }
+
+        // 绘制逻辑门
+        function drawGate(gateType, inA, inB, out) {
+            const svg = document.getElementById('gateGroup');
+            svg.innerHTML = '';
+
+            // 输入线
+            svg.innerHTML += `<line x1="50" y1="100" x2="150" y2="100" class="wire ${inA ? 'high' : ''}" />`;
+            if (gateType !== 'NOT') {
+                svg.innerHTML += `<line x1="50" y1="200" x2="150" y2="200" class="wire ${inB ? 'high' : ''}" />`;
+            }
+
+            // 输出线
+            svg.innerHTML += `<line x1="250" y1="150" x2="350" y2="150" class="wire ${out ? 'high' : ''}" />`;
+
+            // 输入标签
+            svg.innerHTML += `<text x="30" y="105" fill="#374151" font-size="14" font-weight="bold">A</text>`;
+            if (gateType !== 'NOT') {
+                svg.innerHTML += `<text x="30" y="205" fill="#374151" font-size="14" font-weight="bold">B</text>`;
+            }
+
+            // 输出标签
+            svg.innerHTML += `<text x="360" y="155" fill="#374151" font-size="14" font-weight="bold">Y</text>`;
+
+            // 输入点
+            svg.innerHTML += `<circle cx="50" cy="100" r="5" class="input-pin ${inA ? 'high' : ''}" />`;
+            if (gateType !== 'NOT') {
+                svg.innerHTML += `<circle cx="50" cy="200" r="5" class="input-pin ${inB ? 'high' : ''}" />`;
+            }
+
+            // 输出点
+            svg.innerHTML += `<circle cx="350" cy="150" r="5" class="output-pin ${out ? 'high' : ''}" />`;
+
+            // 绘制逻辑门符号
+            switch (gateType) {
+                case 'AND':
+                    svg.innerHTML += `
+                        <path d="M 150 120 L 150 180 L 200 180 A 30 30 0 0 0 200 120 Z" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="12" font-weight="bold">AND</text>
+                    `;
+                    break;
+                case 'OR':
+                    svg.innerHTML += `
+                        <path d="M 150 120 Q 175 120 200 150 Q 175 180 150 180 Q 175 150 150 120" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="12" font-weight="bold">OR</text>
+                    `;
+                    break;
+                case 'NOT':
+                    svg.innerHTML += `
+                        <path d="M 150 120 L 150 180 L 220 150 Z" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <circle cx="230" cy="150" r="8" fill="white" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="10" font-weight="bold">NOT</text>
+                    `;
+                    break;
+                case 'NAND':
+                    svg.innerHTML += `
+                        <path d="M 150 120 L 150 180 L 200 180 A 30 30 0 0 0 200 120 Z" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <circle cx="210" cy="150" r="8" fill="white" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="10" font-weight="bold">NAND</text>
+                    `;
+                    break;
+                case 'NOR':
+                    svg.innerHTML += `
+                        <path d="M 150 120 Q 175 120 200 150 Q 175 180 150 180 Q 175 150 150 120" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <circle cx="210" cy="150" r="8" fill="white" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="10" font-weight="bold">NOR</text>
+                    `;
+                    break;
+                case 'XOR':
+                    svg.innerHTML += `
+                        <path d="M 140 120 Q 165 120 190 150 Q 165 180 140 180 Q 165 150 140 120" 
+                              fill="white" stroke="#374151" stroke-width="2"/>
+                        <path d="M 150 120 Q 175 120 200 150 Q 175 180 150 180 Q 175 150 150 120" 
+                              fill="none" stroke="#374151" stroke-width="2"/>
+                        <text x="175" y="155" text-anchor="middle" fill="#374151" font-size="10" font-weight="bold">XOR</text>
+                    `;
+                    break;
+            }
+        }
+
+        // 更新真值表
+        function updateTruthTable() {
+            const gate = gates[currentGate];
+            const tbody = document.getElementById('truthTableBody');
+            tbody.innerHTML = '';
+
+            gate.truthTable.forEach(row => {
+                const tr = document.createElement('tr');
+                const currentRow = (row[0] == (inputA ? 1 : 0)) &&
+                    (currentGate === 'NOT' || row[1] == (inputB ? 1 : 0));
+
+                if (currentRow) {
+                    tr.className = 'bg-yellow-100';
+                }
+
+                tr.innerHTML = `
+                    <td class="border border-gray-300 px-3 py-2 text-center">${row[0]}</td>
+                    <td class="border border-gray-300 px-3 py-2 text-center">${row[1]}</td>
+                    <td class="border border-gray-300 px-3 py-2 text-center font-bold ${row[2] ? 'text-green-600' : 'text-red-600'}">${row[2]}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 更新逻辑表达式
+        function updateLogicExpression() {
+            const gate = gates[currentGate];
+            document.getElementById('logicExpression').textContent = gate.expression;
+        }
+
+        // 更新门特性
+        function updateCharacteristics() {
+            const gate = gates[currentGate];
+            document.getElementById('gateCharacteristics').textContent = gate.characteristics;
+        }
+
+        // 记录实验数据
+        function recordData() {
+            const gate = gates[currentGate];
+            let output;
+
+            if (currentGate === 'NOT') {
+                output = gate.logic(inputA);
+            } else {
+                output = gate.logic(inputA, inputB);
+            }
+
+            const record = {
+                timestamp: new Date().toLocaleString(),
+                gate: currentGate,
+                inputA: inputA ? 1 : 0,
+                inputB: currentGate === 'NOT' ? '-' : (inputB ? 1 : 0),
+                output: output ? 1 : 0
+            };
+
+            experimentData.push(record);
+            updateDataDisplay();
+        }
+
+        // 更新数据显示
+        function updateDataDisplay() {
+            const container = document.getElementById('dataRecords');
+
+            if (experimentData.length === 0) {
+                container.innerHTML = '<p class="text-gray-500">暂无实验数据，点击"记录当前状态"开始记录</p>';
+                return;
+            }
+
+            container.innerHTML = experimentData.map((record, index) => `
+                <div class="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                    <div>
+                        <span class="font-medium">${record.gate}</span>
+                        <span class="text-gray-600 ml-2">A=${record.inputA}, B=${record.inputB} → Y=${record.output}</span>
+                    </div>
+                    <div class="text-sm text-gray-500">${record.timestamp}</div>
+                </div>
+            `).join('');
+        }
+
+        // 导出实验数据
+        function exportData() {
+            if (experimentData.length === 0) {
+                alert('没有实验数据可导出');
+                return;
+            }
+
+            const csv = [
+                ['时间', '逻辑门', '输入A', '输入B', '输出Y'],
+                ...experimentData.map(record => [
+                    record.timestamp,
+                    record.gate,
+                    record.inputA,
+                    record.inputB,
+                    record.output
+                ])
+            ].map(row => row.join(',')).join('\n');
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `数字电路实验数据_${new Date().toISOString().slice(0, 10)}.csv`;
+            link.click();
+        }
+
+        // 清除实验数据
+        function clearData() {
+            if (confirm('确定要清除所有实验数据吗？')) {
+                experimentData = [];
+                updateDataDisplay();
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            selectGate('AND');
+        });
+    </script>
+</body>
+
+</html>

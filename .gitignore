@@ -192,3 +192,20 @@ docs/build/
 *.temp
 .tmp/
 .temp/
+
+# Aliyun deployment files (exclude from GitHub sync)
+阿里云部署指南_*.md
+快速开始部署.md
+一键部署到阿里云*.sh
+alethea_deploy.tar.gz
+SSH配置指南.md
+紧急SSH修复指南.md
+阿里云安全组配置指南.md
+阿里云信息收集清单.md
+安全组配置检查清单.md
+手动部署指南.md
+deploy/aliyun_*.sh
+deploy/ALIYUN_*.md
+deploy/aliyun_*.conf
+deploy/quick_*.sh
+deploy/upload_to_server.sh

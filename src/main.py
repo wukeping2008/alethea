@@ -15,6 +15,9 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 from routes.llm_routes import llm_bp
 from routes.user import user_bp
 from routes.analytics_routes import analytics_bp
+from routes.project_routes import project_bp
+from routes.experiment_routes import experiment_bp
+from routes.personal_knowledge_routes import personal_knowledge_bp
 from models.llm_models import initialize_llm_providers
 from models.user import initialize_user_system, db
 from models.user_analytics import UserAnalyticsManager
@@ -99,6 +102,9 @@ def initialize_app():
 app.register_blueprint(llm_bp)
 app.register_blueprint(user_bp)
 app.register_blueprint(analytics_bp)
+app.register_blueprint(project_bp)
+app.register_blueprint(experiment_bp)
+app.register_blueprint(personal_knowledge_bp)
 
 # Routes
 @app.route('/')

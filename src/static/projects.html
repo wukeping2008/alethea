@@ -1,17 +1,20 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>项目制学习 - Alethea</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Custom styles -->
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
-        
+
         :root {
             --primary-color: #0a2342;
             --secondary-color: #126872;
@@ -19,38 +22,38 @@
             --light-color: #f8f9fa;
             --dark-color: #212529;
         }
-        
+
         body {
             font-family: 'Noto Sans SC', sans-serif;
             background-color: #f5f7fa;
         }
-        
+
         .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
         }
-        
+
         .logo {
             height: 60px;
             margin-right: 10px;
         }
-        
+
         .nav-link {
             position: relative;
             color: var(--dark-color);
             transition: all 0.3s ease;
         }
-        
+
         .nav-link:hover {
             color: var(--primary-color);
         }
-        
+
         .nav-link.active {
             color: var(--primary-color);
             font-weight: 600;
         }
-        
+
         .nav-link::after {
             content: '';
             position: absolute;
@@ -61,32 +64,33 @@
             background-color: var(--primary-color);
             transition: width 0.3s ease;
         }
-        
+
         .nav-link:hover::after,
         .nav-link.active::after {
             width: 100%;
         }
-        
+
         .hero-section {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             color: white;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        
+
         .project-card {
             border-radius: 12px;
             transition: all 0.3s ease;
             cursor: pointer;
             border: 1px solid #e2e8f0;
+            background: white;
         }
-        
+
         .project-card:hover {
             transform: translateY(-8px);
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
             border-color: var(--accent-color);
         }
-        
+
         .project-icon {
             width: 60px;
             height: 60px;
@@ -98,7 +102,7 @@
             font-size: 24px;
             color: white;
         }
-        
+
         .difficulty-badge {
             display: inline-flex;
             align-items: center;
@@ -107,38 +111,22 @@
             font-size: 12px;
             font-weight: 500;
         }
-        
+
         .difficulty-easy {
             background-color: #dcfce7;
             color: #166534;
         }
-        
+
         .difficulty-medium {
             background-color: #fef3c7;
             color: #92400e;
         }
-        
+
         .difficulty-hard {
             background-color: #fee2e2;
             color: #991b1b;
         }
-        
-        .refresh-btn {
-            background: linear-gradient(135deg, var(--accent-color), #22d3ee);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        
-        .refresh-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(44, 165, 141, 0.3);
-        }
-        
+
         .category-filter {
             display: inline-flex;
             align-items: center;
@@ -151,49 +139,86 @@
             transition: all 0.3s ease;
             cursor: pointer;
         }
-        
+
         .category-filter:hover,
         .category-filter.active {
             border-color: var(--accent-color);
             background-color: var(--accent-color);
             color: white;
         }
-        
+
+        .featured-project {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .featured-project::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            pointer-events: none;
+        }
+
         /* Animation effects */
         @keyframes fadeInUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(30px); 
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
-            to { 
-                opacity: 1; 
-                transform: translateY(0); 
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
-        
+
         .fade-in-up {
             animation: fadeInUp 0.6s ease forwards;
         }
-        
-        .stagger-1 { animation-delay: 0.1s; }
-        .stagger-2 { animation-delay: 0.2s; }
-        .stagger-3 { animation-delay: 0.3s; }
-        .stagger-4 { animation-delay: 0.4s; }
-        .stagger-5 { animation-delay: 0.5s; }
-        .stagger-6 { animation-delay: 0.6s; }
-        
+
+        .stagger-1 {
+            animation-delay: 0.1s;
+        }
+
+        .stagger-2 {
+            animation-delay: 0.2s;
+        }
+
+        .stagger-3 {
+            animation-delay: 0.3s;
+        }
+
+        .stagger-4 {
+            animation-delay: 0.4s;
+        }
+
+        .stagger-5 {
+            animation-delay: 0.5s;
+        }
+
+        .stagger-6 {
+            animation-delay: 0.6s;
+        }
+
         /* Responsive adjustments */
         @media (max-width: 768px) {
             .hero-section {
                 padding: 2rem 1rem;
             }
-            
+
             .logo {
                 height: 40px;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Navigation -->
     <nav class="bg-white shadow-sm py-4">
@@ -211,7 +236,8 @@
             </div>
             <div class="flex items-center space-x-4">
                 <!-- Language Switcher -->
-                <button onclick="switchLanguage()" class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                <button onclick="switchLanguage()"
+                    class="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
                     <span class="text-sm font-medium">🇺🇸 English</span>
                 </button>
                 <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100">
@@ -235,7 +261,8 @@
             <div class="container mx-auto px-4 flex flex-col space-y-3">
                 <a href="/" class="block py-2 px-4 hover:bg-gray-100 rounded">首页</a>
                 <a href="/#subjects" class="block py-2 px-4 hover:bg-gray-100 rounded">学科</a>
-                <a href="/static/projects.html" class="block py-2 px-4 hover:bg-gray-100 rounded bg-blue-50 text-blue-600">项目制学习</a>
+                <a href="/static/projects.html"
+                    class="block py-2 px-4 hover:bg-gray-100 rounded bg-blue-50 text-blue-600">项目制学习</a>
                 <a href="/static/experiments.html" class="block py-2 px-4 hover:bg-gray-100 rounded">实验仿真</a>
                 <a href="/#about" class="block py-2 px-4 hover:bg-gray-100 rounded">关于我们</a>
             </div>
@@ -264,6 +291,69 @@
         </div>
     </section>
 
+    <!-- Featured Project Section -->
+    <section class="container mx-auto px-4 mb-12">
+        <div class="featured-project p-8 text-white relative">
+            <div class="relative z-10">
+                <div class="flex items-center justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-4">
+                            <span class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded-full text-sm font-bold mr-3">
+                                <i class="fas fa-star mr-1"></i>推荐体验
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-robot mr-1"></i>AI编程助手
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm ml-2">
+                                <i class="fas fa-graduation-cap mr-1"></i>教育部案例
+                            </span>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-3">WiFi智能感知系统</h2>
+                        <p class="text-xl mb-4 opacity-90">基于WiFi CSI信号的人体存在检测系统，结合机器学习实现无接触式感知</p>
+                        <div class="flex flex-wrap gap-3 mb-6">
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-wifi mr-1"></i>WiFi通信
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-wave-square mr-1"></i>信号处理
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-brain mr-1"></i>机器学习
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-3 py-1 rounded-full text-sm">
+                                <i class="fas fa-cloud mr-1"></i>云端部署
+                            </span>
+                        </div>
+                        <div class="flex items-center space-x-6 text-sm mb-6">
+                            <span><i class="fas fa-clock mr-2"></i>3-4周</span>
+                            <span><i class="fas fa-signal mr-2"></i>中级难度</span>
+                            <span><i class="fas fa-users mr-2"></i>适合1-3人</span>
+                            <span><i class="fas fa-code mr-2"></i>Python/JavaScript</span>
+                        </div>
+                        <div class="flex space-x-4">
+                            <button onclick="openProjectDetail('wifi-sensing')"
+                                class="bg-white text-purple-600 px-8 py-3 rounded-lg font-bold hover:bg-gray-100 transition-colors">
+                                <i class="fas fa-play mr-2"></i>立即开始体验
+                            </button>
+                            <button onclick="showProjectPreview('wifi-sensing')"
+                                class="bg-white bg-opacity-20 text-white px-6 py-3 rounded-lg font-medium hover:bg-opacity-30 transition-colors">
+                                <i class="fas fa-eye mr-2"></i>预览项目
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hidden lg:block ml-8">
+                        <div class="w-64 h-48 bg-white bg-opacity-10 rounded-lg flex items-center justify-center">
+                            <div class="text-center">
+                                <i class="fas fa-wifi text-6xl mb-4 opacity-80"></i>
+                                <p class="text-sm opacity-80">WiFi信号感知演示</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Filter Section -->
     <section class="container mx-auto px-4 mb-8">
         <div class="flex flex-wrap justify-center gap-4 mb-6">
@@ -286,12 +376,16 @@
                 <i class="fas fa-cogs mr-2"></i>自动化
             </button>
         </div>
-        
+
         <div class="text-center space-x-4">
-            <button class="refresh-btn" id="refresh-projects">
+            <button
+                class="bg-gradient-to-r from-teal-500 to-cyan-600 text-white px-6 py-3 rounded-lg hover:from-teal-600 hover:to-cyan-700 transition-all duration-300 font-medium"
+                id="refresh-projects">
                 <i class="fas fa-sync-alt mr-2"></i>换一批项目
             </button>
-            <button class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 font-medium" id="ai-recommend-btn">
+            <button
+                class="bg-gradient-to-r from-purple-500 to-pink-600 text-white px-6 py-3 rounded-lg hover:from-purple-600 hover:to-pink-700 transition-all duration-300 font-medium"
+                id="ai-recommend-btn">
                 <i class="fas fa-magic mr-2"></i>AI智能推荐
             </button>
         </div>
@@ -337,7 +431,7 @@
                     </ul>
                 </div>
             </div>
-            
+
             <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
                 <p>&copy; 2025 Alethea. 保留所有权利。</p>
             </div>
@@ -346,181 +440,212 @@
 
     <!-- JavaScript -->
     <script>
-        // 项目数据
+        // 项目数据 - 重新设计的项目数据结构
         const projectsData = {
             electronics: [
                 {
                     id: 'smart-car',
-                    title: '智能小车',
-                    description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块',
+                    title: '智能小车控制系统',
+                    description: '基于Arduino的多传感器智能小车，集成超声波避障、循迹、蓝牙控制等功能',
                     difficulty: 'medium',
                     duration: '2-3周',
-                    skills: ['Arduino编程', '传感器应用', '电机控制', '电路设计'],
+                    skills: ['Arduino编程', '传感器融合', '电机控制', '无线通信'],
                     icon: 'fas fa-car',
                     color: 'bg-blue-500',
-                    category: 'electronics'
+                    category: 'electronics',
+                    hasCodeAssistant: true,
+                    features: ['实时避障', '路径规划', '远程控制', '数据采集']
                 },
                 {
                     id: 'led-matrix',
-                    title: 'LED点阵显示屏',
-                    description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示等功能',
+                    title: 'LED点阵显示系统',
+                    description: '制作可编程LED点阵显示屏，实现文字滚动、图案显示、音乐可视化等功能',
                     difficulty: 'easy',
                     duration: '1-2周',
-                    skills: ['数字电路', 'LED驱动', '单片机编程', '显示原理'],
+                    skills: ['数字电路', 'LED驱动', '单片机编程', '图形显示'],
                     icon: 'fas fa-tv',
                     color: 'bg-green-500',
-                    category: 'electronics'
+                    category: 'electronics',
+                    hasCodeAssistant: true,
+                    features: ['动态显示', '音乐同步', '自定义图案', 'WiFi控制']
                 },
                 {
                     id: 'digital-clock',
-                    title: '数字时钟',
-                    description: '设计制作带闹钟功能的数字时钟，包含RTC模块和LCD显示',
+                    title: '智能数字时钟',
+                    description: '设计制作带环境监测功能的智能时钟，包含温湿度显示、闹钟、天气预报',
                     difficulty: 'easy',
-                    duration: '1周',
-                    skills: ['时钟电路', 'LCD显示', 'RTC应用', '按键控制'],
+                    duration: '1-2周',
+                    skills: ['时钟电路', 'LCD显示', 'RTC应用', '环境传感器'],
                     icon: 'fas fa-clock',
                     color: 'bg-purple-500',
-                    category: 'electronics'
+                    category: 'electronics',
+                    hasCodeAssistant: true,
+                    features: ['环境监测', '智能闹钟', '天气显示', '语音播报']
                 }
             ],
             robotics: [
                 {
                     id: 'robotic-arm',
-                    title: '机械臂控制系统',
-                    description: '设计多自由度机械臂，实现精确的位置控制和路径规划',
+                    title: '六自由度机械臂',
+                    description: '设计多自由度机械臂控制系统，实现精确的位置控制、路径规划和物体抓取',
                     difficulty: 'hard',
                     duration: '4-6周',
-                    skills: ['机械设计', '伺服控制', '运动学', '编程控制'],
+                    skills: ['机械设计', '伺服控制', '运动学建模', '视觉识别'],
                     icon: 'fas fa-robot',
                     color: 'bg-red-500',
-                    category: 'robotics'
+                    category: 'robotics',
+                    hasCodeAssistant: true,
+                    features: ['精确定位', '路径规划', '视觉抓取', '力反馈']
                 },
                 {
                     id: 'line-follower',
-                    title: '循迹机器人',
-                    description: '制作能够自动循迹的机器人，使用红外传感器检测路径',
+                    title: '智能循迹机器人',
+                    description: '制作能够自动循迹、避障、寻光的多功能机器人，使用多传感器融合技术',
                     difficulty: 'medium',
-                    duration: '2周',
-                    skills: ['传感器融合', 'PID控制', '路径跟踪', '机器人导航'],
+                    duration: '2-3周',
+                    skills: ['传感器融合', 'PID控制', '路径跟踪', '决策算法'],
                     icon: 'fas fa-route',
                     color: 'bg-yellow-500',
-                    category: 'robotics'
+                    category: 'robotics',
+                    hasCodeAssistant: true,
+                    features: ['多模式切换', '自适应控制', '障碍识别', '速度优化']
                 },
                 {
                     id: 'drone-basic',
-                    title: '四旋翼无人机',
-                    description: '组装并编程四旋翼无人机，实现稳定飞行和基本控制',
+                    title: '四旋翼飞行器',
+                    description: '组装并编程四旋翼无人机，实现稳定飞行、航点导航和图像传输',
                     difficulty: 'hard',
                     duration: '3-4周',
-                    skills: ['飞行控制', '姿态传感器', '电机调速', '无线通信'],
+                    skills: ['飞行控制', '姿态估计', '图传系统', '导航算法'],
                     icon: 'fas fa-helicopter',
                     color: 'bg-indigo-500',
-                    category: 'robotics'
+                    category: 'robotics',
+                    hasCodeAssistant: true,
+                    features: ['自主飞行', '航点导航', '实时图传', '一键返航']
                 }
             ],
             iot: [
                 {
-                    id: 'smart-home',
-                    title: '智能家居系统',
-                    description: '构建物联网智能家居系统，实现远程控制和环境监测',
+                    id: 'wifi-sensing',
+                    title: 'WiFi智能感知系统',
+                    description: '基于WiFi CSI信号的人体存在检测系统，结合机器学习实现无接触式感知',
                     difficulty: 'medium',
                     duration: '3-4周',
-                    skills: ['WiFi通信', '传感器网络', '移动应用', '云平台'],
+                    skills: ['WiFi通信', '信号处理', '机器学习', '云端部署'],
+                    icon: 'fas fa-wifi',
+                    color: 'bg-blue-600',
+                    category: 'iot',
+                    featured: true,
+                    hasCodeAssistant: true,
+                    features: ['无接触检测', 'AI算法', '实时监控', '云端分析']
+                },
+                {
+                    id: 'smart-home',
+                    title: '智能家居控制系统',
+                    description: '构建完整的物联网智能家居系统，实现设备联动、语音控制和远程管理',
+                    difficulty: 'medium',
+                    duration: '3-4周',
+                    skills: ['物联网协议', '设备联动', '语音识别', '移动应用'],
                     icon: 'fas fa-home',
                     color: 'bg-teal-500',
-                    category: 'iot'
+                    category: 'iot',
+                    hasCodeAssistant: true,
+                    features: ['设备联动', '语音控制', '场景模式', '能耗监控']
                 },
                 {
                     id: 'weather-station',
-                    title: '气象监测站',
-                    description: '制作能够实时监测温湿度、气压等环境参数的气象站',
+                    title: '智能气象监测站',
+                    description: '制作能够实时监测多种环境参数的气象站，支持数据可视化和预警功能',
                     difficulty: 'easy',
                     duration: '1-2周',
                     skills: ['环境传感器', '数据采集', '无线传输', '数据可视化'],
                     icon: 'fas fa-cloud-sun',
                     color: 'bg-cyan-500',
-                    category: 'iot'
-                },
-                {
-                    id: 'smart-garden',
-                    title: '智能花园',
-                    description: '设计自动浇水和环境监控的智能花园系统',
-                    difficulty: 'medium',
-                    duration: '2-3周',
-                    skills: ['土壤传感器', '自动控制', '定时系统', '移动监控'],
-                    icon: 'fas fa-seedling',
-                    color: 'bg-green-600',
-                    category: 'iot'
+                    category: 'iot',
+                    hasCodeAssistant: true,
+                    features: ['多参数监测', '历史数据', '趋势分析', '异常预警']
                 }
             ],
             ai: [
                 {
                     id: 'face-recognition',
-                    title: '人脸识别系统',
-                    description: '基于深度学习的人脸识别系统，实现身份验证功能',
+                    title: '智能人脸识别系统',
+                    description: '基于深度学习的人脸识别系统，支持实时检测、身份验证和考勤管理',
                     difficulty: 'hard',
                     duration: '4-5周',
-                    skills: ['深度学习', '计算机视觉', 'Python编程', '模型训练'],
+                    skills: ['深度学习', '计算机视觉', '模型训练', '系统集成'],
                     icon: 'fas fa-user-check',
                     color: 'bg-pink-500',
-                    category: 'ai'
+                    category: 'ai',
+                    hasCodeAssistant: true,
+                    features: ['实时识别', '活体检测', '考勤统计', '权限管理']
                 },
                 {
                     id: 'chatbot',
-                    title: '智能聊天机器人',
-                    description: '开发基于自然语言处理的智能聊天机器人',
+                    title: '智能对话机器人',
+                    description: '开发基于自然语言处理的智能聊天机器人，支持多轮对话和知识问答',
                     difficulty: 'medium',
-                    duration: '3周',
-                    skills: ['NLP', '机器学习', '对话系统', 'API开发'],
+                    duration: '3-4周',
+                    skills: ['自然语言处理', '对话管理', '知识图谱', 'API开发'],
                     icon: 'fas fa-comments',
                     color: 'bg-blue-600',
-                    category: 'ai'
+                    category: 'ai',
+                    hasCodeAssistant: true,
+                    features: ['多轮对话', '情感分析', '知识问答', '个性化回复']
                 },
                 {
                     id: 'image-classifier',
-                    title: '图像分类器',
-                    description: '训练卷积神经网络进行图像分类和物体识别',
+                    title: '图像智能分类器',
+                    description: '训练卷积神经网络进行图像分类和物体检测，支持自定义数据集训练',
                     difficulty: 'medium',
                     duration: '2-3周',
-                    skills: ['CNN', '图像处理', 'TensorFlow', '数据预处理'],
+                    skills: ['卷积神经网络', '图像处理', '模型优化', '数据增强'],
                     icon: 'fas fa-images',
                     color: 'bg-purple-600',
-                    category: 'ai'
+                    category: 'ai',
+                    hasCodeAssistant: true,
+                    features: ['多类别识别', '实时检测', '模型压缩', '边缘部署']
                 }
             ],
             automation: [
                 {
                     id: 'plc-control',
-                    title: 'PLC控制系统',
-                    description: '设计工业自动化PLC控制系统，实现生产线自动化',
+                    title: 'PLC工业控制系统',
+                    description: '设计工业自动化PLC控制系统，实现生产线自动化和设备监控',
                     difficulty: 'hard',
                     duration: '4-6周',
-                    skills: ['PLC编程', '工业控制', '传感器应用', '人机界面'],
+                    skills: ['PLC编程', '工业通信', 'HMI设计', '故障诊断'],
                     icon: 'fas fa-industry',
                     color: 'bg-gray-600',
-                    category: 'automation'
+                    category: 'automation',
+                    hasCodeAssistant: true,
+                    features: ['流程控制', '设备监控', '故障诊断', '数据记录']
                 },
                 {
                     id: 'motor-control',
-                    title: '电机调速系统',
-                    description: '实现直流电机和步进电机的精确调速控制',
+                    title: '电机智能调速系统',
+                    description: '实现直流电机和步进电机的精确调速控制，支持多种控制算法和反馈机制',
                     difficulty: 'medium',
                     duration: '2-3周',
                     skills: ['电机原理', 'PWM控制', '反馈控制', '驱动电路'],
                     icon: 'fas fa-cog',
                     color: 'bg-orange-500',
-                    category: 'automation'
+                    category: 'automation',
+                    hasCodeAssistant: true,
+                    features: ['精确调速', '多种算法', '实时监控', '故障保护']
                 },
                 {
                     id: 'conveyor-system',
-                    title: '传送带控制系统',
-                    description: '设计自动化传送带系统，包含物料检测和分拣功能',
+                    title: '智能传送带系统',
+                    description: '设计自动化传送带控制系统，包含物料检测、分拣和流量控制功能',
                     difficulty: 'medium',
-                    duration: '3周',
+                    duration: '3-4周',
                     skills: ['传感器应用', '逻辑控制', '机械设计', '系统集成'],
                     icon: 'fas fa-conveyor-belt',
                     color: 'bg-amber-500',
-                    category: 'automation'
+                    category: 'automation',
+                    hasCodeAssistant: true,
+                    features: ['自动分拣', '流量控制', '质量检测', '数据统计']
                 }
             ]
         };
@@ -574,32 +699,54 @@
 
         // 渲染项目卡片
         function renderProjectCard(project, index) {
+            const hasAI = project.hasCodeAssistant ? '<i class="fas fa-robot text-purple-500 ml-2" title="AI编程助手"></i>' : '';
+            const featuredBadge = project.featured ? '<span class="absolute top-2 right-2 bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold"><i class="fas fa-star mr-1"></i>推荐</span>' : '';
+
             return `
-                <div class="project-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1}" 
+                <div class="project-card p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1} relative" 
                      data-project-id="${project.id}" 
                      onclick="openProjectDetail('${project.id}')">
+                    ${featuredBadge}
                     <div class="project-icon ${project.color}">
                         <i class="${project.icon}"></i>
                     </div>
                     <div class="flex justify-between items-start mb-3">
-                        <h3 class="text-xl font-bold text-gray-800">${project.title}</h3>
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            ${project.title}
+                            ${hasAI}
+                        </h3>
                         <span class="difficulty-badge ${getDifficultyClass(project.difficulty)}">
                             ${getDifficultyText(project.difficulty)}
                         </span>
                     </div>
                     <p class="text-gray-600 mb-4 line-clamp-2">${project.description}</p>
+                    
+                    ${project.features ? `
+                        <div class="mb-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">核心功能：</h4>
+                            <div class="flex flex-wrap gap-1">
+                                ${project.features.slice(0, 3).map(feature =>
+                `<span class="bg-blue-50 text-blue-700 px-2 py-1 rounded text-xs">${feature}</span>`
+            ).join('')}
+                                ${project.features.length > 3 ?
+                        `<span class="text-gray-500 text-xs">+${project.features.length - 3}</span>` : ''
+                    }
+                            </div>
+                        </div>
+                    ` : ''}
+                    
                     <div class="mb-4">
                         <div class="flex items-center text-sm text-gray-500 mb-2">
                             <i class="fas fa-clock mr-2"></i>
                             <span>预计时间：${project.duration}</span>
                         </div>
                         <div class="flex flex-wrap gap-1">
-                            ${project.skills.slice(0, 3).map(skill => 
-                                `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
-                            ).join('')}
-                            ${project.skills.length > 3 ? 
-                                `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
-                            }
+                            ${project.skills.slice(0, 3).map(skill =>
+                        `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
+                    ).join('')}
+                            ${project.skills.length > 3 ?
+                    `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
+                }
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
@@ -607,10 +754,10 @@
                             开始项目 <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                         <div class="flex space-x-2">
-                            <button class="p-2 rounded hover:bg-gray-100" title="收藏">
+                            <button class="p-2 rounded hover:bg-gray-100" title="收藏" onclick="event.stopPropagation(); toggleFavorite('${project.id}')">
                                 <i class="far fa-heart text-gray-400"></i>
                             </button>
-                            <button class="p-2 rounded hover:bg-gray-100" title="分享">
+                            <button class="p-2 rounded hover:bg-gray-100" title="分享" onclick="event.stopPropagation(); shareProject('${project.id}')">
                                 <i class="fas fa-share-alt text-gray-400"></i>
                             </button>
                         </div>
@@ -628,19 +775,47 @@
         // 加载项目
         function loadProjects(category = 'all', refresh = false) {
             const availableProjects = getProjectsByCategory(category);
-            
+
             if (refresh || currentProjects.length === 0) {
                 currentProjects = getRandomProjects(availableProjects, 6);
             }
-            
+
             renderProjects(currentProjects);
         }
 
         // 打开项目详情
         function openProjectDetail(projectId) {
-            console.log('Opening project:', projectId); // 调试信息
-            // 跳转到项目详情页面
+            console.log('Opening project:', projectId);
+
+            // 特殊处理WiFi智能感知项目
+            if (projectId === 'wifi-sensing') {
+                window.location.href = '/static/wifi-sensing-project.html';
+                return;
+            }
+
+            // 其他项目跳转到通用详情页面
             window.location.href = `/static/project-detail.html?id=${projectId}`;
+        }
+
+        // 显示项目预览
+        function showProjectPreview(projectId) {
+            // 这里可以实现项目预览功能
+            alert('项目预览功能开发中...');
+        }
+
+        // 切换收藏状态
+        function toggleFavorite(projectId) {
+            // 实现收藏功能
+            console.log('Toggle favorite for project:', projectId);
+        }
+
+        // 分享项目
+        function shareProject(projectId) {
+            // 实现分享功能
+            const url = `${window.location.origin}/static/project-detail.html?id=${projectId}`;
+            navigator.clipboard.writeText(url).then(() => {
+                alert('项目链接已复制到剪贴板！');
+            });
         }
 
         // Language switching function
@@ -649,17 +824,17 @@
         }
 
         // 分类筛选事件
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // 初始加载项目
             loadProjects('all');
 
             // 分类筛选按钮事件
             document.querySelectorAll('.category-filter').forEach(button => {
-                button.addEventListener('click', function() {
+                button.addEventListener('click', function () {
                     // 更新按钮状态
                     document.querySelectorAll('.category-filter').forEach(btn => btn.classList.remove('active'));
                     this.classList.add('active');
-                    
+
                     // 获取分类并加载项目
                     const category = this.dataset.category;
                     currentCategory = category;
@@ -668,31 +843,31 @@
             });
 
             // 换一批按钮事件
-            document.getElementById('refresh-projects').addEventListener('click', function() {
+            document.getElementById('refresh-projects').addEventListener('click', function () {
                 // 添加旋转动画
                 const icon = this.querySelector('i');
                 icon.style.transform = 'rotate(360deg)';
                 icon.style.transition = 'transform 0.5s ease';
-                
+
                 setTimeout(() => {
                     icon.style.transform = 'rotate(0deg)';
                 }, 500);
-                
+
                 // 重新加载项目
                 loadProjects(currentCategory, true);
             });
 
             // AI智能推荐按钮事件
-            document.getElementById('ai-recommend-btn').addEventListener('click', function() {
+            document.getElementById('ai-recommend-btn').addEventListener('click', function () {
                 getAIRecommendations();
             });
 
             // 移动端菜单切换
             const mobileMenuButton = document.getElementById('mobile-menu-button');
             const mobileMenu = document.getElementById('mobile-menu');
-            
+
             if (mobileMenuButton && mobileMenu) {
-                mobileMenuButton.addEventListener('click', function() {
+                mobileMenuButton.addEventListener('click', function () {
                     mobileMenu.classList.toggle('hidden');
                 });
             }
@@ -702,7 +877,7 @@
         async function getAIRecommendations() {
             const button = document.getElementById('ai-recommend-btn');
             const originalText = button.innerHTML;
-            
+
             // 显示加载状态
             button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>AI分析中...';
             button.disabled = true;
@@ -717,7 +892,7 @@
                 };
 
                 // 调用AI推荐API
-                const response = await fetch('/api/llm/recommend-projects', {
+                const response = await fetch('/api/projects/recommend', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -730,7 +905,7 @@
                 if (data.success && data.recommendations) {
                     // 显示AI推荐的项目
                     displayAIRecommendations(data.recommendations);
-                    
+
                     // 如果有学习路径，也可以显示
                     if (data.learning_path) {
                         console.log('学习路径建议:', data.learning_path);
@@ -753,13 +928,10 @@
 
         // 获取用户技能（模拟数据，实际应用中从用户配置获取）
         function getUserSkills() {
-            // 这里可以从localStorage、用户配置或问卷调查获取
             const savedSkills = localStorage.getItem('userSkills');
             if (savedSkills) {
                 return JSON.parse(savedSkills);
             }
-            
-            // 默认技能
             return ['编程基础', '电路基础', '数学基础'];
         }
 
@@ -775,12 +947,12 @@
             if (savedInterests) {
                 return JSON.parse(savedInterests);
             }
-            
+
             // 根据当前分类推断兴趣
             if (currentCategory !== 'all') {
                 return [currentCategory];
             }
-            
+
             return ['electronics', 'robotics'];
         }
 
@@ -804,15 +976,16 @@
                 color: getProjectColor(rec.category),
                 category: rec.category,
                 matchScore: rec.match_score,
-                reason: rec.reason
+                reason: rec.reason,
+                hasCodeAssistant: true
             }));
 
             // 更新当前项目列表
             currentProjects = formattedProjects;
-            
+
             // 渲染推荐项目
             renderAIRecommendedProjects(formattedProjects);
-            
+
             // 显示推荐提示
             showRecommendationNotice();
         }
@@ -821,20 +994,21 @@
         function renderAIRecommendedProjects(projects) {
             const grid = document.getElementById('projects-grid');
             grid.innerHTML = projects.map((project, index) => `
-                <div class="project-card bg-white p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1} border-2 border-purple-200" 
+                <div class="project-card p-6 shadow-lg fade-in-up stagger-${(index % 6) + 1} border-2 border-purple-200 relative" 
                      data-project-id="${project.id}" 
                      onclick="openProjectDetail('${project.id}')">
-                    <div class="flex justify-between items-start mb-3">
-                        <div class="project-icon ${project.color}">
-                            <i class="${project.icon}"></i>
-                        </div>
-                        <div class="flex items-center bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
-                            <i class="fas fa-magic mr-1"></i>
-                            AI推荐 ${project.matchScore}%
-                        </div>
+                    <div class="absolute top-2 right-2 flex items-center bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs">
+                        <i class="fas fa-magic mr-1"></i>
+                        AI推荐 ${project.matchScore}%
+                    </div>
+                    <div class="project-icon ${project.color}">
+                        <i class="${project.icon}"></i>
                     </div>
                     <div class="flex justify-between items-start mb-3">
-                        <h3 class="text-xl font-bold text-gray-800">${project.title}</h3>
+                        <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                            ${project.title}
+                            <i class="fas fa-robot text-purple-500 ml-2" title="AI编程助手"></i>
+                        </h3>
                         <span class="difficulty-badge ${getDifficultyClass(project.difficulty)}">
                             ${getDifficultyText(project.difficulty)}
                         </span>
@@ -854,12 +1028,12 @@
                             <span>预计时间：${project.duration}</span>
                         </div>
                         <div class="flex flex-wrap gap-1">
-                            ${project.skills.slice(0, 3).map(skill => 
-                                `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
-                            ).join('')}
-                            ${project.skills.length > 3 ? 
-                                `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
-                            }
+                            ${project.skills.slice(0, 3).map(skill =>
+                `<span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">${skill}</span>`
+            ).join('')}
+                            ${project.skills.length > 3 ?
+                    `<span class="text-gray-500 text-xs">+${project.skills.length - 3}</span>` : ''
+                }
                         </div>
                     </div>
                     <div class="flex justify-between items-center">
@@ -867,10 +1041,10 @@
                             开始项目 <i class="fas fa-arrow-right ml-2"></i>
                         </button>
                         <div class="flex space-x-2">
-                            <button class="p-2 rounded hover:bg-gray-100" title="收藏">
+                            <button class="p-2 rounded hover:bg-gray-100" title="收藏" onclick="event.stopPropagation(); toggleFavorite('${project.id}')">
                                 <i class="far fa-heart text-gray-400"></i>
                             </button>
-                            <button class="p-2 rounded hover:bg-gray-100" title="分享">
+                            <button class="p-2 rounded hover:bg-gray-100" title="分享" onclick="event.stopPropagation(); shareProject('${project.id}')">
                                 <i class="fas fa-share-alt text-gray-400"></i>
                             </button>
                         </div>
@@ -917,14 +1091,14 @@
                     </button>
                 </div>
             `;
-            
+
             document.body.appendChild(notice);
-            
+
             // 显示动画
             setTimeout(() => {
                 notice.classList.remove('translate-x-full');
             }, 100);
-            
+
             // 自动隐藏
             setTimeout(() => {
                 notice.classList.add('translate-x-full');
@@ -936,5 +1110,8 @@
             }, 5000);
         }
     </script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
 </body>
+
 </html>

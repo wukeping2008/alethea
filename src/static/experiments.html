@@ -1,31 +1,39 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>仿真实验 - Alethea Enhanced</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         .experiment-card {
             transition: all 0.3s ease;
             border: 2px solid transparent;
         }
+
         .experiment-card:hover {
             transform: translateY(-4px);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
             border-color: #3b82f6;
         }
+
         .subject-tab {
             transition: all 0.3s ease;
         }
+
         .subject-tab.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
+
         .modal-overlay {
             backdrop-filter: blur(8px);
         }
+
         .loading-spinner {
             border: 3px solid #f3f4f6;
             border-top: 3px solid #3b82f6;
@@ -34,12 +42,19 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
+
 <body class="bg-gray-50 min-h-screen">
     <!-- 导航栏 -->
     <nav class="bg-white shadow-lg border-b border-gray-200">
@@ -53,19 +68,27 @@
                     <a href="index.html" class="text-gray-600 hover:text-blue-600 transition-colors">首页</a>
                     <a href="index.html#subjects" class="text-gray-600 hover:text-blue-600 transition-colors">学科</a>
                     <a href="projects.html" class="text-gray-600 hover:text-blue-600 transition-colors">项目制学习</a>
-                    <a href="experiments.html" class="text-blue-600 font-medium">仿真实验</a>
+                    <a href="experiments.html" class="text-blue-600 font-medium">实验仿真</a>
                     <a href="dashboard.html" class="text-gray-600 hover:text-blue-600 transition-colors">学习分析</a>
+                    <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+                        <i class="fas fa-moon"></i>
+                    </button>
                     <div class="relative">
-                        <button id="userMenuBtn" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                        <button id="userMenuBtn"
+                            class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
                             <i class="fas fa-user-circle text-xl mr-1"></i>
                             <span>用户</span>
                             <i class="fas fa-chevron-down ml-1 text-sm"></i>
                         </button>
-                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                            <a href="profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</a>
-                            <a href="settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">设置</a>
+                        <div id="userMenu"
+                            class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="profile.html"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">个人资料</a>
+                            <a href="settings.html"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">设置</a>
                             <hr class="my-1">
-                            <a href="login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">退出登录</a>
+                            <a href="login.html"
+                                class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">退出登录</a>
                         </div>
                     </div>
                 </div>
@@ -90,22 +113,28 @@
                 <button class="subject-tab active px-6 py-3 rounded-lg font-medium transition-all" data-subject="all">
                     <i class="fas fa-th-large mr-2"></i>全部实验
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="circuit">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="circuit">
                     <i class="fas fa-bolt mr-2"></i>电路分析
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="digital">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="digital">
                     <i class="fas fa-microchip mr-2"></i>数字电路
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="analog">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="analog">
                     <i class="fas fa-wave-square mr-2"></i>模拟电路
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="signal">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="signal">
                     <i class="fas fa-signal mr-2"></i>信号与系统
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="communication">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="communication">
                     <i class="fas fa-broadcast-tower mr-2"></i>通信原理
                 </button>
-                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="embedded">
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50"
+                    data-subject="embedded">
                     <i class="fas fa-memory mr-2"></i>嵌入式系统
                 </button>
             </div>
@@ -118,7 +147,8 @@
     </div>
 
     <!-- 实验详情模态框 -->
-    <div id="experimentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 flex items-center justify-center p-4">
+    <div id="experimentModal"
+        class="hidden fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
             <div class="flex justify-between items-center p-6 border-b border-gray-200">
                 <h3 id="modalTitle" class="text-xl font-bold text-gray-900"></h3>
@@ -136,13 +166,15 @@
 
     <!-- AI助手浮动按钮 -->
     <div class="fixed bottom-6 right-6 z-40">
-        <button id="aiAssistantBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110">
+        <button id="aiAssistantBtn"
+            class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110">
             <i class="fas fa-robot text-xl"></i>
         </button>
     </div>
 
     <!-- AI助手聊天窗口 -->
-    <div id="aiChatWindow" class="hidden fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
+    <div id="aiChatWindow"
+        class="hidden fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
         <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
             <h4 class="font-medium">AI实验助手</h4>
             <button id="closeChatBtn" class="text-white hover:text-gray-200">
@@ -156,9 +188,10 @@
         </div>
         <div class="p-4 border-t border-gray-200">
             <div class="flex gap-2">
-                <input type="text" id="chatInput" placeholder="输入你的问题..." 
-                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <button id="sendChatBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <input type="text" id="chatInput" placeholder="输入你的问题..."
+                    class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="sendChatBtn"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
                     <i class="fas fa-paper-plane"></i>
                 </button>
             </div>
@@ -379,7 +412,7 @@
             const allExperiments = [];
             Object.keys(experimentModules).forEach(subject => {
                 experimentModules[subject].forEach(exp => {
-                    allExperiments.push({...exp, subject});
+                    allExperiments.push({ ...exp, subject });
                 });
             });
             return allExperiments;
@@ -416,7 +449,7 @@
                         </button>
                     </div>
                 `;
-                
+
                 card.addEventListener('click', () => generateExperiment(exp));
                 container.appendChild(card);
             });
@@ -440,9 +473,9 @@
             const modal = document.getElementById('experimentModal');
             const title = document.getElementById('modalTitle');
             const content = document.getElementById('modalContent');
-            
+
             title.textContent = experiment.title;
-            
+
             // 显示加载状态
             content.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-12">
@@ -451,12 +484,12 @@
                     <p class="text-gray-600 text-center">请稍候，我们正在为您定制专属的实验方案</p>
                 </div>
             `;
-            
+
             modal.classList.remove('hidden');
 
             try {
                 // 调用AI生成实验内容
-                const response = await fetch('/api/llm/generate-experiment', {
+                const response = await fetch('/api/experiments/generate', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -499,7 +532,7 @@
         // 显示生成的实验内容
         function displayGeneratedExperiment(experimentData, originalExp) {
             const content = document.getElementById('modalContent');
-            
+
             content.innerHTML = `
                 <div class="space-y-6">
                     <!-- 实验概览 -->
@@ -626,7 +659,7 @@
         // 显示备用实验内容
         function displayFallbackExperiment(experiment) {
             const content = document.getElementById('modalContent');
-            
+
             content.innerHTML = `
                 <div class="space-y-6">
                     <!-- 实验概览 -->
@@ -678,7 +711,21 @@
 
         // 启动仿真实验
         function startSimulation(experimentId) {
-            alert(`启动仿真实验: ${experimentId}\n\n在实际应用中，这里会打开相应的在线仿真环境。`);
+            // 获取仿真URL
+            const simulationUrls = {
+                'circuit_ohm': '/static/simulations/circuit-simulator.html',
+                'circuit_rc': '/static/simulations/general-simulator.html',
+                'digital_gates': '/static/simulations/general-simulator.html',
+                'analog_opamp': '/static/simulations/general-simulator.html',
+                'signal_fourier': '/static/simulations/general-simulator.html',
+                'comm_am': '/static/simulations/general-simulator.html',
+                'embedded_gpio': '/static/simulations/general-simulator.html'
+            };
+
+            const simulationUrl = simulationUrls[experimentId] || '/static/simulations/general-simulator.html';
+
+            // 在新窗口中打开仿真环境
+            window.open(simulationUrl, '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
         }
 
         // 学科标签页切换
@@ -690,7 +737,7 @@
                     tabs.forEach(t => t.classList.remove('active'));
                     // 添加当前活动状态
                     tab.classList.add('active');
-                    
+
                     const subject = tab.dataset.subject;
                     if (subject === 'all') {
                         renderExperiments(getAllExperiments());
@@ -792,5 +839,8 @@
             initUserMenu();
         });
     </script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
 </body>
+
 </html>

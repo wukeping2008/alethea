@@ -209,3 +209,11 @@ deploy/ALIYUN_*.md
 deploy/aliyun_*.conf
 deploy/quick_*.sh
 deploy/upload_to_server.sh
+
+# AI Education Case documents (exclude from GitHub sync)
+AI_EDUCATION_CASE_*.md
+CASE_WRITING_PLAN.md
+AI教育案例申报书_*.docx
+图1-*.png
+图2-*.png
+图表说明文档.md

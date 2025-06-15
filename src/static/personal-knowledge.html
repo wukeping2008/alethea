@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人知识库 - Alethea智能学习平台</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .sidebar-item:hover {
+            background-color: #f3f4f6;
+        }
+
+        .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed #d1d5db;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #f8fafc;
+        }
+
+        .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #eff6ff;
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- 导航栏 -->
+    <nav class="gradient-bg shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-white">
+                            <i class="fas fa-brain mr-2"></i>个人知识库
+                        </h1>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="user-info" class="text-white"></span>
+                    <a href="index.html"
+                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all">
+                        <i class="fas fa-home mr-2"></i>返回首页
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex h-screen bg-gray-100">
+        <!-- 侧边栏 -->
+        <div class="w-64 glass-effect shadow-lg">
+            <div class="p-4">
+                <nav class="space-y-2">
+                    <a href="#" onclick="showSection('overview')"
+                        class="sidebar-item active flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-tachometer-alt mr-3"></i>知识库概览
+                    </a>
+                    <a href="#" onclick="showSection('upload')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-upload mr-3"></i>上传文档
+                    </a>
+                    <a href="#" onclick="showSection('documents')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-file-alt mr-3"></i>文档管理
+                    </a>
+                    <a href="#" onclick="showSection('search')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-search mr-3"></i>智能搜索
+                    </a>
+                    <a href="#" onclick="showSection('ai-chat')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-comments mr-3"></i>AI对话
+                    </a>
+                    <a href="#" onclick="showSection('categories')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-tags mr-3"></i>分类管理
+                    </a>
+                    <a href="#" onclick="showSection('settings')"
+                        class="sidebar-item flex items-center px-4 py-3 text-gray-700 rounded-lg transition-all">
+                        <i class="fas fa-cog mr-3"></i>个性化设置
+                    </a>
+                </nav>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="flex-1 overflow-auto">
+            <div class="p-6">
+                <!-- 知识库概览 -->
+                <div id="overview-section" class="section">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">我的知识库</h2>
+                        <p class="text-gray-600">构建属于你的个性化AI学习助手</p>
+                    </div>
+
+                    <!-- 统计卡片 -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                                    <i class="fas fa-file-alt text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">总文档数</p>
+                                    <p id="total-documents" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 text-green-600">
+                                    <i class="fas fa-database text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">存储大小</p>
+                                    <p id="total-size" class="text-2xl font-bold text-gray-900">0 MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                                    <i class="fas fa-tags text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">分类数量</p>
+                                    <p id="total-categories" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                                    <i class="fas fa-comments text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-600">AI对话数</p>
+                                    <p id="total-chats" class="text-2xl font-bold text-gray-900">0</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 快速操作 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-rocket mr-2 text-blue-600"></i>快速开始
+                            </h3>
+                            <div class="space-y-3">
+                                <button onclick="showSection('upload')"
+                                    class="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all">
+                                    <i class="fas fa-upload mr-3 text-blue-600"></i>
+                                    <span class="font-medium">上传第一个文档</span>
+                                    <p class="text-sm text-gray-600 ml-6">支持PDF、Word、PPT、Excel等格式</p>
+                                </button>
+                                <button onclick="showSection('ai-chat')"
+                                    class="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-green-300 hover:bg-green-50 transition-all">
+                                    <i class="fas fa-comments mr-3 text-green-600"></i>
+                                    <span class="font-medium">开始AI对话</span>
+                                    <p class="text-sm text-gray-600 ml-6">基于你的知识库进行智能问答</p>
+                                </button>
+                                <button onclick="showSection('settings')"
+                                    class="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-purple-300 hover:bg-purple-50 transition-all">
+                                    <i class="fas fa-cog mr-3 text-purple-600"></i>
+                                    <span class="font-medium">个性化设置</span>
+                                    <p class="text-sm text-gray-600 ml-6">配置AI助手的回答风格和偏好</p>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-clock mr-2 text-green-600"></i>最近活动
+                            </h3>
+                            <div id="recent-activities" class="space-y-3">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-history text-3xl mb-2"></i>
+                                    <p>暂无活动记录</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 知识库分类概览 -->
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                            <i class="fas fa-chart-pie mr-2 text-purple-600"></i>知识库分布
+                        </h3>
+                        <div id="category-overview" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                            <div class="text-center py-8 text-gray-500 col-span-full">
+                                <i class="fas fa-folder-open text-3xl mb-2"></i>
+                                <p>暂无文档分类</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 上传文档 -->
+                <div id="upload-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">上传文档</h2>
+                        <p class="text-gray-600">将你的学习资料、研究文档、课程笔记等上传到个人知识库</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg">
+                        <form id="upload-form" class="space-y-6">
+                            <!-- 文件上传区域 -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">选择文件</label>
+                                <div id="upload-area" class="upload-area p-8 text-center rounded-xl cursor-pointer">
+                                    <input type="file" id="file-input" name="file"
+                                        accept=".pdf,.doc,.docx,.txt,.md,.ppt,.pptx,.xls,.xlsx" class="hidden" multiple>
+                                    <div id="upload-placeholder">
+                                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                                        <p class="text-lg text-gray-600 mb-2">点击选择文件或拖拽文件到此处</p>
+                                        <p class="text-sm text-gray-500 mb-1">支持 PDF, Word, PowerPoint, Excel, TXT,
+                                            Markdown 格式</p>
+                                        <p class="text-sm text-gray-500">最大文件大小: 16MB，支持批量上传</p>
+                                    </div>
+                                    <div id="file-list" class="hidden space-y-2">
+                                        <!-- 文件列表将在这里显示 -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 文档信息 -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">文档分类</label>
+                                    <select name="category" id="upload-category"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="personal">个人学习</option>
+                                        <option value="research">研究资料</option>
+                                        <option value="course">课程笔记</option>
+                                        <option value="reference">参考文献</option>
+                                        <option value="project">项目文档</option>
+                                        <option value="teaching">教学资料</option>
+                                        <option value="other">其他</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">学科领域</label>
+                                    <select name="subject" id="upload-subject"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="general">通用</option>
+                                        <option value="engineering">工程技术</option>
+                                        <option value="science">自然科学</option>
+                                        <option value="mathematics">数学</option>
+                                        <option value="computer">计算机科学</option>
+                                        <option value="physics">物理学</option>
+                                        <option value="chemistry">化学</option>
+                                        <option value="biology">生物学</option>
+                                        <option value="medicine">医学</option>
+                                        <option value="economics">经济学</option>
+                                        <option value="management">管理学</option>
+                                        <option value="literature">文学</option>
+                                        <option value="history">历史学</option>
+                                        <option value="philosophy">哲学</option>
+                                        <option value="art">艺术</option>
+                                        <option value="other">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">标签 (用逗号分隔)</label>
+                                <input type="text" name="tags" placeholder="例如: 机器学习, 深度学习, 神经网络"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">文档描述 (可选)</label>
+                                <textarea name="description" rows="3" placeholder="简要描述文档内容、用途或重要性..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            </div>
+
+                            <!-- 隐私设置 -->
+                            <div class="border-t pt-4">
+                                <h4 class="font-medium text-gray-900 mb-3">隐私设置</h4>
+                                <div class="space-y-2">
+                                    <label class="flex items-center">
+                                        <input type="radio" name="privacy" value="private" checked class="mr-2">
+                                        <span>私有 - 仅我可见</span>
+                                    </label>
+                                    <label class="flex items-center">
+                                        <input type="radio" name="privacy" value="shared" class="mr-2">
+                                        <span>共享 - 允许其他用户查看</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="flex space-x-4">
+                                <button type="submit"
+                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-all">
+                                    <i class="fas fa-upload mr-2"></i>上传文档
+                                </button>
+                                <button type="button" onclick="resetUploadForm()"
+                                    class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
+                                    重置
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- 上传进度 -->
+                        <div id="upload-progress" class="hidden mt-6">
+                            <div class="bg-gray-200 rounded-full h-3">
+                                <div id="upload-progress-bar"
+                                    class="bg-blue-600 h-3 rounded-full transition-all duration-300" style="width: 0%">
+                                </div>
+                            </div>
+                            <p id="upload-status" class="text-sm text-gray-600 mt-2">准备上传...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 文档管理 -->
+                <div id="documents-section" class="section hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h2 class="text-3xl font-bold text-gray-900 mb-2">文档管理</h2>
+                            <p class="text-gray-600">管理你的个人知识库文档</p>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button onclick="refreshDocuments()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                                <i class="fas fa-sync-alt mr-2"></i>刷新
+                            </button>
+                            <button onclick="exportDocuments()"
+                                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all">
+                                <i class="fas fa-download mr-2"></i>导出
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 筛选和搜索 -->
+                    <div class="bg-white p-4 rounded-xl shadow-lg mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                            <div>
+                                <input type="text" id="doc-search" placeholder="搜索文档..."
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div>
+                                <select id="doc-category-filter"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">所有分类</option>
+                                    <option value="personal">个人学习</option>
+                                    <option value="research">研究资料</option>
+                                    <option value="course">课程笔记</option>
+                                    <option value="reference">参考文献</option>
+                                    <option value="project">项目文档</option>
+                                    <option value="teaching">教学资料</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                            <div>
+                                <select id="doc-subject-filter"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">所有学科</option>
+                                    <option value="engineering">工程技术</option>
+                                    <option value="science">自然科学</option>
+                                    <option value="mathematics">数学</option>
+                                    <option value="computer">计算机科学</option>
+                                    <option value="other">其他</option>
+                                </select>
+                            </div>
+                            <div>
+                                <button onclick="filterDocuments()"
+                                    class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                                    <i class="fas fa-filter mr-2"></i>筛选
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 文档列表 -->
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div id="documents-table">
+                            <div class="text-center py-12">
+                                <div
+                                    class="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600 mx-auto">
+                                </div>
+                                <p class="text-gray-500 mt-4">加载文档列表...</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="documents-pagination" class="mt-6 flex justify-center"></div>
+                </div>
+
+                <!-- 智能搜索 -->
+                <div id="search-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">智能搜索</h2>
+                        <p class="text-gray-600">在你的个人知识库中快速找到所需信息</p>
+                    </div>
+
+                    <div class="bg-white p-6 rounded-xl shadow-lg mb-6">
+                        <div class="flex space-x-4 mb-4">
+                            <div class="flex-1">
+                                <input type="text" id="search-input" placeholder="输入搜索关键词或问题..."
+                                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+                            </div>
+                            <button onclick="searchDocuments()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all">
+                                <i class="fas fa-search mr-2"></i>搜索
+                            </button>
+                        </div>
+
+                        <!-- 搜索选项 -->
+                        <div class="flex flex-wrap gap-4 text-sm">
+                            <label class="flex items-center">
+                                <input type="checkbox" id="search-content" checked class="mr-2">
+                                <span>搜索内容</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="search-title" checked class="mr-2">
+                                <span>搜索标题</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="search-tags" checked class="mr-2">
+                                <span>搜索标签</span>
+                            </label>
+                            <label class="flex items-center">
+                                <input type="checkbox" id="search-fuzzy" class="mr-2">
+                                <span>模糊搜索</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 搜索结果 -->
+                    <div id="search-results" class="bg-white rounded-xl shadow-lg">
+                        <div class="p-8 text-center text-gray-500">
+                            <i class="fas fa-search text-4xl mb-4"></i>
+                            <p class="text-lg">输入关键词开始搜索你的知识库</p>
+                            <p class="text-sm mt-2">支持自然语言问题，如"关于机器学习的资料"</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI对话 -->
+                <div id="ai-chat-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">AI智能对话</h2>
+                        <p class="text-gray-600">基于你的个人知识库进行智能问答</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <!-- 对话区域 -->
+                        <div class="lg:col-span-2">
+                            <div class="bg-white rounded-xl shadow-lg h-96 flex flex-col">
+                                <div class="p-4 border-b border-gray-200">
+                                    <h3 class="font-semibold text-gray-900">
+                                        <i class="fas fa-robot mr-2 text-blue-600"></i>AI助手
+                                    </h3>
+                                    <p class="text-sm text-gray-600">基于你的知识库回答问题</p>
+                                </div>
+
+                                <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                                    <div class="flex items-start space-x-3">
+                                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                            <i class="fas fa-robot text-white text-sm"></i>
+                                        </div>
+                                        <div class="bg-gray-100 rounded-lg p-3 max-w-md">
+                                            <p class="text-sm">你好！我是你的个人AI助手。我可以基于你上传的文档回答问题，帮助你更好地理解和运用知识。请问有什么可以帮助你的吗？
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-4 border-t border-gray-200">
+                                    <div class="flex space-x-2">
+                                        <input type="text" id="chat-input" placeholder="输入你的问题..."
+                                            class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <button onclick="sendMessage()"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-all">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 侧边栏 -->
+                        <div class="space-y-6">
+                            <!-- AI设置 -->
+                            <div class="bg-white p-4 rounded-xl shadow-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">
+                                    <i class="fas fa-cog mr-2"></i>AI设置
+                                </h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">回答风格</label>
+                                        <select id="ai-style"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                            <option value="detailed">详细解释</option>
+                                            <option value="concise">简洁明了</option>
+                                            <option value="academic">学术风格</option>
+                                            <option value="casual">轻松对话</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">知识库范围</label>
+                                        <select id="knowledge-scope"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                                            <option value="all">全部文档</option>
+                                            <option value="category">按分类筛选</option>
+                                            <option value="recent">最近文档</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 常用问题 -->
+                            <div class="bg-white p-4 rounded-xl shadow-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">
+                                    <i class="fas fa-lightbulb mr-2"></i>常用问题
+                                </h4>
+                                <div class="space-y-2">
+                                    <button onclick="sendPredefinedMessage('这个文档的主要内容是什么？')"
+                                        class="w-full text-left p-2 text-sm bg-gray-50 hover:bg-gray-100 rounded transition-all">
+                                        这个文档的主要内容是什么？
+                                    </button>
+                                    <button onclick="sendPredefinedMessage('请总结文档的关键要点')"
+                                        class="w-full text-left p-2 text-sm bg-gray-50 hover:bg-gray-100 rounded transition-all">
+                                        请总结文档的关键要点
+                                    </button>
+                                    <button onclick="sendPredefinedMessage('这个概念如何应用到实际项目中？')"
+                                        class="w-full text-left p-2 text-sm bg-gray-50 hover:bg-gray-100 rounded transition-all">
+                                        这个概念如何应用到实际项目中？
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 分类管理 -->
+                <div id="categories-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">分类管理</h2>
+                        <p class="text-gray-600">管理你的文档分类和标签</p>
+                    </div>
+
+                    <!-- 分类概览 -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-folder mr-2 text-blue-600"></i>文档分类
+                            </h3>
+                            <div id="categories-list" class="space-y-3">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                    <p>加载分类信息...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-tags mr-2 text-green-600"></i>标签云
+                            </h3>
+                            <div id="tags-cloud" class="space-y-2">
+                                <div class="text-center py-8 text-gray-500">
+                                    <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                    <p>加载标签信息...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 分类详情 -->
+                    <div id="category-details" class="bg-white rounded-xl shadow-lg hidden">
+                        <div class="p-6 border-b border-gray-200">
+                            <div class="flex justify-between items-center">
+                                <h3 id="category-title" class="text-xl font-semibold text-gray-900"></h3>
+                                <button onclick="closeCategoryDetails()" class="text-gray-500 hover:text-gray-700">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                            <p id="category-description" class="text-gray-600 mt-2"></p>
+                        </div>
+                        <div class="p-6">
+                            <div id="category-documents" class="space-y-3">
+                                <!-- 分类文档列表 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 个性化设置 -->
+                <div id="settings-section" class="section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-3xl font-bold text-gray-900 mb-2">个性化设置</h2>
+                        <p class="text-gray-600">配置你的AI助手偏好和知识库设置</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- AI偏好设置 -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-robot mr-2 text-blue-600"></i>AI助手偏好
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">回答风格</label>
+                                    <select id="settings-ai-style"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="detailed">详细解释 - 提供深入的分析和解释</option>
+                                        <option value="concise">简洁明了 - 直接回答要点</option>
+                                        <option value="academic">学术风格 - 正式的学术表达</option>
+                                        <option value="casual">轻松对话 - 友好的对话风格</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">知识库范围</label>
+                                    <select id="settings-knowledge-scope"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="all">全部文档 - 搜索所有上传的文档</option>
+                                        <option value="category">按分类筛选 - 优先搜索相关分类</option>
+                                        <option value="recent">最近文档 - 优先搜索最近上传的文档</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">首选AI模型</label>
+                                    <select id="settings-preferred-provider"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="auto">自动选择 - 根据问题类型智能选择</option>
+                                        <option value="claude">Claude - 适合分析和推理</option>
+                                        <option value="gemini">Gemini - 适合通用问答</option>
+                                        <option value="volces_deepseek">火山引擎DeepSeek - 适合中文和编程</option>
+                                        <option value="ali_qwen">阿里云通义千问 - 适合中文理解</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">回答长度</label>
+                                    <select id="settings-response-length"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="short">简短 - 100-200字</option>
+                                        <option value="medium">中等 - 200-500字</option>
+                                        <option value="long">详细 - 500字以上</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 知识库设置 -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-database mr-2 text-green-600"></i>知识库设置
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-auto-categorize" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">自动分类</span>
+                                            <p class="text-sm text-gray-600">根据文档内容自动分配分类</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-smart-tags" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">智能标签</span>
+                                            <p class="text-sm text-gray-600">自动生成相关标签</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-include-sources" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">显示信息来源</span>
+                                            <p class="text-sm text-gray-600">在AI回答中显示引用的文档</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-explain-reasoning" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">解释推理过程</span>
+                                            <p class="text-sm text-gray-600">AI解释其回答的逻辑</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 通知设置 -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-bell mr-2 text-yellow-600"></i>通知设置
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-upload-success" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">上传成功通知</span>
+                                            <p class="text-sm text-gray-600">文档上传完成时显示通知</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-ai-response" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">AI回答通知</span>
+                                            <p class="text-sm text-gray-600">AI完成回答时显示通知</p>
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-daily-summary" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">每日总结</span>
+                                            <p class="text-sm text-gray-600">每天发送知识库使用总结</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 隐私设置 -->
+                        <div class="bg-white p-6 rounded-xl shadow-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-shield-alt mr-2 text-purple-600"></i>隐私设置
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">默认文档可见性</label>
+                                    <select id="settings-default-visibility"
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                        <option value="private">私有 - 仅我可见</option>
+                                        <option value="shared">共享 - 允许其他用户查看</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label class="flex items-center">
+                                        <input type="checkbox" id="settings-allow-sharing" class="mr-3">
+                                        <div>
+                                            <span class="font-medium">允许分享</span>
+                                            <p class="text-sm text-gray-600">允许其他用户查看我的公开文档</p>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 操作按钮 -->
+                    <div class="mt-6 flex justify-between">
+                        <button onclick="resetSettings()"
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-all">
+                            <i class="fas fa-undo mr-2"></i>重置为默认
+                        </button>
+                        <div class="space-x-3">
+                            <button onclick="saveSettings()"
+                                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-all">
+                                <i class="fas fa-save mr-2"></i>保存设置
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 设置状态提示 -->
+                    <div id="settings-status" class="mt-4 hidden">
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                            <i class="fas fa-check-circle mr-2"></i>
+                            <span id="settings-message">设置已保存</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/personal-knowledge.js"></script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
+</body>
+
+</html>

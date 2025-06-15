@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>通用仿真器 - Alethea</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .simulation-canvas {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, .1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, .1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .tool-button {
+            transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .parameter-display {
+            background: #1f2937;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            text-align: center;
+            border-radius: 8px;
+            padding: 0.75rem;
+            border: 2px solid #374151;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+        }
+
+        .status-running {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        .status-stopped {
+            background-color: #ef4444;
+        }
+
+        .status-paused {
+            background-color: #f59e0b;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .waveform {
+            stroke: #3b82f6;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .grid-line {
+            stroke: #d1d5db;
+            stroke-width: 1;
+            opacity: 0.5;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- 标题栏 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-desktop text-blue-500 mr-2"></i>
+                        通用仿真器
+                    </h1>
+                    <p class="text-gray-600">多功能实验仿真环境，支持各种工程实验的可视化仿真</p>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="resetSimulation()"
+                        class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-redo mr-2"></i>重置
+                    </button>
+                    <button onclick="exportData()"
+                        class="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-download mr-2"></i>导出
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <!-- 仿真画布区域 -->
+            <div class="lg:col-span-3">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-xl font-semibold text-gray-900">
+                            <i class="fas fa-chart-line text-blue-500 mr-2"></i>
+                            仿真画布
+                        </h2>
+                        <div class="flex items-center space-x-4">
+                            <div class="flex items-center">
+                                <span class="status-indicator" id="statusIndicator"></span>
+                                <span id="statusText" class="text-sm font-medium">就绪</span>
+                            </div>
+                            <div class="text-sm text-gray-500">
+                                时间: <span id="simulationTime" class="font-mono">0.00s</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="simulation-canvas relative">
+                        <svg width="100%" height="400" viewBox="0 0 800 400" class="w-full" id="simulationCanvas">
+                            <!-- 网格线 -->
+                            <defs>
+                                <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+                                    <path d="M 40 0 L 0 0 0 40" class="grid-line" />
+                                </pattern>
+                            </defs>
+                            <rect width="100%" height="100%" fill="url(#grid)" />
+
+                            <!-- 坐标轴 -->
+                            <line x1="50" y1="350" x2="750" y2="350" stroke="#374151" stroke-width="2" />
+                            <line x1="50" y1="50" x2="50" y2="350" stroke="#374151" stroke-width="2" />
+
+                            <!-- 坐标轴标签 -->
+                            <text x="400" y="380" text-anchor="middle" class="text-sm fill-gray-600">时间 / 参数</text>
+                            <text x="25" y="200" text-anchor="middle" class="text-sm fill-gray-600"
+                                transform="rotate(-90 25 200)">幅度 / 数值</text>
+
+                            <!-- 波形显示区域 -->
+                            <g id="waveformGroup">
+                                <!-- 波形将通过JavaScript动态生成 -->
+                            </g>
+
+                            <!-- 测量标记 -->
+                            <g id="measurementGroup">
+                                <!-- 测量点将通过JavaScript动态生成 -->
+                            </g>
+                        </svg>
+                    </div>
+
+                    <!-- 控制按钮 -->
+                    <div class="mt-4 flex justify-center space-x-4">
+                        <button onclick="startSimulation()"
+                            class="tool-button bg-green-500 hover:bg-green-600 text-white px-6 py-2 rounded-lg">
+                            <i class="fas fa-play mr-2"></i>开始
+                        </button>
+                        <button onclick="pauseSimulation()"
+                            class="tool-button bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-lg">
+                            <i class="fas fa-pause mr-2"></i>暂停
+                        </button>
+                        <button onclick="stopSimulation()"
+                            class="tool-button bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg">
+                            <i class="fas fa-stop mr-2"></i>停止
+                        </button>
+                        <button onclick="stepSimulation()"
+                            class="tool-button bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg">
+                            <i class="fas fa-step-forward mr-2"></i>单步
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 数据分析区域 -->
+                <div class="bg-white rounded-lg shadow-md p-6 mt-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-chart-bar text-purple-500 mr-2"></i>
+                        数据分析
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">统计信息</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>最大值: <span id="maxValue" class="font-mono text-blue-600">--</span></div>
+                                <div>最小值: <span id="minValue" class="font-mono text-blue-600">--</span></div>
+                                <div>平均值: <span id="avgValue" class="font-mono text-blue-600">--</span></div>
+                                <div>RMS值: <span id="rmsValue" class="font-mono text-blue-600">--</span></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">频域分析</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>基频: <span id="fundamentalFreq" class="font-mono text-green-600">--</span></div>
+                                <div>谐波: <span id="harmonics" class="font-mono text-green-600">--</span></div>
+                                <div>THD: <span id="thd" class="font-mono text-green-600">--</span></div>
+                                <div>SNR: <span id="snr" class="font-mono text-green-600">--</span></div>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">测量结果</h4>
+                            <div class="space-y-2 text-sm">
+                                <div>周期: <span id="period" class="font-mono text-purple-600">--</span></div>
+                                <div>频率: <span id="frequency" class="font-mono text-purple-600">--</span></div>
+                                <div>占空比: <span id="dutyCycle" class="font-mono text-purple-600">--</span></div>
+                                <div>相位: <span id="phase" class="font-mono text-purple-600">--</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="space-y-6">
+                <!-- 仿真类型选择 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-cogs text-blue-500 mr-2"></i>
+                        仿真类型
+                    </h3>
+
+                    <select id="simulationType" onchange="changeSimulationType()"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="signal">信号分析</option>
+                        <option value="circuit">电路仿真</option>
+                        <option value="control">控制系统</option>
+                        <option value="digital">数字逻辑</option>
+                        <option value="communication">通信系统</option>
+                    </select>
+                </div>
+
+                <!-- 参数控制 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-sliders-h text-green-500 mr-2"></i>
+                        参数控制
+                    </h3>
+
+                    <div class="space-y-4" id="parameterControls">
+                        <!-- 参数控制将根据仿真类型动态生成 -->
+                    </div>
+                </div>
+
+                <!-- 测量工具 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-ruler text-purple-500 mr-2"></i>
+                        测量工具
+                    </h3>
+
+                    <div class="space-y-3">
+                        <button onclick="addCursor()"
+                            class="w-full bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-crosshairs mr-2"></i>添加游标
+                        </button>
+                        <button onclick="measurePeakToPeak()"
+                            class="w-full bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-arrows-alt-v mr-2"></i>峰峰值测量
+                        </button>
+                        <button onclick="measureFrequency()"
+                            class="w-full bg-purple-500 hover:bg-purple-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-wave-square mr-2"></i>频率测量
+                        </button>
+                        <button onclick="clearMeasurements()"
+                            class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm">
+                            <i class="fas fa-eraser mr-2"></i>清除测量
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 显示设置 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-eye text-indigo-500 mr-2"></i>
+                        显示设置
+                    </h3>
+
+                    <div class="space-y-3">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="showGrid" checked onchange="toggleGrid()" class="mr-2 rounded">
+                            <span class="text-sm">显示网格</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="showLabels" checked onchange="toggleLabels()"
+                                class="mr-2 rounded">
+                            <span class="text-sm">显示标签</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="showLegend" checked onchange="toggleLegend()"
+                                class="mr-2 rounded">
+                            <span class="text-sm">显示图例</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="autoScale" checked onchange="toggleAutoScale()"
+                                class="mr-2 rounded">
+                            <span class="text-sm">自动缩放</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 实时参数显示 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-tachometer-alt text-red-500 mr-2"></i>
+                        实时参数
+                    </h3>
+
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">输出值</label>
+                            <div class="parameter-display">
+                                <span id="outputValue">0.000</span>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-700 mb-1">状态</label>
+                            <div class="parameter-display">
+                                <span id="systemState">IDLE</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 仿真状态
+        let simulationState = 'stopped';
+        let simulationTime = 0;
+        let animationId = null;
+        let currentSimulationType = 'signal';
+        let dataPoints = [];
+        let measurements = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeSimulation();
+            changeSimulationType();
+        });
+
+        // 初始化仿真
+        function initializeSimulation() {
+            updateStatus('stopped');
+            generateSampleData();
+            updateDisplay();
+        }
+
+        // 更新状态显示
+        function updateStatus(status) {
+            simulationState = status;
+            const indicator = document.getElementById('statusIndicator');
+            const text = document.getElementById('statusText');
+
+            indicator.className = 'status-indicator';
+
+            switch (status) {
+                case 'running':
+                    indicator.classList.add('status-running');
+                    text.textContent = '运行中';
+                    break;
+                case 'paused':
+                    indicator.classList.add('status-paused');
+                    text.textContent = '已暂停';
+                    break;
+                case 'stopped':
+                default:
+                    indicator.classList.add('status-stopped');
+                    text.textContent = '已停止';
+                    break;
+            }
+        }
+
+        // 开始仿真
+        function startSimulation() {
+            if (simulationState !== 'running') {
+                updateStatus('running');
+                runSimulation();
+            }
+        }
+
+        // 暂停仿真
+        function pauseSimulation() {
+            if (simulationState === 'running') {
+                updateStatus('paused');
+                if (animationId) {
+                    cancelAnimationFrame(animationId);
+                }
+            }
+        }
+
+        // 停止仿真
+        function stopSimulation() {
+            updateStatus('stopped');
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+            }
+            simulationTime = 0;
+            updateTimeDisplay();
+            generateSampleData();
+            updateDisplay();
+        }
+
+        // 单步仿真
+        function stepSimulation() {
+            if (simulationState !== 'running') {
+                simulationTime += 0.1;
+                updateTimeDisplay();
+                generateSampleData();
+                updateDisplay();
+            }
+        }
+
+        // 运行仿真循环
+        function runSimulation() {
+            if (simulationState === 'running') {
+                simulationTime += 0.05;
+                updateTimeDisplay();
+                generateSampleData();
+                updateDisplay();
+                updateAnalysis();
+
+                animationId = requestAnimationFrame(runSimulation);
+            }
+        }
+
+        // 更新时间显示
+        function updateTimeDisplay() {
+            document.getElementById('simulationTime').textContent = simulationTime.toFixed(2) + 's';
+        }
+
+        // 生成示例数据
+        function generateSampleData() {
+            dataPoints = [];
+            const numPoints = 200;
+
+            for (let i = 0; i < numPoints; i++) {
+                const t = (i / numPoints) * 4 * Math.PI + simulationTime;
+                let value;
+
+                switch (currentSimulationType) {
+                    case 'signal':
+                        value = Math.sin(t) + 0.3 * Math.sin(3 * t);
+                        break;
+                    case 'circuit':
+                        value = Math.exp(-t / 5) * Math.cos(t);
+                        break;
+                    case 'control':
+                        value = 1 - Math.exp(-t / 2);
+                        break;
+                    case 'digital':
+                        value = Math.sign(Math.sin(t));
+                        break;
+                    case 'communication':
+                        value = Math.sin(t) * (1 + 0.5 * Math.sin(0.1 * t));
+                        break;
+                    default:
+                        value = Math.sin(t);
+                }
+
+                dataPoints.push({
+                    x: 50 + (i / numPoints) * 700,
+                    y: 200 - value * 100,
+                    value: value
+                });
+            }
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            const waveformGroup = document.getElementById('waveformGroup');
+            waveformGroup.innerHTML = '';
+
+            if (dataPoints.length > 1) {
+                let pathData = `M ${dataPoints[0].x} ${dataPoints[0].y}`;
+                for (let i = 1; i < dataPoints.length; i++) {
+                    pathData += ` L ${dataPoints[i].x} ${dataPoints[i].y}`;
+                }
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pathData);
+                path.setAttribute('class', 'waveform');
+                waveformGroup.appendChild(path);
+            }
+
+            // 更新实时参数
+            if (dataPoints.length > 0) {
+                const currentValue = dataPoints[dataPoints.length - 1].value;
+                document.getElementById('outputValue').textContent = currentValue.toFixed(3);
+            }
+        }
+
+        // 更新分析数据
+        function updateAnalysis() {
+            if (dataPoints.length === 0) return;
+
+            const values = dataPoints.map(p => p.value);
+
+            // 统计分析
+            const max = Math.max(...values);
+            const min = Math.min(...values);
+            const avg = values.reduce((a, b) => a + b, 0) / values.length;
+            const rms = Math.sqrt(values.reduce((a, b) => a + b * b, 0) / values.length);
+
+            document.getElementById('maxValue').textContent = max.toFixed(3);
+            document.getElementById('minValue').textContent = min.toFixed(3);
+            document.getElementById('avgValue').textContent = avg.toFixed(3);
+            document.getElementById('rmsValue').textContent = rms.toFixed(3);
+
+            // 简单频率估算
+            const peakToPeak = max - min;
+            document.getElementById('period').textContent = '1.00s';
+            document.getElementById('frequency').textContent = '1.00Hz';
+            document.getElementById('dutyCycle').textContent = '50%';
+            document.getElementById('phase').textContent = '0°';
+        }
+
+        // 改变仿真类型
+        function changeSimulationType() {
+            currentSimulationType = document.getElementById('simulationType').value;
+            generateParameterControls();
+            generateSampleData();
+            updateDisplay();
+        }
+
+        // 生成参数控制界面
+        function generateParameterControls() {
+            const container = document.getElementById('parameterControls');
+            container.innerHTML = '';
+
+            const controls = getControlsForType(currentSimulationType);
+
+            controls.forEach(control => {
+                const div = document.createElement('div');
+                div.innerHTML = `
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        ${control.label}: <span class="text-blue-600 font-bold">${control.value}</span> ${control.unit}
+                    </label>
+                    <input type="range" class="w-full" 
+                           min="${control.min}" max="${control.max}" step="${control.step}" 
+                           value="${control.value}" 
+                           oninput="updateParameter('${control.id}', this.value)">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>${control.min}${control.unit}</span>
+                        <span>${control.max}${control.unit}</span>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // 获取不同类型的控制参数
+        function getControlsForType(type) {
+            const controlSets = {
+                signal: [
+                    { id: 'amplitude', label: '幅度', value: 1.0, min: 0.1, max: 5.0, step: 0.1, unit: 'V' },
+                    { id: 'frequency', label: '频率', value: 1.0, min: 0.1, max: 10.0, step: 0.1, unit: 'Hz' },
+                    { id: 'phase', label: '相位', value: 0, min: 0, max: 360, step: 10, unit: '°' }
+                ],
+                circuit: [
+                    { id: 'resistance', label: '电阻', value: 100, min: 10, max: 1000, step: 10, unit: 'Ω' },
+                    { id: 'capacitance', label: '电容', value: 100, min: 10, max: 1000, step: 10, unit: 'μF' },
+                    { id: 'voltage', label: '电压', value: 5.0, min: 1.0, max: 12.0, step: 0.1, unit: 'V' }
+                ],
+                control: [
+                    { id: 'kp', label: '比例增益', value: 1.0, min: 0.1, max: 10.0, step: 0.1, unit: '' },
+                    { id: 'ki', label: '积分增益', value: 0.1, min: 0.0, max: 1.0, step: 0.01, unit: '' },
+                    { id: 'kd', label: '微分增益', value: 0.01, min: 0.0, max: 0.1, step: 0.001, unit: '' }
+                ],
+                digital: [
+                    { id: 'clockFreq', label: '时钟频率', value: 1.0, min: 0.1, max: 10.0, step: 0.1, unit: 'MHz' },
+                    { id: 'dataWidth', label: '数据位宽', value: 8, min: 1, max: 32, step: 1, unit: 'bit' },
+                    { id: 'threshold', label: '阈值电压', value: 2.5, min: 0.5, max: 5.0, step: 0.1, unit: 'V' }
+                ],
+                communication: [
+                    { id: 'carrierFreq', label: '载波频率', value: 10.0, min: 1.0, max: 100.0, step: 1.0, unit: 'MHz' },
+                    { id: 'modIndex', label: '调制指数', value: 0.5, min: 0.1, max: 1.0, step: 0.1, unit: '' },
+                    { id: 'snr', label: '信噪比', value: 20, min: 0, max: 40, step: 1, unit: 'dB' }
+                ]
+            };
+
+            return controlSets[type] || controlSets.signal;
+        }
+
+        // 更新参数
+        function updateParameter(id, value) {
+            // 更新显示的数值
+            const label = event.target.parentElement.querySelector('span');
+            label.textContent = value;
+
+            // 重新生成数据
+            generateSampleData();
+            updateDisplay();
+        }
+
+        // 测量工具函数
+        function addCursor() {
+            alert('游标功能开发中...');
+        }
+
+        function measurePeakToPeak() {
+            if (dataPoints.length > 0) {
+                const values = dataPoints.map(p => p.value);
+                const max = Math.max(...values);
+                const min = Math.min(...values);
+                const peakToPeak = max - min;
+                alert(`峰峰值: ${peakToPeak.toFixed(3)}`);
+            }
+        }
+
+        function measureFrequency() {
+            alert('频率测量: 1.00 Hz');
+        }
+
+        function clearMeasurements() {
+            measurements = [];
+            document.getElementById('measurementGroup').innerHTML = '';
+        }
+
+        // 显示设置函数
+        function toggleGrid() {
+            // 实现网格显示切换
+        }
+
+        function toggleLabels() {
+            // 实现标签显示切换
+        }
+
+        function toggleLegend() {
+            // 实现图例显示切换
+        }
+
+        function toggleAutoScale() {
+            // 实现自动缩放切换
+        }
+
+        // 重置仿真
+        function resetSimulation() {
+            stopSimulation();
+            simulationTime = 0;
+            updateTimeDisplay();
+            clearMeasurements();
+            generateSampleData();
+            updateDisplay();
+        }
+
+        // 导出数据
+        function exportData() {
+            if (dataPoints.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+
+            const csvContent = 'Time,Value\n' +
+                dataPoints.map((point, index) =>
+                    `${(index * 0.02).toFixed(3)},${point.value.toFixed(6)}`
+                ).join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `simulation_data_${Date.now()}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+
+</html>

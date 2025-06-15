@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人资料 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .profile-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .profile-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .profile-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .form-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .avatar-upload {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .avatar-upload input[type="file"] {
+            display: none;
+        }
+        
+        .avatar-upload .avatar-preview {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .avatar-upload .avatar-preview:hover {
+            transform: scale(1.05);
+        }
+        
+        .avatar-upload .upload-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .avatar-upload:hover .upload-overlay {
+            opacity: 1;
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .activity-item {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 16px;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-10 mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/static/index.html" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-home mr-2"></i>返回首页
+                </a>
+                <button id="logout-btn" class="text-red-600 hover:text-red-800">
+                    <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profile Header -->
+    <div class="profile-header py-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="avatar-upload mb-6">
+                <img id="avatar-preview" src="https://via.placeholder.com/120/667eea/ffffff?text=头像" 
+                     alt="用户头像" class="avatar-preview">
+                <div class="upload-overlay">
+                    <i class="fas fa-camera text-white text-xl"></i>
+                </div>
+                <input type="file" id="avatar-input" accept="image/*">
+            </div>
+            <h1 class="text-3xl font-bold mb-2" id="profile-username">用户名</h1>
+            <p class="text-blue-100 mb-4" id="profile-email">user@example.com</p>
+            <div class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 rounded-full">
+                <i class="fas fa-user-tag mr-2"></i>
+                <span id="profile-role">学生</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Profile Form -->
+            <div class="lg:col-span-2">
+                <div class="profile-card p-6">
+                    <h2 class="text-2xl font-bold text-gray-800 mb-6">
+                        <i class="fas fa-user-edit mr-3 text-blue-600"></i>编辑个人信息
+                    </h2>
+                    
+                    <form id="profile-form" class="space-y-6">
+                        <!-- 基本信息 -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">用户名</label>
+                                <input type="text" id="username" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                       placeholder="请输入用户名">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">邮箱</label>
+                                <input type="email" id="email" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                       placeholder="请输入邮箱">
+                            </div>
+                        </div>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">真实姓名</label>
+                                <input type="text" id="real-name" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                       placeholder="请输入真实姓名">
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">手机号码</label>
+                                <input type="tel" id="phone" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                       placeholder="请输入手机号码">
+                            </div>
+                        </div>
+                        
+                        <!-- 学术信息 -->
+                        <div class="border-t pt-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">学术信息</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">所在院校/机构</label>
+                                    <input type="text" id="institution" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                           placeholder="请输入院校或机构名称">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">专业/学科</label>
+                                    <select id="major" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none">
+                                        <option value="">请选择专业</option>
+                                        <option value="electrical">电气工程</option>
+                                        <option value="electronics">电子工程</option>
+                                        <option value="computer">计算机科学</option>
+                                        <option value="automation">自动化</option>
+                                        <option value="communication">通信工程</option>
+                                        <option value="physics">物理学</option>
+                                        <option value="mathematics">数学</option>
+                                        <option value="other">其他</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">学历层次</label>
+                                    <select id="education-level" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none">
+                                        <option value="">请选择学历</option>
+                                        <option value="undergraduate">本科生</option>
+                                        <option value="graduate">研究生</option>
+                                        <option value="phd">博士生</option>
+                                        <option value="teacher">教师</option>
+                                        <option value="researcher">研究员</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">入学/入职年份</label>
+                                    <input type="number" id="entry-year" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                           placeholder="例如：2023" min="1990" max="2030">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 个人简介 -->
+                        <div class="border-t pt-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">个人简介</h3>
+                            <textarea id="bio" rows="4" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none" 
+                                      placeholder="请简单介绍一下自己的学习背景、研究兴趣或教学经验..."></textarea>
+                        </div>
+                        
+                        <!-- 学习偏好 -->
+                        <div class="border-t pt-6">
+                            <h3 class="text-lg font-semibold text-gray-800 mb-4">学习偏好</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">偏好的回答风格</label>
+                                    <select id="answer-style" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none">
+                                        <option value="detailed">详细解释</option>
+                                        <option value="concise">简洁明了</option>
+                                        <option value="academic">学术严谨</option>
+                                        <option value="casual">轻松易懂</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">偏好的AI模型</label>
+                                    <select id="preferred-model" class="form-input w-full px-4 py-3 rounded-lg focus:outline-none">
+                                        <option value="auto">自动选择</option>
+                                        <option value="gpt-4">GPT-4</option>
+                                        <option value="claude">Claude</option>
+                                        <option value="gemini">Gemini</option>
+                                        <option value="deepseek">DeepSeek</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 保存按钮 -->
+                        <div class="flex justify-end space-x-4 pt-6">
+                            <button type="button" id="cancel-btn" class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                取消
+                            </button>
+                            <button type="submit" class="btn-primary px-6 py-3 rounded-lg text-white font-medium">
+                                <i class="fas fa-save mr-2"></i>保存更改
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- 学习统计 -->
+                <div class="stats-card">
+                    <h3 class="text-lg font-semibold mb-4">学习统计</h3>
+                    <div class="grid grid-cols-2 gap-4 text-center">
+                        <div>
+                            <div class="text-2xl font-bold" id="questions-count">0</div>
+                            <div class="text-sm opacity-80">提问次数</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" id="study-days">0</div>
+                            <div class="text-sm opacity-80">学习天数</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" id="experiments-count">0</div>
+                            <div class="text-sm opacity-80">完成实验</div>
+                        </div>
+                        <div>
+                            <div class="text-2xl font-bold" id="knowledge-points">0</div>
+                            <div class="text-sm opacity-80">掌握知识点</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 最近活动 -->
+                <div class="profile-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-clock mr-2 text-blue-600"></i>最近活动
+                    </h3>
+                    <div id="recent-activities">
+                        <div class="activity-item">
+                            <div class="text-sm text-gray-600">2小时前</div>
+                            <div class="font-medium">完成了电路分析实验</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="text-sm text-gray-600">1天前</div>
+                            <div class="font-medium">提问了关于运算放大器的问题</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="text-sm text-gray-600">3天前</div>
+                            <div class="font-medium">学习了数字电路基础</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 快捷操作 -->
+                <div class="profile-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-yellow-600"></i>快捷操作
+                    </h3>
+                    <div class="space-y-3">
+                        <a href="/static/dashboard.html" class="block w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors">
+                            <i class="fas fa-tachometer-alt mr-2 text-blue-600"></i>个人仪表板
+                        </a>
+                        <a href="/static/personal-knowledge.html" class="block w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 rounded-lg transition-colors">
+                            <i class="fas fa-book mr-2 text-green-600"></i>个人知识库
+                        </a>
+                        <a href="/static/settings.html" class="block w-full text-left px-4 py-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition-colors">
+                            <i class="fas fa-cog mr-2 text-purple-600"></i>系统设置
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 全局变量
+        let currentUser = null;
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUserProfile();
+            setupEventListeners();
+        });
+
+        // 加载用户资料
+        function loadUserProfile() {
+            const userStr = localStorage.getItem('current_user');
+            if (userStr) {
+                try {
+                    currentUser = JSON.parse(userStr);
+                    populateProfileForm(currentUser);
+                    loadUserStats();
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
+                    redirectToLogin();
+                }
+            } else {
+                redirectToLogin();
+            }
+        }
+
+        // 填充表单数据
+        function populateProfileForm(user) {
+            // 基本信息
+            document.getElementById('profile-username').textContent = user.username || '用户名';
+            document.getElementById('profile-email').textContent = user.email || 'user@example.com';
+            document.getElementById('profile-role').textContent = getRoleText(user.role);
+            
+            // 表单字段
+            document.getElementById('username').value = user.username || '';
+            document.getElementById('email').value = user.email || '';
+            document.getElementById('real-name').value = user.real_name || '';
+            document.getElementById('phone').value = user.phone || '';
+            document.getElementById('institution').value = user.institution || '';
+            document.getElementById('major').value = user.major || '';
+            document.getElementById('education-level').value = user.education_level || '';
+            document.getElementById('entry-year').value = user.entry_year || '';
+            document.getElementById('bio').value = user.bio || '';
+            document.getElementById('answer-style').value = user.answer_style || 'detailed';
+            document.getElementById('preferred-model').value = user.preferred_model || 'auto';
+        }
+
+        // 获取角色文本
+        function getRoleText(role) {
+            const roleMap = {
+                'student': '学生',
+                'teacher': '教师',
+                'admin': '管理员'
+            };
+            return roleMap[role] || '用户';
+        }
+
+        // 加载用户统计数据
+        function loadUserStats() {
+            // 模拟统计数据
+            document.getElementById('questions-count').textContent = Math.floor(Math.random() * 100) + 20;
+            document.getElementById('study-days').textContent = Math.floor(Math.random() * 30) + 10;
+            document.getElementById('experiments-count').textContent = Math.floor(Math.random() * 20) + 5;
+            document.getElementById('knowledge-points').textContent = Math.floor(Math.random() * 50) + 15;
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 头像上传
+            document.getElementById('avatar-input').addEventListener('change', handleAvatarUpload);
+            document.querySelector('.avatar-upload').addEventListener('click', function() {
+                document.getElementById('avatar-input').click();
+            });
+
+            // 表单提交
+            document.getElementById('profile-form').addEventListener('submit', handleFormSubmit);
+            
+            // 取消按钮
+            document.getElementById('cancel-btn').addEventListener('click', function() {
+                if (confirm('确定要取消更改吗？未保存的修改将丢失。')) {
+                    loadUserProfile(); // 重新加载原始数据
+                }
+            });
+
+            // 退出登录
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    logout();
+                }
+            });
+        }
+
+        // 处理头像上传
+        function handleAvatarUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                if (file.size > 5 * 1024 * 1024) { // 5MB限制
+                    alert('头像文件大小不能超过5MB');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('avatar-preview').src = e.target.result;
+                    showNotification('头像已更新，请保存更改', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 处理表单提交
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            
+            // 收集表单数据
+            const formData = {
+                username: document.getElementById('username').value,
+                email: document.getElementById('email').value,
+                real_name: document.getElementById('real-name').value,
+                phone: document.getElementById('phone').value,
+                institution: document.getElementById('institution').value,
+                major: document.getElementById('major').value,
+                education_level: document.getElementById('education-level').value,
+                entry_year: document.getElementById('entry-year').value,
+                bio: document.getElementById('bio').value,
+                answer_style: document.getElementById('answer-style').value,
+                preferred_model: document.getElementById('preferred-model').value
+            };
+
+            // 验证必填字段
+            if (!formData.username || !formData.email) {
+                showNotification('用户名和邮箱为必填项', 'error');
+                return;
+            }
+
+            // 保存到本地存储（实际应用中应该发送到服务器）
+            const updatedUser = { ...currentUser, ...formData };
+            localStorage.setItem('current_user', JSON.stringify(updatedUser));
+            currentUser = updatedUser;
+
+            showNotification('个人资料已成功保存', 'success');
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+            
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${message}`;
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${message}`;
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${message}`;
+            }
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('opacity-0');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+
+        // 退出登录
+        function logout() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_user');
+            window.location.href = '/static/index.html';
+        }
+
+        // 重定向到登录页面
+        function redirectToLogin() {
+            alert('请先登录');
+            window.location.href = '/static/login.html?redirect=' + encodeURIComponent(window.location.pathname);
+        }
+    </script>
+</body>
+</html>

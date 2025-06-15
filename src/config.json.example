@@ -1,0 +1,107 @@
+{
+  "comment": "Alethea优化版配置文件 - 专为中国网络环境优化",
+  
+  "国内AI服务配置": {
+    "comment": "国内AI服务优先级最高，可直接访问"
+  },
+  
+  "deepseek": {
+    "api_key": "your_deepseek_api_key_here",
+    "default_model": "deepseek-chat",
+    "comment": "DeepSeek - 国产领先大模型，擅长数学推理和代码生成"
+  },
+  
+  "ali_qwen": {
+    "api_key": "your_ali_qwen_api_key_here",
+    "api_url": "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "default_model": "qwen-plus",
+    "comment": "阿里云通义千问 - 中文理解和生成能力优秀"
+  },
+  
+  "baidu_wenxin": {
+    "api_key": "your_baidu_api_key_here",
+    "secret_key": "your_baidu_secret_key_here",
+    "default_model": "ERNIE-4.0-8K",
+    "comment": "百度文心一言 - 知识增强大语言模型"
+  },
+  
+  "zhipu_ai": {
+    "api_key": "your_zhipu_ai_api_key_here",
+    "default_model": "glm-4",
+    "comment": "智谱AI - 清华系国产AI，中文理解和推理能力强"
+  },
+  
+  "kimi": {
+    "api_key": "your_kimi_api_key_here",
+    "default_model": "moonshot-v1-8k",
+    "comment": "Kimi (月之暗面) - 擅长长文本理解和处理"
+  },
+  
+  "本地AI服务配置": {
+    "comment": "本地部署的AI服务，无需API密钥"
+  },
+  
+  "ollama_deepseek": {
+    "base_url": "http://localhost:11434",
+    "default_model": "deepseek-r1:7b",
+    "comment": "本地Ollama DeepSeek - 需要先安装Ollama和DeepSeek模型"
+  },
+  
+  "国外AI服务配置": {
+    "comment": "国外AI服务默认禁用，需要网络代理才能访问"
+  },
+  
+  "openai": {
+    "api_key": "your_openai_api_key_here",
+    "default_model": "gpt-4o",
+    "enabled": false,
+    "comment": "OpenAI GPT - 需要网络代理，默认禁用"
+  },
+  
+  "claude": {
+    "api_key": "your_claude_api_key_here",
+    "default_model": "claude-3-opus",
+    "enabled": false,
+    "comment": "Anthropic Claude - 需要网络代理，默认禁用"
+  },
+  
+  "gemini": {
+    "api_key": "your_gemini_api_key_here",
+    "default_model": "gemini-pro",
+    "enabled": false,
+    "comment": "Google Gemini - 需要网络代理，默认禁用"
+  },
+  
+  "系统配置": {
+    "comment": "系统级配置选项"
+  },
+  
+  "default_provider": "deepseek",
+  "comment_default_provider": "默认AI提供商，推荐使用国内AI服务",
+  
+  "使用说明": {
+    "1": "复制此文件为 config.json",
+    "2": "填入相应的API密钥",
+    "3": "国内AI服务可直接使用，无需代理",
+    "4": "国外AI服务需要配置网络代理并设置 enabled: true",
+    "5": "本地AI服务需要先安装Ollama和相应模型",
+    "6": "系统会自动选择最佳可用的AI服务"
+  },
+  
+  "获取API密钥": {
+    "DeepSeek": "https://platform.deepseek.com/",
+    "阿里云通义千问": "https://dashscope.aliyuncs.com/",
+    "百度文心一言": "https://cloud.baidu.com/product/wenxinworkshop",
+    "智谱AI": "https://open.bigmodel.cn/",
+    "Kimi": "https://platform.moonshot.cn/",
+    "OpenAI": "https://platform.openai.com/",
+    "Claude": "https://console.anthropic.com/",
+    "Gemini": "https://makersuite.google.com/"
+  },
+  
+  "本地模型安装": {
+    "安装Ollama": "https://ollama.ai/",
+    "安装DeepSeek模型": "ollama pull deepseek-r1:7b",
+    "其他可用模型": ["deepseek-r1:1.5b", "deepseek-coder:6.7b"]
+  }
+}

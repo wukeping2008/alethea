@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师数智化课程AI助手 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Global Theme CSS -->
+    <link rel="stylesheet" href="/static/css/global-theme.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+            color: #1f2937;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .student-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .course-generator {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .input-field {
+            background: white;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            width: 100%;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.1);
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: var(--accent-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-secondary:hover {
+            background: #249c7a;
+        }
+
+        .recommendation-item {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .recommendation-item:hover {
+            background: #f1f5f9;
+            border-color: var(--accent-color);
+        }
+
+        .priority-high {
+            border-left: 4px solid #ef4444;
+        }
+
+        .priority-medium {
+            border-left: 4px solid #f59e0b;
+        }
+
+        .priority-low {
+            border-left: 4px solid #10b981;
+        }
+
+        .nav-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav-header py-4 px-6">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-8 mr-3">
+                <span class="text-xl font-bold text-gray-800">Alethea 教师助手</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-user-tie text-white text-sm"></i>
+                    </div>
+                    <span class="text-gray-700 font-medium">张教授</span>
+                </div>
+                <button class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">数智化课程AI助手</h1>
+            <p class="text-gray-600">基于学生学习数据的智能教学规划与课程生成系统</p>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card">
+                <div class="stat-number" id="total-students">156</div>
+                <div class="stat-label">总学生数</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-number" id="total-knowledge-points">2,847</div>
+                <div class="stat-label">累积知识点</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-number" id="total-experiments">89</div>
+                <div class="stat-label">完成实验数</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-number" id="avg-progress">78%</div>
+                <div class="stat-label">平均学习进度</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Analytics -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Subject Distribution Chart -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-pie mr-2 text-blue-600"></i>
+                        学科学习分布
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="subjectChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Learning Progress Trend -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-chart-line mr-2 text-green-600"></i>
+                        学习进度趋势
+                    </h3>
+                    <div class="chart-container">
+                        <canvas id="progressChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Student Performance -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-users mr-2 text-purple-600"></i>
+                        学生表现概览
+                    </h3>
+                    <div class="space-y-4" id="student-performance">
+                        <!-- Student items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: AI Recommendations & Tools -->
+            <div class="space-y-6">
+                <!-- AI Recommendations -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-lightbulb mr-2 text-yellow-600"></i>
+                        AI智能推荐
+                    </h3>
+                    <div class="space-y-3" id="ai-recommendations">
+                        <div class="recommendation-item priority-high">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-red-600">高优先级</span>
+                                <span class="text-sm text-gray-500">基于78%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">PID控制系统实验</h4>
+                            <p class="text-sm text-gray-600">多数学生在控制理论方面需要加强实践</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('PID控制系统')">
+                                生成课程
+                            </button>
+                        </div>
+
+                        <div class="recommendation-item priority-medium">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-yellow-600">中优先级</span>
+                                <span class="text-sm text-gray-500">基于65%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">数字信号处理项目</h4>
+                            <p class="text-sm text-gray-600">信号处理算法理解需要项目实践</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('数字信号处理')">
+                                生成课程
+                            </button>
+                        </div>
+
+                        <div class="recommendation-item priority-low">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="font-semibold text-green-600">低优先级</span>
+                                <span class="text-sm text-gray-500">基于45%学生数据</span>
+                            </div>
+                            <h4 class="font-medium mb-1">电路仿真设计</h4>
+                            <p class="text-sm text-gray-600">部分学生需要加强电路设计能力</p>
+                            <button class="btn-secondary mt-2" onclick="generateCourse('电路仿真设计')">
+                                生成课程
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Course Generator -->
+                <div class="course-generator">
+                    <h3 class="text-xl font-bold mb-4">
+                        <i class="fas fa-magic mr-2"></i>
+                        AI课程讲义生成器
+                    </h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-2">课程主题</label>
+                            <input type="text" id="course-topic" class="input-field text-gray-800"
+                                placeholder="例如：PID控制原理与应用">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">课程类型</label>
+                            <select id="course-type" class="input-field text-gray-800">
+                                <option value="theory">理论课程</option>
+                                <option value="experiment">实验课程</option>
+                                <option value="project">项目制学习</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-2">目标学时</label>
+                            <input type="number" id="course-hours" class="input-field text-gray-800" placeholder="例如：16"
+                                min="1" max="64">
+                        </div>
+                        <button class="btn-primary w-full" onclick="generateCourseOutline()">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI生成课程讲义
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-orange-600"></i>
+                        快速操作
+                    </h3>
+                    <div class="space-y-3">
+                        <button class="w-full btn-primary" onclick="viewStudentDetails()">
+                            <i class="fas fa-chart-bar mr-2"></i>
+                            查看学生详细数据
+                        </button>
+                        <button class="w-full btn-primary" onclick="exportLearningReport()">
+                            <i class="fas fa-download mr-2"></i>
+                            导出学习报告
+                        </button>
+                        <button class="w-full btn-primary" onclick="customizeTeachingPlan()">
+                            <i class="fas fa-calendar-alt mr-2"></i>
+                            定制教学计划
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Course Generation Modal -->
+    <div id="courseModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeCourseModal()">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">AI生成的课程讲义</h2>
+            <div id="course-content" class="prose max-w-none">
+                <!-- Generated content will be inserted here -->
+            </div>
+            <div class="mt-6 flex space-x-4">
+                <button class="btn-primary" onclick="downloadCourse()">
+                    <i class="fas fa-download mr-2"></i>
+                    下载讲义
+                </button>
+                <button class="btn-secondary" onclick="editCourse()">
+                    <i class="fas fa-edit mr-2"></i>
+                    编辑修改
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Details Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStudentModal()">&times;</span>
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">学生学习详情</h2>
+            <div id="student-details" class="space-y-6">
+                <!-- Student details will be populated here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Check -->
+    <script src="/static/js/auth-check.js"></script>
+    <!-- JavaScript -->
+    <script>
+        // Sample data for demonstration
+        const sampleData = {
+            students: [
+                { id: 1, name: '张三', progress: 85, knowledgePoints: 45, experiments: 12, subjects: ['电工实验', '控制系统'] },
+                { id: 2, name: '李四', progress: 72, knowledgePoints: 38, experiments: 9, subjects: ['电路分析', '数字电子'] },
+                { id: 3, name: '王五', progress: 91, knowledgePoints: 52, experiments: 15, subjects: ['模拟电子', 'PID控制'] },
+                { id: 4, name: '赵六', progress: 68, knowledgePoints: 34, experiments: 8, subjects: ['电力电子', '控制系统'] },
+                { id: 5, name: '钱七', progress: 79, knowledgePoints: 41, experiments: 11, subjects: ['电工实验', '数字信号处理'] }
+            ],
+            subjectDistribution: {
+                '电工实验': 28,
+                '电路分析': 22,
+                '控制系统': 18,
+                '数字电子': 15,
+                '模拟电子': 12,
+                '其他': 5
+            },
+            progressTrend: {
+                labels: ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'],
+                data: [45, 52, 58, 65, 71, 76, 78, 82]
+            }
+        };
+
+        // Course generation templates
+        const courseTemplates = {
+            experiment: {
+                "name": "实验课程模板",
+                "adminInputs": {
+                    "inputB1": "实验目标",
+                    "inputB2": "被控对象类型",
+                    "inputB3": "是否需要包含代码实现"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n实验目标：${inputB1}\n被控对象类型：${inputB2}\n是否需要包含代码实现：${inputB3}\n\n请根据以上信息，提供一个完整的实验课程设计方案。",
+                    "基于已提供的实验设计方案 ${promptBlock1}，请进一步补充以下内容：\n1. 实验所需的硬件设备清单和软件工具；\n2. 参数整定的具体步骤；\n3. 如果选择了代码实现，请生成示例代码框架及注释说明。",
+                    "在已有实验方案 ${promptBlock1} 和详细补充内容 ${promptBlock2} 的基础上，请提供一份可打印的实验指导书模板，包括实验目的、原理简介、实验步骤、数据记录表、思考题等内容。"
+                ]
+            },
+            theory: {
+                "name": "理论课程模板",
+                "adminInputs": {
+                    "inputB1": "课程主题",
+                    "inputB2": "难度级别",
+                    "inputB3": "学时安排"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n课程主题：${inputB1}\n难度级别：${inputB2}\n学时安排：${inputB3}\n\n请根据以上信息，提供一个完整的理论课程教学大纲。",
+                    "基于已提供的教学大纲 ${promptBlock1}，请进一步补充以下内容：\n1. 详细的章节内容和知识点分解；\n2. 每章节的教学重点和难点；\n3. 推荐的教学方法和辅助材料。",
+                    "在已有教学大纲 ${promptBlock1} 和详细内容 ${promptBlock2} 的基础上，请生成完整的课程讲义，包括理论阐述、例题分析、课后习题等内容。"
+                ]
+            },
+            project: {
+                "name": "项目制学习模板",
+                "adminInputs": {
+                    "inputB1": "项目主题",
+                    "inputB2": "项目周期",
+                    "inputB3": "团队规模"
+                },
+                "promptBlocks": [
+                    "以下是用户输入的基本信息：\n项目主题：${inputB1}\n项目周期：${inputB2}\n团队规模：${inputB3}\n\n请根据以上信息，设计一个完整的项目制学习方案。",
+                    "基于已提供的项目方案 ${promptBlock1}，请进一步补充以下内容：\n1. 项目的具体实施步骤和时间节点；\n2. 所需的技术栈和工具；\n3. 项目评估标准和考核方式。",
+                    "在已有项目方案 ${promptBlock1} 和实施细节 ${promptBlock2} 的基础上，请生成项目指导手册，包括项目背景、技术要求、实施指南、成果展示要求等内容。"
+                ]
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeCharts();
+            populateStudentPerformance();
+            updateStatistics();
+        });
+
+        // Initialize charts
+        function initializeCharts() {
+            // Subject Distribution Pie Chart
+            const subjectCtx = document.getElementById('subjectChart').getContext('2d');
+            new Chart(subjectCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(sampleData.subjectDistribution),
+                    datasets: [{
+                        data: Object.values(sampleData.subjectDistribution),
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe',
+                            '#00f2fe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Progress Trend Line Chart
+            const progressCtx = document.getElementById('progressChart').getContext('2d');
+            new Chart(progressCtx, {
+                type: 'line',
+                data: {
+                    labels: sampleData.progressTrend.labels,
+                    datasets: [{
+                        label: '平均学习进度 (%)',
+                        data: sampleData.progressTrend.data,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+        }
+
+        // Populate student performance
+        function populateStudentPerformance() {
+            const container = document.getElementById('student-performance');
+            container.innerHTML = '';
+
+            sampleData.students.forEach(student => {
+                const studentItem = document.createElement('div');
+                studentItem.className = 'flex items-center justify-between p-4 bg-gray-50 rounded-lg';
+                studentItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="student-avatar">
+                            ${student.name.charAt(0)}
+                        </div>
+                        <div>
+                            <div class="font-medium text-gray-800">${student.name}</div>
+                            <div class="text-sm text-gray-600">${student.knowledgePoints}个知识点 · ${student.experiments}个实验</div>
+                        </div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-lg font-bold text-gray-800">${student.progress}%</div>
+                        <div class="w-20 progress-bar mt-1">
+                            <div class="progress-fill" style="width: ${student.progress}%"></div>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(studentItem);
+            });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const totalStudents = sampleData.students.length;
+            const totalKnowledgePoints = sampleData.students.reduce((sum, student) => sum + student.knowledgePoints, 0);
+            const totalExperiments = sampleData.students.reduce((sum, student) => sum + student.experiments, 0);
+            const avgProgress = Math.round(sampleData.students.reduce((sum, student) => sum + student.progress, 0) / totalStudents);
+
+            document.getElementById('total-students').textContent = totalStudents;
+            document.getElementById('total-knowledge-points').textContent = totalKnowledgePoints.toLocaleString();
+            document.getElementById('total-experiments').textContent = totalExperiments;
+            document.getElementById('avg-progress').textContent = avgProgress + '%';
+        }
+
+        // Generate course outline
+        function generateCourseOutline() {
+            const topic = document.getElementById('course-topic').value;
+            const type = document.getElementById('course-type').value;
+            const hours = document.getElementById('course-hours').value;
+
+            if (!topic || !hours) {
+                alert('请填写完整的课程信息');
+                return;
+            }
+
+            // Show loading
+            const modal = document.getElementById('courseModal');
+            const content = document.getElementById('course-content');
+            content.innerHTML = `
+                <div class="flex items-center justify-center py-8">
+                    <div class="loading-spinner mr-3"></div>
+                    <span>AI正在生成课程讲义，请稍候...</span>
+                </div>
+            `;
+            modal.style.display = 'block';
+
+            // Simulate API call
+            setTimeout(() => {
+                try {
+                    const template = courseTemplates[type];
+                    const generatedContent = generateCourseContent(topic, type, hours, template);
+                    content.innerHTML = generatedContent;
+                } catch (error) {
+                    console.error('Error generating course content:', error);
+                    content.innerHTML = `
+                        <div class="text-red-600 p-4">
+                            <h3 class="font-bold mb-2">生成失败</h3>
+                            <p>课程内容生成时出现错误，请重试。</p>
+                            <p class="text-sm mt-2">错误信息: ${error.message}</p>
+                        </div>
+                    `;
+                }
+            }, 2000);
+        }
+
+        // Generate course content based on template with progressive prompts
+        function generateCourseContent(topic, type, hours, template) {
+            const typeNames = {
+                'theory': '理论课程',
+                'experiment': '实验课程',
+                'project': '项目制学习'
+            };
+
+            // Simulate user inputs based on course type
+            const userInputs = generateUserInputs(topic, type, hours);
+
+            // Generate content progressively using template prompts
+            const progressiveContent = generateProgressiveContent(template, userInputs, topic);
+
+            return `
+                <div class="space-y-6">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-blue-800 mb-2">课程基本信息</h3>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div><strong>课程名称：</strong>${topic}</div>
+                            <div><strong>课程类型：</strong>${typeNames[type]}</div>
+                            <div><strong>计划学时：</strong>${hours}学时</div>
+                            <div><strong>生成时间：</strong>${new Date().toLocaleString()}</div>
+                        </div>
+                    </div>
+
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-green-800 mb-2">AI生成配置</h3>
+                        <div class="text-sm space-y-2">
+                            <p><strong>模板名称：</strong>${template.name}</p>
+                            <p><strong>输入参数：</strong></p>
+                            <ul class="list-disc list-inside ml-4">
+                                ${Object.entries(template.adminInputs).map(([key, label]) =>
+                `<li>${label}: ${userInputs[key]}</li>`
+            ).join('')}
+                            </ul>
+                            <p><strong>生成阶段：</strong>${template.promptBlocks.length}个递进阶段</p>
+                        </div>
+                    </div>
+
+                    ${progressiveContent}
+
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <h3 class="text-lg font-bold text-purple-800 mb-2">生成过程说明</h3>
+                        <div class="text-sm text-gray-700 space-y-2">
+                            <p><strong>第一阶段：</strong>基于用户输入生成基础框架</p>
+                            <p><strong>第二阶段：</strong>补充详细内容和技术细节</p>
+                            <p><strong>第三阶段：</strong>生成完整的教学材料</p>
+                            <p class="text-green-600"><strong>✓ 已按照JSON模板的promptBlocks递进生成详细内容</strong></p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Generate user inputs based on course type
+        function generateUserInputs(topic, type, hours) {
+            const inputs = {};
+
+            if (type === 'experiment') {
+                inputs.inputB1 = `掌握${topic}的基本原理和实验方法`;
+                inputs.inputB2 = `${topic.includes('控制') ? '控制系统' : topic.includes('电路') ? '电路系统' : '通用系统'}`;
+                inputs.inputB3 = topic.includes('PID') || topic.includes('控制') ? '是' : '否';
+            } else if (type === 'theory') {
+                inputs.inputB1 = topic;
+                inputs.inputB2 = hours <= 16 ? '基础' : hours <= 32 ? '中级' : '高级';
+                inputs.inputB3 = `${hours}学时`;
+            } else if (type === 'project') {
+                inputs.inputB1 = topic;
+                inputs.inputB2 = hours <= 32 ? '4周' : hours <= 64 ? '8周' : '12周';
+                inputs.inputB3 = '3-4人';
+            }
+
+            return inputs;
+        }
+
+        // Generate progressive content using template prompts
+        function generateProgressiveContent(template, userInputs, topic) {
+            const stages = [];
+
+            // Stage 1: Basic framework
+            const stage1Content = generateStage1Content(template, userInputs, topic);
+            stages.push({
+                title: '第一阶段：基础框架生成',
+                content: stage1Content,
+                prompt: template.promptBlocks[0]
+            });
+
+            // Stage 2: Detailed content
+            const stage2Content = generateStage2Content(template, userInputs, topic, stage1Content);
+            stages.push({
+                title: '第二阶段：详细内容补充',
+                content: stage2Content,
+                prompt: template.promptBlocks[1]
+            });
+
+            // Stage 3: Complete materials
+            const stage3Content = generateStage3Content(template, userInputs, topic, stage1Content, stage2Content);
+            stages.push({
+                title: '第三阶段：完整教学材料',
+                content: stage3Content,
+                prompt: template.promptBlocks[2]
+            });
+
+            return stages.map((stage, index) => `
+                <div class="bg-white border-l-4 border-blue-500 p-6 rounded-lg">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3">
+                        <i class="fas fa-layer-group mr-2 text-blue-600"></i>
+                        ${stage.title}
+                    </h3>
+                    
+                    <div class="bg-gray-50 p-3 rounded mb-4">
+                        <h4 class="font-medium text-gray-700 mb-2">使用的Prompt:</h4>
+                        <p class="text-sm text-gray-600 italic">"${stage.prompt.replace(/\$\{[^}]+\}/g, '[参数替换]')}"</p>
+                    </div>
+                    
+                    <div class="prose max-w-none">
+                        ${stage.content}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Generate Stage 1 content (Basic framework)
+        function generateStage1Content(template, userInputs, topic) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">实验设计基础框架</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验目标</h5>
+                            <p>${userInputs.inputB1}</p>
+                            <ul class="list-disc list-inside mt-2 text-sm">
+                                <li>理解${topic}的基本概念和工作原理</li>
+                                <li>掌握${topic}的设计方法和参数调节</li>
+                                <li>培养实际工程问题的分析和解决能力</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">被控对象分析</h5>
+                            <p>被控对象类型：${userInputs.inputB2}</p>
+                            <div class="mt-2 text-sm">
+                                <p><strong>系统特性：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>系统阶数：二阶系统</li>
+                                    <li>时间常数：T₁ = 0.5s, T₂ = 0.1s</li>
+                                    <li>增益：K = 2.0</li>
+                                    <li>传递函数：G(s) = 2/(0.5s+1)(0.1s+1)</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验方案概述</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>控制策略：</strong>${topic}控制算法</p>
+                                <p><strong>实现方式：</strong>${userInputs.inputB3 === '是' ? 'MATLAB/Simulink仿真 + 代码实现' : '理论分析 + 仿真验证'}</p>
+                                <p><strong>评价指标：</strong>超调量、调节时间、稳态误差</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">理论课程教学大纲</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">课程概述</h5>
+                            <p>本课程系统讲授${topic}的基本理论、分析方法和应用技术。</p>
+                            <p class="mt-2"><strong>难度级别：</strong>${userInputs.inputB2}</p>
+                            <p><strong>学时安排：</strong>${userInputs.inputB3}</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">教学目标</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>掌握${topic}的基本概念、基本原理和基本方法</li>
+                                <li>具备${topic}系统分析和设计的基本能力</li>
+                                <li>了解${topic}在工程实际中的应用</li>
+                                <li>培养工程思维和创新能力</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">章节安排</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>第1-2章：</strong>基础理论（${Math.ceil(parseInt(userInputs.inputB3) * 0.3)}学时）</p>
+                                <p><strong>第3-4章：</strong>核心方法（${Math.ceil(parseInt(userInputs.inputB3) * 0.4)}学时）</p>
+                                <p><strong>第5-6章：</strong>应用实践（${Math.ceil(parseInt(userInputs.inputB3) * 0.3)}学时）</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目制学习方案</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目概述</h5>
+                            <p>基于${topic}的综合性项目制学习，培养学生的工程实践能力。</p>
+                            <p class="mt-2"><strong>项目周期：</strong>${userInputs.inputB2}</p>
+                            <p><strong>团队规模：</strong>${userInputs.inputB3}</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目目标</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li>设计并实现一个完整的${topic}系统</li>
+                                <li>掌握项目管理和团队协作技能</li>
+                                <li>培养工程文档编写和技术报告能力</li>
+                                <li>提升创新思维和问题解决能力</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate Stage 2 content (Detailed content)
+        function generateStage2Content(template, userInputs, topic, stage1) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">实验详细设计</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">硬件设备清单</h5>
+                            <div class="grid grid-cols-2 gap-4 text-sm">
+                                <div>
+                                    <p><strong>主要设备：</strong></p>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>计算机（MATLAB/Simulink）</li>
+                                        <li>数据采集卡</li>
+                                        <li>信号发生器</li>
+                                        <li>示波器</li>
+                                    </ul>
+                                </div>
+                                <div>
+                                    <p><strong>辅助器件：</strong></p>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>连接线缆</li>
+                                        <li>电阻、电容</li>
+                                        <li>运算放大器</li>
+                                        <li>面包板</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">软件工具</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>MATLAB/Simulink：</strong>系统建模和仿真</li>
+                                <li><strong>Control System Toolbox：</strong>控制系统分析</li>
+                                <li><strong>Real-Time Workshop：</strong>实时代码生成</li>
+                                ${userInputs.inputB3 === '是' ? '<li><strong>C/C++编译器：</strong>代码编译和调试</li>' : ''}
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">参数整定步骤</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li><strong>系统辨识：</strong>确定被控对象的数学模型</li>
+                                <li><strong>控制器设计：</strong>根据性能指标设计${topic}控制器</li>
+                                <li><strong>参数初值：</strong>使用经验公式计算初始参数</li>
+                                <li><strong>仿真调试：</strong>在Simulink中进行仿真验证</li>
+                                <li><strong>参数优化：</strong>根据仿真结果调整参数</li>
+                                <li><strong>实验验证：</strong>在实际系统中验证控制效果</li>
+                            </ol>
+                        </div>
+                        
+                        ${userInputs.inputB3 === '是' ? `
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">示例代码框架</h5>
+                            <pre class="bg-white p-3 rounded border text-xs overflow-x-auto"><code>// ${topic}控制器实现
+#include <stdio.h>
+#include <math.h>
+
+typedef struct {
+    double kp, ki, kd;    // PID参数
+    double error_prev;    // 前一次误差
+    double integral;      // 积分项
+    double dt;           // 采样时间
+} PIDController;
+
+// 初始化PID控制器
+void PID_Init(PIDController* pid, double kp, double ki, double kd, double dt) {
+    pid->kp = kp;
+    pid->ki = ki;
+    pid->kd = kd;
+    pid->dt = dt;
+    pid->error_prev = 0.0;
+    pid->integral = 0.0;
+}
+
+// PID控制算法
+double PID_Update(PIDController* pid, double setpoint, double feedback) {
+    double error = setpoint - feedback;
+    
+    // 比例项
+    double proportional = pid->kp * error;
+    
+    // 积分项
+    pid->integral += error * pid->dt;
+    double integral = pid->ki * pid->integral;
+    
+    // 微分项
+    double derivative = pid->kd * (error - pid->error_prev) / pid->dt;
+    pid->error_prev = error;
+    
+    // 控制输出
+    return proportional + integral + derivative;
+}</code></pre>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">详细教学内容</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第一章：${topic}基础理论</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>1.1 基本概念</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>${topic}的定义和基本原理</li>
+                                    <li>系统的组成和结构</li>
+                                    <li>性能指标和评价标准</li>
+                                </ul>
+                                <p><strong>1.2 数学基础</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>拉普拉斯变换和传递函数</li>
+                                    <li>频域分析方法</li>
+                                    <li>稳定性理论</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第二章：${topic}设计方法</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>2.1 经典设计方法</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>根轨迹法</li>
+                                    <li>频率响应法</li>
+                                    <li>PID控制器设计</li>
+                                </ul>
+                                <p><strong>2.2 现代设计方法</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>状态空间法</li>
+                                    <li>最优控制</li>
+                                    <li>鲁棒控制</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">教学重点与难点</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>教学重点：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>${topic}的基本概念和工作原理</li>
+                                    <li>系统分析和设计方法</li>
+                                    <li>参数调节和性能优化</li>
+                                </ul>
+                                <p><strong>教学难点：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>复杂系统的数学建模</li>
+                                    <li>多变量系统的耦合分析</li>
+                                    <li>理论与实践的结合应用</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">推荐教学方法</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>理论讲授：</strong>采用启发式教学，结合工程实例</p>
+                                <p><strong>案例分析：</strong>选择典型工程案例进行深入分析</p>
+                                <p><strong>仿真实验：</strong>使用MATLAB/Simulink进行仿真验证</p>
+                                <p><strong>课堂讨论：</strong>组织学生讨论实际工程问题</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目实施细节</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目实施步骤</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>第1-2周：</strong>需求分析和系统设计</p>
+                                <p><strong>第3-4周：</strong>核心算法实现</p>
+                                <p><strong>第5-6周：</strong>系统集成和测试</p>
+                                <p><strong>第7-8周：</strong>性能优化和文档编写</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">技术栈要求</h5>
+                            <ul class="list-disc list-inside text-sm space-y-1">
+                                <li><strong>编程语言：</strong>MATLAB/Simulink, C/C++</li>
+                                <li><strong>开发工具：</strong>Visual Studio, Code Composer Studio</li>
+                                <li><strong>硬件平台：</strong>DSP开发板, 传感器模块</li>
+                                <li><strong>仿真软件：</strong>MATLAB/Simulink, Proteus</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目评估标准</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>技术实现（40%）：</strong>算法正确性、代码质量、系统性能</p>
+                                <p><strong>创新性（20%）：</strong>设计思路、技术创新、问题解决</p>
+                                <p><strong>团队协作（20%）：</strong>分工合理、沟通有效、进度控制</p>
+                                <p><strong>文档报告（20%）：</strong>技术文档、演示汇报、总结反思</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate Stage 3 content (Complete materials)
+        function generateStage3Content(template, userInputs, topic, stage1, stage2) {
+            if (template.name.includes('实验')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">完整实验指导书</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">实验报告模板</h5>
+                            <div class="bg-white p-3 rounded border text-sm">
+                                <p><strong>实验名称：</strong>${topic}实验</p>
+                                <p><strong>实验目的：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>掌握${topic}的基本原理和设计方法</li>
+                                    <li>学会使用MATLAB/Simulink进行系统仿真</li>
+                                    <li>理解控制参数对系统性能的影响</li>
+                                    <li>培养实际工程问题的分析和解决能力</li>
+                                </ol>
+                                <p class="mt-3"><strong>实验步骤：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>搭建${topic}仿真模型</li>
+                                    <li>设置系统参数和控制器参数</li>
+                                    <li>运行仿真并记录实验数据</li>
+                                    <li>分析实验结果并优化参数</li>
+                                    <li>撰写实验报告和总结</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">数据记录表</h5>
+                            <div class="bg-white p-3 rounded border">
+                                <table class="w-full text-sm border-collapse border border-gray-300">
+                                    <thead>
+                                        <tr class="bg-gray-100">
+                                            <th class="border border-gray-300 p-2">参数名称</th>
+                                            <th class="border border-gray-300 p-2">设定值</th>
+                                            <th class="border border-gray-300 p-2">测量值</th>
+                                            <th class="border border-gray-300 p-2">误差</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">超调量(%)</td>
+                                            <td class="border border-gray-300 p-2">≤20%</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">调节时间(s)</td>
+                                            <td class="border border-gray-300 p-2">≤5s</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-300 p-2">稳态误差</td>
+                                            <td class="border border-gray-300 p-2">≤2%</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                            <td class="border border-gray-300 p-2">_____</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">思考题</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li>分析${topic}控制器各参数对系统性能的影响</li>
+                                <li>比较不同控制策略的优缺点</li>
+                                <li>讨论实际工程中${topic}的应用场景</li>
+                                <li>如何根据系统特性选择合适的控制参数？</li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            } else if (template.name.includes('理论')) {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">完整课程讲义</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">第一讲：${topic}概述</h5>
+                            <div class="text-sm space-y-3">
+                                <div class="bg-white p-3 rounded border">
+                                    <h6 class="font-medium mb-2">1.1 引言</h6>
+                                    <p>${topic}是现代控制理论的重要组成部分，广泛应用于工业自动化、航空航天、机器人等领域。</p>
+                                </div>
+                                <div class="bg-white p-3 rounded border">
+                                    <h6 class="font-medium mb-2">1.2 基本概念</h6>
+                                    <ul class="list-disc list-inside ml-4">
+                                        <li>控制系统的基本组成</li>
+                                        <li>开环与闭环控制</li>
+                                        <li>反馈控制原理</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">例题分析</h5>
+                            <div class="bg-white p-3 rounded border text-sm">
+                                <p><strong>例题1：</strong>某二阶系统的传递函数为G(s)=K/(s²+2s+1)，求系统的单位阶跃响应。</p>
+                                <p class="mt-2"><strong>解：</strong></p>
+                                <ol class="list-decimal list-inside ml-4 mt-2">
+                                    <li>确定系统的特征方程：s²+2s+1=0</li>
+                                    <li>求解特征根：s₁=s₂=-1（重根）</li>
+                                    <li>系统为临界阻尼，响应形式为：y(t)=K[1-(1+t)e^(-t)]</li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">课后习题</h5>
+                            <ol class="list-decimal list-inside text-sm space-y-2">
+                                <li>推导${topic}的数学模型和传递函数</li>
+                                <li>分析系统稳定性的判据和方法</li>
+                                <li>设计满足性能指标的控制器参数</li>
+                                <li>比较不同控制方法的适用范围</li>
+                            </ol>
+                        </div>
+                    </div>
+                `;
+            } else {
+                return `
+                    <h4 class="font-bold text-gray-800 mb-3">项目指导手册</h4>
+                    <div class="space-y-4">
+                        <div class="bg-blue-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">项目背景</h5>
+                            <div class="text-sm space-y-2">
+                                <p>本项目旨在通过${topic}的实际应用，培养学生的工程实践能力和创新思维。</p>
+                                <p><strong>项目意义：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>加深对${topic}理论知识的理解</li>
+                                    <li>提升系统设计和实现能力</li>
+                                    <li>培养团队协作和项目管理技能</li>
+                                    <li>增强工程文档编写能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-green-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">技术要求</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>硬件要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>开发板：STM32F4系列或同等性能</li>
+                                    <li>传感器：根据项目需求选择</li>
+                                    <li>执行器：电机、舵机等</li>
+                                    <li>通信模块：WiFi、蓝牙等</li>
+                                </ul>
+                                <p><strong>软件要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>开发环境：Keil MDK或STM32CubeIDE</li>
+                                    <li>仿真软件：MATLAB/Simulink</li>
+                                    <li>版本控制：Git</li>
+                                    <li>文档工具：LaTeX或Word</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-50 p-4 rounded">
+                            <h5 class="font-semibold mb-2">成果展示要求</h5>
+                            <div class="text-sm space-y-2">
+                                <p><strong>技术文档：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>需求分析报告</li>
+                                    <li>系统设计文档</li>
+                                    <li>代码实现说明</li>
+                                    <li>测试报告</li>
+                                </ul>
+                                <p><strong>演示要求：</strong></p>
+                                <ul class="list-disc list-inside ml-4">
+                                    <li>现场演示系统功能</li>
+                                    <li>PPT汇报（15分钟）</li>
+                                    <li>回答评委提问</li>
+                                    <li>提交完整项目代码</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // Generate course for specific topic
+        function generateCourse(topic) {
+            document.getElementById('course-topic').value = topic;
+            generateCourseOutline();
+        }
+
+        // Close course modal
+        function closeCourseModal() {
+            document.getElementById('courseModal').style.display = 'none';
+        }
+
+        // Download course
+        function downloadCourse() {
+            const content = document.getElementById('course-content').innerHTML;
+            const blob = new Blob([content], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '课程讲义.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Edit course
+        function editCourse() {
+            alert('编辑功能将在后续版本中提供');
+        }
+
+        // View student details
+        function viewStudentDetails() {
+            const modal = document.getElementById('studentModal');
+            const details = document.getElementById('student-details');
+
+            details.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    ${sampleData.students.map(student => `
+                        <div class="bg-white p-6 rounded-lg border">
+                            <div class="flex items-center space-x-3 mb-4">
+                                <div class="student-avatar">
+                                    ${student.name.charAt(0)}
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-gray-800">${student.name}</h4>
+                                    <p class="text-sm text-gray-600">学习进度：${student.progress}%</p>
+                                </div>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">掌握知识点：</span>
+                                    <span class="font-medium">${student.knowledgePoints}个</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-sm text-gray-600">完成实验：</span>
+                                    <span class="font-medium">${student.experiments}个</span>
+                                </div>
+                                <div>
+                                    <span class="text-sm text-gray-600">学习学科：</span>
+                                    <div class="mt-1 flex flex-wrap gap-1">
+                                        ${student.subjects.map(subject =>
+                `<span class="px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded">${subject}</span>`
+            ).join('')}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+            modal.style.display = 'block';
+        }
+
+        // Close student modal
+        function closeStudentModal() {
+            document.getElementById('studentModal').style.display = 'none';
+        }
+
+        // Export learning report
+        function exportLearningReport() {
+            const reportData = {
+                totalStudents: sampleData.students.length,
+                totalKnowledgePoints: sampleData.students.reduce((sum, student) => sum + student.knowledgePoints, 0),
+                totalExperiments: sampleData.students.reduce((sum, student) => sum + student.experiments, 0),
+                avgProgress: Math.round(sampleData.students.reduce((sum, student) => sum + student.progress, 0) / sampleData.students.length),
+                subjectDistribution: sampleData.subjectDistribution,
+                students: sampleData.students
+            };
+
+            const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '学习报告.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Customize teaching plan
+        function customizeTeachingPlan() {
+            alert('教学计划定制功能正在开发中，敬请期待！');
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function (event) {
+            const courseModal = document.getElementById('courseModal');
+            const studentModal = document.getElementById('studentModal');
+
+            if (event.target === courseModal) {
+                courseModal.style.display = 'none';
+            }
+            if (event.target === studentModal) {
+                studentModal.style.display = 'none';
+            }
+        }
+    </script>
+    <!-- Global Theme Manager -->
+    <script src="/static/js/global-theme.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电路仿真器 - 欧姆定律验证</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .circuit-canvas {
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+            background-image:
+                linear-gradient(rgba(0, 0, 0, .1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 0, 0, .1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .component {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .component:hover {
+            transform: scale(1.05);
+        }
+
+        .meter-display {
+            background: #1f2937;
+            color: #10b981;
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 2px solid #374151;
+        }
+
+        .control-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .control-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+
+        .control-slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+        }
+
+        .wire {
+            stroke: #ef4444;
+            stroke-width: 3;
+            fill: none;
+        }
+
+        .component-symbol {
+            stroke: #1f2937;
+            stroke-width: 2;
+            fill: none;
+        }
+
+        .voltage-source {
+            fill: #fbbf24;
+            stroke: #1f2937;
+            stroke-width: 2;
+        }
+
+        .resistor {
+            fill: #8b5cf6;
+            stroke: #1f2937;
+            stroke-width: 2;
+        }
+
+        .current-arrow {
+            stroke: #10b981;
+            stroke-width: 2;
+            fill: #10b981;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen">
+    <div class="container mx-auto px-4 py-6">
+        <!-- 标题栏 -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-gray-900 mb-2">
+                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>
+                        电路仿真器 - 欧姆定律验证
+                    </h1>
+                    <p class="text-gray-600">通过调节电压和电阻值，观察电流的变化，验证欧姆定律 V = I × R</p>
+                </div>
+                <button onclick="resetCircuit()"
+                    class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors">
+                    <i class="fas fa-redo mr-2"></i>重置
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- 电路图区域 -->
+            <div class="lg:col-span-2">
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-project-diagram text-blue-500 mr-2"></i>
+                        电路图
+                    </h2>
+
+                    <div class="circuit-canvas relative">
+                        <svg width="100%" height="400" viewBox="0 0 600 400" class="w-full">
+                            <!-- 电路连线 -->
+                            <path d="M 100 200 L 200 200" class="wire" />
+                            <path d="M 300 200 L 400 200" class="wire" />
+                            <path d="M 500 200 L 500 300 L 100 300 L 100 200" class="wire" />
+
+                            <!-- 电压源 -->
+                            <circle cx="150" cy="200" r="30" class="voltage-source" />
+                            <text x="150" y="205" text-anchor="middle" class="text-sm font-bold">V</text>
+                            <text x="150" y="250" text-anchor="middle" class="text-xs">电压源</text>
+
+                            <!-- 电阻 -->
+                            <rect x="320" y="185" width="60" height="30" rx="5" class="resistor" />
+                            <path d="M 330 200 L 340 190 L 350 210 L 360 190 L 370 210 L 380 200"
+                                class="component-symbol" />
+                            <text x="350" y="175" text-anchor="middle" class="text-xs">R</text>
+                            <text x="350" y="240" text-anchor="middle" class="text-xs">电阻</text>
+
+                            <!-- 电流方向箭头 -->
+                            <defs>
+                                <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5"
+                                    orient="auto">
+                                    <polygon points="0 0, 10 3.5, 0 7" class="current-arrow" />
+                                </marker>
+                            </defs>
+                            <path d="M 250 180 L 280 180" class="current-arrow" marker-end="url(#arrowhead)" />
+                            <text x="265" y="175" text-anchor="middle"
+                                class="text-xs text-green-600 font-semibold">I</text>
+
+                            <!-- 测量点 -->
+                            <circle cx="200" cy="200" r="5" fill="#ef4444" />
+                            <circle cx="400" cy="200" r="5" fill="#ef4444" />
+                            <text x="200" y="230" text-anchor="middle" class="text-xs">A点</text>
+                            <text x="400" y="230" text-anchor="middle" class="text-xs">B点</text>
+
+                            <!-- 电压标注 -->
+                            <path d="M 200 160 L 400 160" stroke="#3b82f6" stroke-width="2" stroke-dasharray="5,5" />
+                            <text x="300" y="155" text-anchor="middle" class="text-sm text-blue-600 font-semibold">V = I
+                                × R</text>
+                        </svg>
+                    </div>
+
+                    <!-- 实验说明 -->
+                    <div class="mt-4 bg-blue-50 border-l-4 border-blue-400 p-4">
+                        <h3 class="text-sm font-semibold text-blue-800 mb-2">实验说明</h3>
+                        <ul class="text-sm text-blue-700 space-y-1">
+                            <li>• 调节左侧控制面板的电压和电阻值</li>
+                            <li>• 观察电流表显示的电流变化</li>
+                            <li>• 验证欧姆定律：V = I × R</li>
+                            <li>• 记录不同参数下的测量数据</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 控制面板 -->
+            <div class="space-y-6">
+                <!-- 电压控制 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-battery-full text-yellow-500 mr-2"></i>
+                        电压控制
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                电压值: <span id="voltageValue" class="text-blue-600 font-bold">5.0</span> V
+                            </label>
+                            <input type="range" id="voltageSlider" class="control-slider" min="1" max="12" step="0.1"
+                                value="5.0" oninput="updateVoltage(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>1V</span>
+                                <span>12V</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 电阻控制 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-microchip text-purple-500 mr-2"></i>
+                        电阻控制
+                    </h3>
+
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                电阻值: <span id="resistanceValue" class="text-purple-600 font-bold">100</span> Ω
+                            </label>
+                            <input type="range" id="resistanceSlider" class="control-slider" min="10" max="1000"
+                                step="10" value="100" oninput="updateResistance(this.value)">
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>10Ω</span>
+                                <span>1000Ω</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 测量结果 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-tachometer-alt text-green-500 mr-2"></i>
+                        测量结果
+                    </h3>
+
+                    <div class="space-y-4">
+                        <!-- 电流表 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">电流 (A)</label>
+                            <div class="meter-display">
+                                <span id="currentDisplay">0.050</span>
+                            </div>
+                        </div>
+
+                        <!-- 功率显示 -->
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">功率 (W)</label>
+                            <div class="meter-display">
+                                <span id="powerDisplay">0.250</span>
+                            </div>
+                        </div>
+
+                        <!-- 验证结果 -->
+                        <div class="bg-gray-50 rounded-lg p-3">
+                            <h4 class="text-sm font-semibold text-gray-700 mb-2">欧姆定律验证</h4>
+                            <div class="text-sm text-gray-600">
+                                <div>V = <span id="calcVoltage" class="font-mono">5.0</span> V</div>
+                                <div>I = <span id="calcCurrent" class="font-mono">0.050</span> A</div>
+                                <div>R = <span id="calcResistance" class="font-mono">100</span> Ω</div>
+                                <div class="mt-2 pt-2 border-t border-gray-300">
+                                    <div class="font-semibold">V = I × R = <span id="calcResult"
+                                            class="text-green-600">5.0</span> V</div>
+                                    <div class="text-xs mt-1">
+                                        误差: <span id="errorPercent" class="text-blue-600">0.0%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 数据记录 -->
+                <div class="bg-white rounded-lg shadow-md p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                        <i class="fas fa-table text-indigo-500 mr-2"></i>
+                        数据记录
+                    </h3>
+
+                    <button onclick="recordData()"
+                        class="w-full bg-indigo-500 hover:bg-indigo-600 text-white px-4 py-2 rounded-lg mb-4 transition-colors">
+                        <i class="fas fa-plus mr-2"></i>记录当前数据
+                    </button>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="px-2 py-1 text-left">V(V)</th>
+                                    <th class="px-2 py-1 text-left">R(Ω)</th>
+                                    <th class="px-2 py-1 text-left">I(A)</th>
+                                    <th class="px-2 py-1 text-left">P(W)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable">
+                                <!-- 数据行将通过JavaScript添加 -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <button onclick="clearData()"
+                        class="w-full bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg mt-4 transition-colors">
+                        <i class="fas fa-trash mr-2"></i>清空数据
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 电路参数
+        let voltage = 5.0;
+        let resistance = 100;
+        let current = 0;
+        let power = 0;
+        let dataRecords = [];
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function () {
+            calculateCircuit();
+        });
+
+        // 更新电压
+        function updateVoltage(value) {
+            voltage = parseFloat(value);
+            document.getElementById('voltageValue').textContent = voltage.toFixed(1);
+            calculateCircuit();
+        }
+
+        // 更新电阻
+        function updateResistance(value) {
+            resistance = parseInt(value);
+            document.getElementById('resistanceValue').textContent = resistance;
+            calculateCircuit();
+        }
+
+        // 计算电路参数
+        function calculateCircuit() {
+            // 根据欧姆定律计算电流
+            current = voltage / resistance;
+
+            // 计算功率
+            power = voltage * current;
+
+            // 更新显示
+            document.getElementById('currentDisplay').textContent = current.toFixed(3);
+            document.getElementById('powerDisplay').textContent = power.toFixed(3);
+
+            // 更新验证计算
+            document.getElementById('calcVoltage').textContent = voltage.toFixed(1);
+            document.getElementById('calcCurrent').textContent = current.toFixed(3);
+            document.getElementById('calcResistance').textContent = resistance;
+
+            // 验证欧姆定律
+            const calculatedVoltage = current * resistance;
+            document.getElementById('calcResult').textContent = calculatedVoltage.toFixed(1);
+
+            // 计算误差
+            const error = Math.abs(voltage - calculatedVoltage) / voltage * 100;
+            document.getElementById('errorPercent').textContent = error.toFixed(1) + '%';
+        }
+
+        // 记录数据
+        function recordData() {
+            const record = {
+                voltage: voltage.toFixed(1),
+                resistance: resistance,
+                current: current.toFixed(3),
+                power: power.toFixed(3)
+            };
+
+            dataRecords.push(record);
+            updateDataTable();
+        }
+
+        // 更新数据表
+        function updateDataTable() {
+            const tableBody = document.getElementById('dataTable');
+            tableBody.innerHTML = '';
+
+            dataRecords.forEach((record, index) => {
+                const row = document.createElement('tr');
+                row.className = index % 2 === 0 ? 'bg-white' : 'bg-gray-50';
+                row.innerHTML = `
+                    <td class="px-2 py-1">${record.voltage}</td>
+                    <td class="px-2 py-1">${record.resistance}</td>
+                    <td class="px-2 py-1">${record.current}</td>
+                    <td class="px-2 py-1">${record.power}</td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        // 清空数据
+        function clearData() {
+            dataRecords = [];
+            updateDataTable();
+        }
+
+        // 重置电路
+        function resetCircuit() {
+            voltage = 5.0;
+            resistance = 100;
+
+            document.getElementById('voltageSlider').value = voltage;
+            document.getElementById('resistanceSlider').value = resistance;
+            document.getElementById('voltageValue').textContent = voltage.toFixed(1);
+            document.getElementById('resistanceValue').textContent = resistance;
+
+            calculateCircuit();
+            clearData();
+        }
+    </script>
+</body>
+
+</html>

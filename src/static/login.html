@@ -378,13 +378,13 @@
                 if (response.ok) {
                     // Store token and user info
                     localStorage.setItem('auth_token', data.token);
-                    localStorage.setItem('user_info', JSON.stringify(data.user));
+                    localStorage.setItem('current_user', JSON.stringify(data.user));
                     
                     showSuccess('登录成功！正在跳转...');
                     
-                    // Redirect to dashboard or previous page
+                    // Redirect to previous page or home page
                     setTimeout(() => {
-                        const returnUrl = new URLSearchParams(window.location.search).get('return') || '/static/dashboard.html';
+                        const returnUrl = new URLSearchParams(window.location.search).get('return') || '/static/index.html';
                         window.location.href = returnUrl;
                     }, 1500);
                 } else {
@@ -418,7 +418,7 @@
                 .catch(error => {
                     // Token is invalid, remove it
                     localStorage.removeItem('auth_token');
-                    localStorage.removeItem('user_info');
+                    localStorage.removeItem('current_user');
                 });
             }
         });

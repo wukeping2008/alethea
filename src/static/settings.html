@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>系统设置 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .settings-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .settings-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .form-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.1);
+        }
+        
+        .btn-primary {
+            background-color: var(--accent-color);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: var(--accent-color);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .setting-item {
+            border-bottom: 1px solid #e5e7eb;
+            padding: 20px 0;
+        }
+        
+        .setting-item:last-child {
+            border-bottom: none;
+        }
+        
+        .danger-zone {
+            border: 2px solid #fee2e2;
+            background-color: #fef2f2;
+            border-radius: 12px;
+        }
+        
+        .btn-danger {
+            background-color: #dc2626;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-danger:hover {
+            background-color: #b91c1c;
+        }
+        
+        .nav-tabs {
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .nav-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-tab.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .nav-tab:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-10 mr-3">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/static/index.html" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-home mr-2"></i>返回首页
+                </a>
+                <a href="/static/profile.html" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-user mr-2"></i>个人资料
+                </a>
+                <button id="logout-btn" class="text-red-600 hover:text-red-800">
+                    <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-12">
+        <div class="container mx-auto px-4">
+            <h1 class="text-3xl font-bold mb-2">
+                <i class="fas fa-cog mr-3"></i>系统设置
+            </h1>
+            <p class="text-blue-100">个性化您的学习体验和系统偏好</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs mb-8">
+            <div class="flex space-x-0">
+                <div class="nav-tab active" data-tab="general">
+                    <i class="fas fa-sliders-h mr-2"></i>常规设置
+                </div>
+                <div class="nav-tab" data-tab="ai">
+                    <i class="fas fa-robot mr-2"></i>AI设置
+                </div>
+                <div class="nav-tab" data-tab="notification">
+                    <i class="fas fa-bell mr-2"></i>通知设置
+                </div>
+                <div class="nav-tab" data-tab="privacy">
+                    <i class="fas fa-shield-alt mr-2"></i>隐私安全
+                </div>
+                <div class="nav-tab" data-tab="advanced">
+                    <i class="fas fa-tools mr-2"></i>高级设置
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            <!-- Main Settings Area -->
+            <div class="lg:col-span-3">
+                <!-- 常规设置 -->
+                <div id="general-tab" class="tab-content active">
+                    <div class="settings-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">常规设置</h2>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">界面语言</h3>
+                                    <p class="text-gray-600">选择您偏好的界面显示语言</p>
+                                </div>
+                                <select id="language-select" class="form-input px-4 py-2 rounded-lg">
+                                    <option value="zh-CN">简体中文</option>
+                                    <option value="en-US">English</option>
+                                    <option value="zh-TW">繁體中文</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">主题模式</h3>
+                                    <p class="text-gray-600">选择明亮或暗黑主题</p>
+                                </div>
+                                <select id="theme-select" class="form-input px-4 py-2 rounded-lg">
+                                    <option value="auto">跟随系统</option>
+                                    <option value="light">明亮主题</option>
+                                    <option value="dark">暗黑主题</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">字体大小</h3>
+                                    <p class="text-gray-600">调整界面文字大小</p>
+                                </div>
+                                <select id="font-size-select" class="form-input px-4 py-2 rounded-lg">
+                                    <option value="small">小</option>
+                                    <option value="medium">中等</option>
+                                    <option value="large">大</option>
+                                    <option value="extra-large">特大</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">自动保存</h3>
+                                    <p class="text-gray-600">自动保存您的学习进度和设置</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="auto-save" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI设置 -->
+                <div id="ai-tab" class="tab-content">
+                    <div class="settings-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">AI设置</h2>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">个性化AI</h3>
+                                    <p class="text-gray-600">启用基于您偏好的个性化AI回答</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="ai-personalization" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">默认AI模型</h3>
+                                    <p class="text-gray-600">选择您偏好的AI模型</p>
+                                </div>
+                                <select id="default-ai-model" class="form-input px-4 py-2 rounded-lg">
+                                    <option value="auto">智能选择</option>
+                                    <option value="gpt-4">GPT-4</option>
+                                    <option value="claude">Claude</option>
+                                    <option value="gemini">Gemini</option>
+                                    <option value="deepseek">DeepSeek</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">回答详细程度</h3>
+                                    <p class="text-gray-600">控制AI回答的详细程度</p>
+                                </div>
+                                <select id="answer-detail" class="form-input px-4 py-2 rounded-lg">
+                                    <option value="brief">简洁</option>
+                                    <option value="moderate">适中</option>
+                                    <option value="detailed">详细</option>
+                                    <option value="comprehensive">全面</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">知识库集成</h3>
+                                    <p class="text-gray-600">在AI回答中包含您的个人知识库内容</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="knowledge-integration" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">实验建议</h3>
+                                    <p class="text-gray-600">AI自动推荐相关实验和练习</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="experiment-suggestions" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 通知设置 -->
+                <div id="notification-tab" class="tab-content">
+                    <div class="settings-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">通知设置</h2>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">桌面通知</h3>
+                                    <p class="text-gray-600">允许显示桌面通知</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="desktop-notifications">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">学习提醒</h3>
+                                    <p class="text-gray-600">定期提醒您进行学习</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="study-reminders" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">实验完成通知</h3>
+                                    <p class="text-gray-600">实验完成时发送通知</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="experiment-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">系统更新通知</h3>
+                                    <p class="text-gray-600">新功能和更新发布时通知</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="update-notifications" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 隐私安全 -->
+                <div id="privacy-tab" class="tab-content">
+                    <div class="settings-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">隐私安全</h2>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">数据收集</h3>
+                                    <p class="text-gray-600">允许收集匿名使用数据以改进服务</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="data-collection" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">学习历史记录</h3>
+                                    <p class="text-gray-600">保存您的学习历史和进度</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="learning-history" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">自动登录</h3>
+                                    <p class="text-gray-600">记住登录状态，下次自动登录</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="auto-login" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">两步验证</h3>
+                                    <p class="text-gray-600">启用两步验证增强账户安全</p>
+                                </div>
+                                <button class="btn-primary px-4 py-2 rounded-lg text-white">
+                                    设置
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 高级设置 -->
+                <div id="advanced-tab" class="tab-content">
+                    <div class="settings-card p-6">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-6">高级设置</h2>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">开发者模式</h3>
+                                    <p class="text-gray-600">启用开发者工具和调试功能</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="developer-mode">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">实验性功能</h3>
+                                    <p class="text-gray-600">启用测试中的新功能</p>
+                                </div>
+                                <label class="toggle-switch">
+                                    <input type="checkbox" id="experimental-features">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">缓存管理</h3>
+                                    <p class="text-gray-600">清除应用缓存和临时文件</p>
+                                </div>
+                                <button id="clear-cache-btn" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                                    清除缓存
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-item">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h3 class="text-lg font-semibold text-gray-800">导出数据</h3>
+                                    <p class="text-gray-600">导出您的学习数据和设置</p>
+                                </div>
+                                <button id="export-data-btn" class="btn-primary px-4 py-2 rounded-lg text-white">
+                                    导出
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 危险区域 -->
+                    <div class="danger-zone p-6 mt-6">
+                        <h3 class="text-xl font-bold text-red-800 mb-4">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>危险区域
+                        </h3>
+                        <p class="text-red-700 mb-6">以下操作不可逆，请谨慎操作</p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold text-red-800">重置所有设置</h4>
+                                    <p class="text-red-600 text-sm">将所有设置恢复为默认值</p>
+                                </div>
+                                <button id="reset-settings-btn" class="btn-danger px-4 py-2 rounded-lg">
+                                    重置设置
+                                </button>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold text-red-800">删除学习数据</h4>
+                                    <p class="text-red-600 text-sm">永久删除所有学习历史和进度</p>
+                                </div>
+                                <button id="delete-data-btn" class="btn-danger px-4 py-2 rounded-lg">
+                                    删除数据
+                                </button>
+                            </div>
+                            
+                            <div class="flex justify-between items-center">
+                                <div>
+                                    <h4 class="font-semibold text-red-800">删除账户</h4>
+                                    <p class="text-red-600 text-sm">永久删除账户和所有相关数据</p>
+                                </div>
+                                <button id="delete-account-btn" class="btn-danger px-4 py-2 rounded-lg">
+                                    删除账户
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- 快速操作 -->
+                <div class="settings-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-bolt mr-2 text-yellow-600"></i>快速操作
+                    </h3>
+                    <div class="space-y-3">
+                        <button id="save-all-btn" class="w-full btn-primary py-3 rounded-lg text-white font-medium">
+                            <i class="fas fa-save mr-2"></i>保存所有设置
+                        </button>
+                        <button id="restore-defaults-btn" class="w-full px-4 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                            <i class="fas fa-undo mr-2"></i>恢复默认
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 帮助信息 -->
+                <div class="settings-card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">
+                        <i class="fas fa-question-circle mr-2 text-blue-600"></i>需要帮助？
+                    </h3>
+                    <div class="space-y-3 text-sm">
+                        <a href="#" class="block text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-book mr-2"></i>设置指南
+                        </a>
+                        <a href="#" class="block text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-video mr-2"></i>视频教程
+                        </a>
+                        <a href="#" class="block text-blue-600 hover:text-blue-800">
+                            <i class="fas fa-envelope mr-2"></i>联系支持
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTabs();
+            loadSettings();
+            setupEventListeners();
+        });
+
+        // 初始化标签页
+        function initializeTabs() {
+            const tabs = document.querySelectorAll('.nav-tab');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetTab = this.dataset.tab;
+                    
+                    // 移除所有活动状态
+                    tabs.forEach(t => t.classList.remove('active'));
+                    contents.forEach(c => c.classList.remove('active'));
+                    
+                    // 激活当前标签
+                    this.classList.add('active');
+                    document.getElementById(targetTab + '-tab').classList.add('active');
+                });
+            });
+        }
+
+        // 加载设置
+        function loadSettings() {
+            // 从localStorage加载设置
+            const settings = JSON.parse(localStorage.getItem('user_settings') || '{}');
+            
+            // 应用设置到界面
+            Object.keys(settings).forEach(key => {
+                const element = document.getElementById(key);
+                if (element) {
+                    if (element.type === 'checkbox') {
+                        element.checked = settings[key];
+                    } else {
+                        element.value = settings[key];
+                    }
+                }
+            });
+        }
+
+        // 保存设置
+        function saveSettings() {
+            const settings = {};
+            
+            // 收集所有设置
+            const inputs = document.querySelectorAll('input, select');
+            inputs.forEach(input => {
+                if (input.id) {
+                    if (input.type === 'checkbox') {
+                        settings[input.id] = input.checked;
+                    } else {
+                        settings[input.id] = input.value;
+                    }
+                }
+            });
+            
+            // 保存到localStorage
+            localStorage.setItem('user_settings', JSON.stringify(settings));
+            
+            showNotification('设置已保存', 'success');
+        }
+
+        // 设置事件监听器
+        function setupEventListeners() {
+            // 保存所有设置
+            document.getElementById('save-all-btn').addEventListener('click', saveSettings);
+            
+            // 恢复默认设置
+            document.getElementById('restore-defaults-btn').addEventListener('click', function() {
+                if (confirm('确定要恢复所有设置为默认值吗？')) {
+                    localStorage.removeItem('user_settings');
+                    location.reload();
+                }
+            });
+            
+            // 清除缓存
+            document.getElementById('clear-cache-btn').addEventListener('click', function() {
+                if (confirm('确定要清除所有缓存吗？')) {
+                    // 清除除了用户数据外的所有localStorage
+                    const userToken = localStorage.getItem('auth_token');
+                    const userData = localStorage.getItem('current_user');
+                    const userSettings = localStorage.getItem('user_settings');
+                    
+                    localStorage.clear();
+                    
+                    if (userToken) localStorage.setItem('auth_token', userToken);
+                    if (userData) localStorage.setItem('current_user', userData);
+                    if (userSettings) localStorage.setItem('user_settings', userSettings);
+                    
+                    showNotification('缓存已清除', 'success');
+                }
+            });
+            
+            // 导出数据
+            document.getElementById('export-data-btn').addEventListener('click', function() {
+                const userData = localStorage.getItem('current_user');
+                const userSettings = localStorage.getItem('user_settings');
+                
+                const exportData = {
+                    user: userData ? JSON.parse(userData) : null,
+                    settings: userSettings ? JSON.parse(userSettings) : {},
+                    exportDate: new Date().toISOString()
+                };
+                
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'alethea-data-export.json';
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                showNotification('数据导出成功', 'success');
+            });
+            
+            // 危险操作
+            document.getElementById('reset-settings-btn').addEventListener('click', function() {
+                if (confirm('确定要重置所有设置吗？此操作不可撤销。')) {
+                    localStorage.removeItem('user_settings');
+                    showNotification('设置已重置', 'success');
+                    setTimeout(() => location.reload(), 1000);
+                }
+            });
+            
+            document.getElementById('delete-data-btn').addEventListener('click', function() {
+                if (confirm('确定要删除所有学习数据吗？此操作不可撤销。')) {
+                    // 保留用户基本信息和设置，删除学习数据
+                    const keysToKeep = ['auth_token', 'current_user', 'user_settings'];
+                    const dataToKeep = {};
+                    
+                    keysToKeep.forEach(key => {
+                        const value = localStorage.getItem(key);
+                        if (value) dataToKeep[key] = value;
+                    });
+                    
+                    localStorage.clear();
+                    
+                    Object.keys(dataToKeep).forEach(key => {
+                        localStorage.setItem(key, dataToKeep[key]);
+                    });
+                    
+                    showNotification('学习数据已删除', 'success');
+                }
+            });
+            
+            document.getElementById('delete-account-btn').addEventListener('click', function() {
+                if (confirm('确定要删除账户吗？此操作将永久删除您的所有数据，且不可撤销。')) {
+                    if (confirm('请再次确认：您真的要删除账户吗？')) {
+                        localStorage.clear();
+                        alert('账户已删除');
+                        window.location.href = '/static/index.html';
+                    }
+                }
+            });
+            
+            // 退出登录
+            document.getElementById('logout-btn').addEventListener('click', function() {
+                if (confirm('确定要退出登录吗？')) {
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('current_user');
+                    window.location.href = '/static/index.html';
+                }
+            });
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg z-50 transition-all duration-300';
+            
+            switch (type) {
+                case 'success':
+                    notification.classList.add('bg-green-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i> ${message}`;
+                    break;
+                case 'error':
+                    notification.classList.add('bg-red-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i> ${message}`;
+                    break;
+                default:
+                    notification.classList.add('bg-blue-500', 'text-white');
+                    notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i> ${message}`;
+            }
+
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.classList.add('opacity-0');
+                setTimeout(() => {
+                    document.body.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

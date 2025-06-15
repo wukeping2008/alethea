@@ -948,16 +948,20 @@
                 <button id="ai-personalization-toggle" class="p-2 rounded-full hover:bg-gray-100" title="个性化AI开关">
                     <i class="fas fa-user-cog text-blue-600"></i>
                 </button>
+                <!-- 快速登录测试按钮 -->
+                <button id="quick-login-test" class="p-2 rounded-full hover:bg-gray-100" title="快速登录测试" style="display: none;">
+                    <i class="fas fa-user-check text-green-600"></i>
+                </button>
                 <div class="relative" id="user-menu">
                     <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
                         <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
                             <i class="fas fa-user text-gray-600"></i>
                         </div>
                         <span class="hidden md:inline-block" id="user-menu-text">登录/注册</span>
-                        <i class="fas fa-chevron-down text-sm hidden md:inline-block" id="user-menu-arrow"></i>
+                        <i class="fas fa-chevron-down text-sm hidden" id="user-menu-arrow"></i>
                     </button>
                     <!-- Guest menu -->
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden"
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-50"
                         id="guest-dropdown">
                         <a href="/static/login.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                             <i class="fas fa-sign-in-alt mr-2"></i>登录
@@ -967,8 +971,8 @@
                         </a>
                     </div>
                     <!-- User menu -->
-                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden"
-                        id="user-dropdown">
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden z-[99999]"
+                        id="user-dropdown" style="z-index: 99999 !important;">
                         <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
                             <div class="font-medium" id="user-name">用户名</div>
                             <div class="text-xs" id="user-email">user@example.com</div>

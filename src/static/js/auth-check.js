@@ -32,10 +32,9 @@ class AuthManager {
 
     async verifyToken() {
         try {
-            const response = await fetch('/api/user/verify', {
-                method: 'POST',
+            const response = await fetch('/api/user/profile', {
+                method: 'GET',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Authorization': `Bearer ${this.token}`
                 }
             });
@@ -45,12 +44,8 @@ class AuthManager {
             }
 
             const data = await response.json();
-            if (data.success) {
-                this.currentUser = data.user;
-                localStorage.setItem('current_user', JSON.stringify(this.currentUser));
-            } else {
-                this.clearAuth();
-            }
+            this.currentUser = data;
+            localStorage.setItem('current_user', JSON.stringify(this.currentUser));
         } catch (error) {
             console.error('Token验证错误:', error);
             this.clearAuth();
@@ -259,6 +254,7 @@ function updateUserMenu() {
     const guestDropdown = document.getElementById('guest-dropdown');
     const userName = document.getElementById('user-name');
     const userEmail = document.getElementById('user-email');
+    const userMenuArrow = document.getElementById('user-menu-arrow');
 
     if (window.authManager.isLoggedIn()) {
         const user = window.authManager.getCurrentUser();
@@ -279,6 +275,12 @@ function updateUserMenu() {
         if (userDropdown) userDropdown.classList.remove('hidden');
         if (guestDropdown) guestDropdown.classList.add('hidden');
         
+        // 显示下拉箭头
+        if (userMenuArrow) {
+            userMenuArrow.classList.remove('hidden');
+            userMenuArrow.classList.add('md:inline-block');
+        }
+        
         // 添加角色标识
         if (userName && user.role) {
             const roleText = {
@@ -296,6 +298,12 @@ function updateUserMenu() {
         // 显示游客菜单，隐藏用户菜单
         if (guestDropdown) guestDropdown.classList.remove('hidden');
         if (userDropdown) userDropdown.classList.add('hidden');
+        
+        // 隐藏下拉箭头
+        if (userMenuArrow) {
+            userMenuArrow.classList.add('hidden');
+            userMenuArrow.classList.remove('md:inline-block');
+        }
     }
 }
 
@@ -323,15 +331,46 @@ document.addEventListener('DOMContentLoaded', function() {
 // 教师助手页面权限检查
 function checkTeacherDashboardAccess() {
     if (window.location.pathname.includes('teacher-dashboard')) {
-        if (!window.authManager.canAccessTeacherDashboard()) {
-            // 隐藏页面内容
-            document.body.style.display = 'none';
+        // 等待authManager初始化完成
+        setTimeout(() => {
+            // 开发模式下允许访问，或者用户有教师权限
+            const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
             
-            // 显示未授权提示
-            window.authManager.showUnauthorizedMessage();
-            
-            return false;
-        }
+            if (!isDevelopment && !window.authManager.canAccessTeacherDashboard()) {
+                // 隐藏页面内容
+                document.body.style.display = 'none';
+                
+                // 显示未授权提示
+                window.authManager.showUnauthorizedMessage();
+                
+                return false;
+            } else if (isDevelopment) {
+                // 开发模式下显示提示信息
+                console.log('开发模式：教师助手页面已启用，无需权限验证');
+                
+                // 在页面顶部添加开发模式提示
+                const devNotice = document.createElement('div');
+                devNotice.className = 'bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-4';
+                devNotice.innerHTML = `
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm">
+                                <strong>开发模式</strong> - 教师助手功能已启用，生产环境下需要教师权限才能访问。
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                // 插入到页面顶部
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.insertBefore(devNotice, container.firstChild);
+                }
+            }
+        }, 100);
     }
     return true;
 }

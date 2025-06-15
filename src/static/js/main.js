@@ -115,6 +115,7 @@ function initializeUI() {
 
             // 根据登录状态显示不同的下拉菜单
             if (currentUser) {
+                // 用户已登录，显示用户下拉菜单
                 if (userDropdown) {
                     userDropdown.classList.toggle('hidden');
                 }
@@ -122,6 +123,7 @@ function initializeUI() {
                     guestDropdown.classList.add('hidden');
                 }
             } else {
+                // 用户未登录，显示访客下拉菜单
                 if (guestDropdown) {
                     guestDropdown.classList.toggle('hidden');
                 }
@@ -170,34 +172,63 @@ function initializeUI() {
  * 检查用户登录状态
  */
 function checkLoginStatus() {
-    // 从本地存储获取令牌
-    const token = localStorage.getItem('authToken');
+    // 统一使用auth_token作为存储键名
+    const token = localStorage.getItem('auth_token');
+    const userStr = localStorage.getItem('current_user');
 
-    if (token) {
-        // 验证令牌有效性
-        fetch(`${API_BASE_URL}/user/profile`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
+    if (token && userStr) {
+        try {
+            // 先从本地存储获取用户信息
+            currentUser = JSON.parse(userStr);
+            updateUserUI(currentUser);
+            
+            // 触发认证状态变化事件，更新导航栏
+            if (window.authManager) {
+                window.authManager.currentUser = currentUser;
+                window.authManager.token = token;
+                window.authManager.triggerAuthEvent('login', currentUser);
             }
-        })
-            .then(response => {
-                if (response.ok) {
-                    return response.json();
-                } else {
-                    // 令牌无效，清除本地存储
-                    localStorage.removeItem('authToken');
-                    throw new Error('Invalid token');
+            
+            // 异步验证令牌有效性（如果API可用）
+            fetch(`${API_BASE_URL}/user/profile`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
                 }
             })
-            .then(data => {
-                // 更新当前用户信息
-                currentUser = data;
-                updateUserUI(currentUser);
-            })
-            .catch(error => {
-                console.error('Error checking login status:', error);
-                updateUserUI(null);
-            });
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        // 如果API返回错误，但不清除本地存储（可能是API服务器问题）
+                        console.warn('Token verification failed, but keeping local session');
+                        return null;
+                    }
+                })
+                .then(data => {
+                    if (data) {
+                        // 更新当前用户信息
+                        currentUser = data;
+                        localStorage.setItem('current_user', JSON.stringify(currentUser));
+                        updateUserUI(currentUser);
+                        
+                        // 触发认证状态变化事件，更新导航栏
+                        if (window.authManager) {
+                            window.authManager.currentUser = currentUser;
+                            window.authManager.token = token;
+                            window.authManager.triggerAuthEvent('login', currentUser);
+                        }
+                    }
+                })
+                .catch(error => {
+                    // 网络错误或API不可用，保持本地登录状态
+                    console.warn('API verification failed, keeping local session:', error);
+                });
+        } catch (e) {
+            console.error('Error parsing user data:', e);
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_user');
+            updateUserUI(null);
+        }
     } else {
         updateUserUI(null);
     }
@@ -223,14 +254,22 @@ function updateUserUI(user) {
             if (userName) userName.textContent = user.username;
             if (userEmail) userEmail.textContent = user.email;
 
+            // 根据用户角色更新下拉菜单内容
+            updateUserDropdownMenu(user);
+
             // 确保两个下拉菜单都是隐藏的（默认状态）
             if (userDropdown) userDropdown.classList.add('hidden');
             if (guestDropdown) guestDropdown.classList.add('hidden');
 
-            // 添加退出登录事件
+            // 移除之前的退出登录事件监听器，避免重复绑定
             const logoutLink = document.getElementById('logout-link');
             if (logoutLink) {
-                logoutLink.addEventListener('click', function (e) {
+                // 克隆节点来移除所有事件监听器
+                const newLogoutLink = logoutLink.cloneNode(true);
+                logoutLink.parentNode.replaceChild(newLogoutLink, logoutLink);
+                
+                // 添加新的退出登录事件
+                newLogoutLink.addEventListener('click', function (e) {
                     e.preventDefault();
                     logout();
                 });
@@ -245,6 +284,69 @@ function updateUserUI(user) {
             if (userDropdown) userDropdown.classList.add('hidden');
         }
     }
+}
+
+/**
+ * 根据用户角色更新下拉菜单内容
+ * @param {Object} user - 用户信息对象
+ */
+function updateUserDropdownMenu(user) {
+    const userDropdown = document.getElementById('user-dropdown');
+    if (!userDropdown) return;
+
+    // 保留用户信息部分
+    const userInfoSection = `
+        <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+            <div class="font-medium" id="user-name">${user.username}</div>
+            <div class="text-xs" id="user-email">${user.email}</div>
+        </div>
+    `;
+
+    let menuItems = '';
+
+    // 根据用户角色生成不同的菜单项
+    if (user.role === 'student') {
+        // 学生菜单：个人仪表板
+        menuItems = `
+            <a href="/static/dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-tachometer-alt mr-2"></i>个人仪表板
+            </a>
+        `;
+    } else if (user.role === 'teacher') {
+        // 教师菜单：教师助手
+        menuItems = `
+            <a href="/static/teacher-dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-chalkboard-teacher mr-2"></i>教师助手
+            </a>
+        `;
+    } else if (user.role === 'admin') {
+        // 管理员菜单：个人仪表板 + 教师助手
+        menuItems = `
+            <a href="/static/dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-tachometer-alt mr-2"></i>个人仪表板
+            </a>
+            <a href="/static/teacher-dashboard.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                <i class="fas fa-chalkboard-teacher mr-2"></i>教师助手
+            </a>
+        `;
+    }
+
+        // 通用菜单项
+        const commonItems = `
+            <a href="/static/profile.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="profile-link">
+                <i class="fas fa-user-circle mr-2"></i>个人资料
+            </a>
+            <a href="/static/settings.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="settings-link">
+                <i class="fas fa-cog mr-2"></i>设置
+            </a>
+            <div class="border-t border-gray-100"></div>
+            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="logout-link">
+                <i class="fas fa-sign-out-alt mr-2"></i>退出登录
+            </a>
+        `;
+
+    // 更新下拉菜单内容
+    userDropdown.innerHTML = userInfoSection + menuItems + commonItems;
 }
 
 /**
@@ -818,17 +920,82 @@ function showForgotPasswordModal() {
 }
 
 /**
+ * 模拟登录功能（用于演示）
+ */
+function simulateLogin(username, password) {
+    // 模拟用户数据
+    const mockUsers = {
+        'student': {
+            id: 1,
+            username: 'student',
+            email: 'student@example.com',
+            role: 'student',
+            name: '张同学'
+        },
+        'teacher': {
+            id: 2,
+            username: 'teacher',
+            email: 'teacher@example.com',
+            role: 'teacher',
+            name: '李老师'
+        },
+        'admin': {
+            id: 3,
+            username: 'admin',
+            email: 'admin@example.com',
+            role: 'admin',
+            name: '王管理员'
+        }
+    };
+
+    // 检查用户名和密码（简单验证，密码为用户名）
+    if (mockUsers[username] && password === username) {
+        const user = mockUsers[username];
+        const token = 'mock_token_' + Date.now();
+        
+        // 保存到本地存储
+        localStorage.setItem('auth_token', token);
+        localStorage.setItem('current_user', JSON.stringify(user));
+        
+        // 更新全局变量
+        currentUser = user;
+        
+        // 更新UI
+        updateUserUI(user);
+        
+        // 触发认证状态变化事件
+        if (window.authManager) {
+            window.authManager.currentUser = user;
+            window.authManager.token = token;
+            window.authManager.triggerAuthEvent('login', user);
+        }
+        
+        return { success: true, user: user };
+    } else {
+        return { success: false, error: '用户名或密码错误' };
+    }
+}
+
+/**
  * 退出登录
  */
 function logout() {
     // 清除本地存储中的令牌
-    localStorage.removeItem('authToken');
+    localStorage.removeItem('auth_token');
+    localStorage.removeItem('current_user');
 
     // 更新当前用户
     currentUser = null;
 
     // 更新UI
     updateUserUI(null);
+    
+    // 触发认证状态变化事件
+    if (window.authManager) {
+        window.authManager.currentUser = null;
+        window.authManager.token = null;
+        window.authManager.triggerAuthEvent('logout');
+    }
 
     // 显示成功消息
     showNotification('已成功退出登录', 'success');
@@ -2391,4 +2558,212 @@ function getAIPersonalizationStatus() {
 // 在DOM加载完成后初始化个性化开关
 document.addEventListener('DOMContentLoaded', function () {
     initAIPersonalizationToggle();
+    initQuickLoginTest();
 });
+
+/**
+ * 初始化快速登录测试功能
+ */
+function initQuickLoginTest() {
+    const quickLoginButton = document.getElementById('quick-login-test');
+    
+    if (quickLoginButton) {
+        // 只在开发环境显示快速登录按钮
+        const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (isDevelopment) {
+            quickLoginButton.style.display = 'block';
+        }
+        
+        quickLoginButton.addEventListener('click', function() {
+            showQuickLoginModal();
+        });
+    }
+}
+
+/**
+ * 显示快速登录测试模态框
+ */
+function showQuickLoginModal() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-xl z-10 w-full max-w-md p-6 relative">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="close-quick-login">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-user-check text-2xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">快速登录测试</h2>
+                <p class="text-gray-600 mt-2">选择一个测试账户快速体验登录功能</p>
+            </div>
+            
+            <div class="space-y-3">
+                <button onclick="quickLogin('student')" class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-graduation-cap mr-2"></i>
+                    学生账户 (student)
+                </button>
+                <button onclick="quickLogin('teacher')" class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-chalkboard-teacher mr-2"></i>
+                    教师账户 (teacher)
+                </button>
+                <button onclick="quickLogin('admin')" class="w-full bg-purple-600 hover:bg-purple-700 text-white py-3 px-4 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-user-shield mr-2"></i>
+                    管理员账户 (admin)
+                </button>
+            </div>
+            
+            <div class="mt-6 text-center">
+                <p class="text-sm text-gray-500">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    这是开发环境的测试功能，密码与用户名相同
+                </p>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // 关闭模态框
+    document.getElementById('close-quick-login').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+
+    // 点击背景关闭
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+}
+
+/**
+ * 快速登录功能
+ */
+function quickLogin(userType) {
+    const result = simulateLogin(userType, userType);
+    
+    if (result.success) {
+        // 关闭模态框
+        const modal = document.querySelector('.fixed.inset-0');
+        if (modal) {
+            document.body.removeChild(modal);
+        }
+        
+        showNotification(`已成功登录为 ${result.user.name} (${result.user.role})`, 'success');
+        
+        // 显示登录成功的详细信息
+        setTimeout(() => {
+            showLoginSuccessInfo(result.user);
+        }, 1000);
+    } else {
+        showNotification('登录失败：' + result.error, 'error');
+    }
+}
+
+/**
+ * 显示登录成功信息
+ */
+function showLoginSuccessInfo(user) {
+    const infoModal = document.createElement('div');
+    infoModal.className = 'fixed inset-0 flex items-center justify-center z-50';
+    infoModal.innerHTML = `
+        <div class="fixed inset-0 bg-black opacity-50"></div>
+        <div class="bg-white rounded-lg shadow-xl z-10 w-full max-w-lg p-6 relative">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="close-success-info">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 flex items-center justify-center">
+                    <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">登录成功！</h2>
+            </div>
+            
+            <div class="bg-gray-50 rounded-lg p-4 mb-6">
+                <h3 class="font-bold text-gray-800 mb-3">当前用户信息</h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">用户名：</span>
+                        <span class="font-medium">${user.username}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">姓名：</span>
+                        <span class="font-medium">${user.name}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">邮箱：</span>
+                        <span class="font-medium">${user.email}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-600">角色：</span>
+                        <span class="font-medium ${user.role === 'teacher' ? 'text-green-600' : user.role === 'admin' ? 'text-purple-600' : 'text-blue-600'}">${user.role === 'teacher' ? '教师' : user.role === 'admin' ? '管理员' : '学生'}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="bg-blue-50 rounded-lg p-4 mb-6">
+                <h3 class="font-bold text-blue-800 mb-3">界面变化</h3>
+                <ul class="text-sm text-blue-700 space-y-1">
+                    <li>✅ 右上角显示用户名：${user.username}</li>
+                    <li>✅ 用户菜单已更新为登录状态</li>
+                    <li>✅ 下拉菜单显示个人信息和操作选项</li>
+                    ${user.role === 'teacher' || user.role === 'admin' ? '<li>✅ 教师助手功能已启用</li>' : ''}
+                </ul>
+            </div>
+            
+            <div class="flex justify-center space-x-3">
+                <button onclick="testUserMenu()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                    <i class="fas fa-user mr-2"></i>测试用户菜单
+                </button>
+                ${user.role === 'teacher' || user.role === 'admin' ? 
+                    '<button onclick="openTeacherDashboard()" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg"><i class="fas fa-chalkboard-teacher mr-2"></i>访问教师助手</button>' : 
+                    ''
+                }
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(infoModal);
+
+    // 关闭模态框
+    document.getElementById('close-success-info').addEventListener('click', function () {
+        document.body.removeChild(infoModal);
+    });
+
+    // 点击背景关闭
+    infoModal.addEventListener('click', function (e) {
+        if (e.target === infoModal) {
+            document.body.removeChild(infoModal);
+        }
+    });
+}
+
+/**
+ * 测试用户菜单
+ */
+function testUserMenu() {
+    // 关闭当前模态框
+    const modal = document.querySelector('.fixed.inset-0');
+    if (modal) {
+        document.body.removeChild(modal);
+    }
+    
+    // 模拟点击用户菜单按钮
+    const userMenuButton = document.getElementById('user-menu-button');
+    if (userMenuButton) {
+        userMenuButton.click();
+        showNotification('用户菜单已打开，请查看右上角', 'info');
+    }
+}
+
+/**
+ * 打开教师助手
+ */
+function openTeacherDashboard() {
+    window.open('/static/teacher-dashboard.html', '_blank');
+}

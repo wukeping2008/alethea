@@ -1210,12 +1210,31 @@ class OptimizedModelSelector:
     
     def _select_best_domestic_provider(self, providers: List[str], characteristics: List[str]) -> str:
         """选择最佳国内AI服务提供商"""
-        # 根据特征匹配选择最佳提供商
-        scores = {}
+        # 首先检查哪些提供商有有效的API密钥
+        providers_with_keys = []
+        providers_without_keys = []
         
         for provider_name in providers:
             provider = self.llm_manager.providers[provider_name]
+            # 检查是否有API密钥
+            if hasattr(provider, 'api_key') and provider.api_key and provider.api_key.strip():
+                providers_with_keys.append(provider_name)
+            else:
+                providers_without_keys.append(provider_name)
+        
+        # 优先从有API密钥的提供商中选择
+        target_providers = providers_with_keys if providers_with_keys else providers_without_keys
+        
+        # 根据特征匹配选择最佳提供商
+        scores = {}
+        
+        for provider_name in target_providers:
+            provider = self.llm_manager.providers[provider_name]
             score = 0
+            
+            # 如果有API密钥，给予额外分数
+            if provider_name in providers_with_keys:
+                score += 10  # 有API密钥的提供商优先级更高
             
             # 基于能力匹配计算分数
             for characteristic in characteristics:
@@ -1233,7 +1252,16 @@ class OptimizedModelSelector:
             scores[provider_name] = score
         
         # 返回得分最高的提供商
-        return max(scores.items(), key=lambda x: x[1])[0]
+        best_provider = max(scores.items(), key=lambda x: x[1])[0]
+        
+        # 调试信息
+        print(f"Available providers: {providers}")
+        print(f"Providers with API keys: {providers_with_keys}")
+        print(f"Providers without API keys: {providers_without_keys}")
+        print(f"Provider scores: {scores}")
+        print(f"Selected provider: {best_provider}")
+        
+        return best_provider
 
 
 # 优化版LLM管理器

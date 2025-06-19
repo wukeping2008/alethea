@@ -1277,19 +1277,7 @@
 
         // User menu toggle is handled in main.js
 
-        // Question submission
-        document.getElementById('submit-question').addEventListener('click', function () {
-            const question = document.getElementById('question-input').value.trim();
-            if (question) {
-                // Save current question to localStorage
-                localStorage.setItem('currentQuestion', question);
-
-                // Open answer page in new window
-                window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
-            } else {
-                alert('请输入问题');
-            }
-        });
+        // Question submission is handled in main.js to avoid duplicate event listeners
 
         // Subject question function
         function askSubjectQuestion(subject) {

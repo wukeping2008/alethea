@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alethea - Higher Education Q&A Platform</title>
+    <!-- Tailwind CSS -->
+    <link href="/static/libs/css/tailwind.min.css" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    
+    <!-- MathJax will be loaded dynamically -->
+    <!-- Highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="/static/libs/css/highlight.min.css">
+    <!-- Highlight.js will be loaded dynamically -->
+    <!-- Chart.js for data visualization -->
+    <!-- Chart.js will be loaded dynamically -->
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo {
+            height: 60px;
+            margin-right: 10px;
+        }
+        
+        .nav-link {
+            position: relative;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-link:hover::after {
+            width: 100%;
+        }
+        
+        .hero-section {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .question-input {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .question-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.2);
+            outline: none;
+        }
+        
+        .submit-btn {
+            background-color: var(--primary-color);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+        
+        .answer-card {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .answer-card:hover {
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .subject-card {
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .feature-icon {
+            background-color: var(--primary-color);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .language-switcher {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .language-switcher:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .language-flag {
+            width: 20px;
+            height: 15px;
+            border-radius: 2px;
+        }
+        
+        /* Math formula styles */
+        .math-formula {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .hero-section {
+                padding: 2rem 1rem;
+            }
+            
+            .logo {
+                height: 40px;
+            }
+        }
+        
+        /* Animation effects */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="logo-container">
+                <img src="/static/logo.png" alt="Alethea Logo" class="logo">
+                <span class="text-2xl font-bold text-primary">Alethea</span>
+            </div>
+            <div class="hidden md:flex space-x-8">
+                <a href="#" class="nav-link font-medium">Home</a>
+                <a href="#subjects" class="nav-link font-medium">Subjects</a>
+                <a href="/static/projects-en.html" class="nav-link font-medium">Project Learning</a>
+                <a href="/static/experiments.html" class="nav-link font-medium">Lab Simulation</a>
+                <a href="#about" class="nav-link font-medium">About Us</a>
+            </div>
+            <div class="flex items-center space-x-4">
+                <!-- Language Switcher -->
+                <div class="language-switcher" onclick="switchLanguage()">
+                    <span class="text-lg">🇨🇳</span>
+                    <span class="text-sm font-medium">中文</span>
+                    <i class="fas fa-chevron-down text-xs"></i>
+                </div>
+                
+                <button id="theme-toggle" class="p-2 rounded-full hover:bg-gray-100">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <div class="relative" id="user-menu">
+                    <button id="user-menu-button" class="flex items-center space-x-2 focus:outline-none">
+                        <div class="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                            <i class="fas fa-user text-gray-600"></i>
+                        </div>
+                        <span class="hidden md:inline-block" id="user-menu-text">Login/Register</span>
+                        <i class="fas fa-chevron-down text-sm hidden md:inline-block" id="user-menu-arrow"></i>
+                    </button>
+                    <!-- Guest menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="guest-dropdown">
+                        <a href="/static/login-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                        <a href="/static/register-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-user-plus mr-2"></i>Register
+                        </a>
+                    </div>
+                    <!-- User menu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 hidden" id="user-dropdown">
+                        <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                            <div class="font-medium" id="user-name">Username</div>
+                            <div class="text-xs" id="user-email">user@example.com</div>
+                        </div>
+                        <a href="/static/dashboard-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                            <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="profile-link">
+                            <i class="fas fa-user-circle mr-2"></i>Profile
+                        </a>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="settings-link">
+                            <i class="fas fa-cog mr-2"></i>Settings
+                        </a>
+                        <div class="border-t border-gray-100"></div>
+                        <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" id="logout-link">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                <button class="md:hidden focus:outline-none" id="mobile-menu-button">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Mobile menu -->
+        <div class="md:hidden hidden bg-white shadow-sm mt-2 py-3" id="mobile-menu">
+            <div class="container mx-auto px-4 flex flex-col space-y-3">
+                <a href="#" class="block py-2 px-4 hover:bg-gray-100 rounded">Home</a>
+                <a href="#subjects" class="block py-2 px-4 hover:bg-gray-100 rounded">Subjects</a>
+                <a href="/static/projects-en.html" class="block py-2 px-4 hover:bg-gray-100 rounded">Project Learning</a>
+                <a href="/static/experiments.html" class="block py-2 px-4 hover:bg-gray-100 rounded">Lab Simulation</a>
+                <a href="#about" class="block py-2 px-4 hover:bg-gray-100 rounded">About Us</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-section py-16 px-4 my-8 container mx-auto">
+        <div class="text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-4">Higher Education Q&A Platform</h1>
+            <p class="text-xl mb-8">Intelligent Learning Assistant for Engineering Students and Faculty</p>
+            <div class="max-w-3xl mx-auto">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <textarea id="question-input" class="question-input w-full p-4 mb-4 h-32 text-gray-800" placeholder="Enter your question, e.g., 'Explain Kirchhoff's laws and their applications in circuit analysis'"></textarea>
+                    <div class="flex justify-center">
+                        <button id="submit-question" class="submit-btn px-8 py-3 rounded-lg font-medium flex items-center">
+                            <i class="fas fa-search mr-2"></i>
+                            Search Answer
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- Subjects Section -->
+    <section id="subjects" class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-12">Subject Categories</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Electrical Engineering -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-blue-600 mb-4">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Electrical Lab</h3>
+                <p class="text-gray-600 mb-4">Circuit analysis, analog circuits, digital circuits experiments</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-green-600 mb-4">
+                    <i class="fas fa-project-diagram"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Circuit Analysis</h3>
+                <p class="text-gray-600 mb-4">DC circuits, AC circuits, three-phase circuits theory</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-purple-600 mb-4">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Analog Electronics</h3>
+                <p class="text-gray-600 mb-4">Amplifiers, filters, oscillators, analog circuit design</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-red-600 mb-4">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Digital Electronics</h3>
+                <p class="text-gray-600 mb-4">Logic gates, flip-flops, counters, digital circuit design</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-yellow-600 mb-4">
+                    <i class="fas fa-plug"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Power Electronics</h3>
+                <p class="text-gray-600 mb-4">Rectifiers, inverters, converters, power applications</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-indigo-600 mb-4">
+                    <i class="fas fa-sliders-h"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Control Systems</h3>
+                <p class="text-gray-600 mb-4">Time domain, frequency domain, state space analysis</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Physics -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-blue-500 mb-4">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">University Physics</h3>
+                <p class="text-gray-600 mb-4">Mechanics, thermodynamics, electromagnetism, optics</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-purple-500 mb-4">
+                    <i class="fas fa-magnet"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Electromagnetism</h3>
+                <p class="text-gray-600 mb-4">Electric fields, magnetic fields, electromagnetic induction</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-orange-500 mb-4">
+                    <i class="fas fa-wave-square"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Quantum Mechanics</h3>
+                <p class="text-gray-600 mb-4">Wave functions, Schrödinger equation, quantum states</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Chemistry -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-green-500 mb-4">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Inorganic Chemistry</h3>
+                <p class="text-gray-600 mb-4">Atomic structure, chemical bonding, coordination compounds</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-emerald-500 mb-4">
+                    <i class="fas fa-leaf"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Organic Chemistry</h3>
+                <p class="text-gray-600 mb-4">Organic compounds, reaction mechanisms, synthesis</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- Computer Science -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-blue-700 mb-4">
+                    <i class="fas fa-laptop-code"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Programming Fundamentals</h3>
+                <p class="text-gray-600 mb-4">C/C++, Python, Java programming languages</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-green-700 mb-4">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Data Structures & Algorithms</h3>
+                <p class="text-gray-600 mb-4">Linear structures, trees, graphs, sorting algorithms</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <!-- AI & Machine Learning -->
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-indigo-600 mb-4">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Machine Learning</h3>
+                <p class="text-gray-600 mb-4">Supervised learning, unsupervised learning, reinforcement learning</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+            
+            <div class="subject-card bg-white p-6 rounded-lg shadow-md hover:shadow-lg">
+                <div class="text-4xl text-pink-600 mb-4">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Deep Learning</h3>
+                <p class="text-gray-600 mb-4">Neural networks, CNN, RNN, Transformer models</p>
+                <a href="#" class="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+                    View Details <i class="fas fa-arrow-right ml-2"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container mx-auto px-4 py-16">
+        <h2 class="text-3xl font-bold text-center mb-12">Platform Features</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="text-center">
+                <div class="feature-icon mx-auto">
+                    <i class="fas fa-brain"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Multi-Model AI Integration</h3>
+                <p class="text-gray-600">Integrates OpenAI, Claude, Gemini and other large models, intelligently selecting the most suitable model for your questions</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="feature-icon mx-auto">
+                    <i class="fas fa-flask"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Online Lab Simulation</h3>
+                <p class="text-gray-600">Provides online simulation environment for circuit and electronics experiments without physical equipment</p>
+            </div>
+            
+            <div class="text-center">
+                <div class="feature-icon mx-auto">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="text-xl font-bold mb-2">Data Visualization</h3>
+                <p class="text-gray-600">Supports beautiful rendering of mathematical formulas, charts and code to make complex concepts easier to understand</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="bg-gray-50 py-16">
+        <div class="container mx-auto px-4">
+            <h2 class="text-3xl font-bold text-center mb-12">About Alethea</h2>
+            <div class="max-w-3xl mx-auto">
+                <p class="text-lg text-gray-700 mb-6">Alethea is a knowledge Q&A platform specifically designed for higher education, particularly for engineering students and faculty. Our mission is to provide intelligent support for teaching and learning through advanced artificial intelligence technology, making knowledge acquisition more efficient and convenient.</p>
+                <p class="text-lg text-gray-700 mb-6">Currently, we focus on serving engineering disciplines such as electrical engineering, circuit analysis, and analog electronics. In the future, we will gradually expand to more higher education subjects and eventually cover K-12 education.</p>
+                <p class="text-lg text-gray-700">The name "Alethea" comes from Greek, meaning "truth" and "discovery", representing our relentless pursuit of knowledge exploration.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Alethea</h3>
+                    <p class="text-gray-400">Higher Education Q&A Platform</p>
+                    <div class="flex space-x-4 mt-4">
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-facebook"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                        <a href="#" class="text-gray-400 hover:text-white">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Quick Links</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Home</a></li>
+                        <li><a href="#subjects" class="text-gray-400 hover:text-white">Subjects</a></li>
+                        <li><a href="#simulation" class="text-gray-400 hover:text-white">Lab Simulation</a></li>
+                        <li><a href="#about" class="text-gray-400 hover:text-white">About Us</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Support</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Help Center</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">FAQ</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Contact Us</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Feedback</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h3 class="text-lg font-bold mb-4">Legal</h3>
+                    <ul class="space-y-2">
+                        <li><a href="#" class="text-gray-400 hover:text-white">Privacy Policy</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Terms of Service</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white">Copyright</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 Alethea. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // Language switching function
+        function switchLanguage() {
+            window.location.href = '/static/index.html';
+        }
+        
+        // Theme toggle
+        document.getElementById('theme-toggle').addEventListener('click', function() {
+            document.body.classList.toggle('dark-mode');
+            const icon = this.querySelector('i');
+            if (document.body.classList.contains('dark-mode')) {
+                icon.className = 'fas fa-sun';
+            } else {
+                icon.className = 'fas fa-moon';
+            }
+        });
+        
+        // Mobile menu toggle
+        document.getElementById('mobile-menu-button').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // User menu toggle
+        document.getElementById('user-menu-button').addEventListener('click', function() {
+            const guestDropdown = document.getElementById('guest-dropdown');
+            const userDropdown = document.getElementById('user-dropdown');
+            
+            // Toggle guest dropdown (when not logged in)
+            guestDropdown.classList.toggle('hidden');
+        });
+        
+        // Question submission
+        document.getElementById('submit-question').addEventListener('click', function() {
+            const question = document.getElementById('question-input').value.trim();
+            if (question) {
+                // Save current question to localStorage
+                localStorage.setItem('currentQuestion', question);
+                
+                // Open answer page in new window
+                window.open(`/static/answer-en.html?q=${encodeURIComponent(question)}`, '_blank');
+            } else {
+                alert('Please enter a question');
+            }
+        });
+        
+        // Initialize MathJax
+        window.MathJax = {
+            tex: {
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']]
+            },
+            svg: {
+                fontCache: 'global'
+            }
+        };
+        
+        // Initialize syntax highlighting
+        document.addEventListener('DOMContentLoaded', function() {
+            hljs.highlightAll();
+        });
+        
+        // Draw circuit example
+        function drawCircuitExample() {
+            const canvas = document.getElementById('circuit-example');
+            if (!canvas) return;
+            
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Set line style
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#333';
+            
+            // Draw voltage source
+            ctx.beginPath();
+            ctx.arc(50, 100, 20, 0, 2 * Math.PI);
+            ctx.stroke();
+            ctx.fillText('V', 45, 105);
+            
+            // Draw resistors
+            // R1
+            ctx.strokeRect(120, 90, 40, 20);
+            ctx.fillText('R1', 130, 85);
+            
+            // R2
+            ctx.strokeRect(220, 90, 40, 20);
+            ctx.fillText('R2', 230, 85);
+            
+            // R3
+            ctx.strokeRect(170, 140, 40, 20);
+            ctx.fillText('R3', 180, 135);
+            
+            // Draw connecting wires
+            ctx.beginPath();
+            // From voltage source to R1
+            ctx.moveTo(70, 100);
+            ctx.lineTo(120, 100);
+            
+            // From R1 to R2
+            ctx.moveTo(160, 100);
+            ctx.lineTo(220, 100);
+            
+            // From R2 back to voltage source
+            ctx.moveTo(260, 100);
+            ctx.lineTo(350, 100);
+            ctx.lineTo(350, 180);
+            ctx.lineTo(50, 180);
+            ctx.lineTo(50, 120);
+            
+            // Branch to R3
+            ctx.moveTo(190, 100);
+            ctx.lineTo(190, 140);
+            ctx.moveTo(190, 160);
+            ctx.lineTo(190, 180);
+            
+            ctx.stroke();
+            
+            // Add current direction arrows
+            ctx.fillStyle = 'red';
+            ctx.fillText('I1', 90, 95);
+            ctx.fillText('I2', 190, 95);
+            ctx.fillText('I3', 195, 175);
+        }
+        
+        // Draw circuit when page loads
+        document.addEventListener('DOMContentLoaded', drawCircuitExample);
+    </script>
+    <script src="/static/js/main-en.js"></script>
+
+    <script>
+        // 延迟加载脚本函数
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // 页面加载完成后加载非关键资源
+        window.addEventListener('load', function() {
+            // 延迟加载Chart.js
+            if (document.querySelector('canvas')) {
+                loadScript('/static/libs/js/chart.min.js');
+            }
+            
+            // 延迟加载Highlight.js
+            if (document.querySelector('pre code')) {
+                loadScript('/static/libs/js/highlight.min.js', function() {
+                    if (window.hljs) {
+                        hljs.highlightAll();
+                    }
+                });
+            }
+
+            // 延迟加载MathJax
+            if (document.querySelector('.math') || document.querySelector('[data-math]')) {
+                loadScript('/static/libs/js/mathjax.min.js');
+            }
+        });
+    </script>
+</body>
+</html>

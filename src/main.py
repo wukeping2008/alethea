@@ -40,6 +40,7 @@ app.db = db
 # Load configuration
 def load_config():
     """Load configuration from environment or config file"""
+    # Default configuration with all providers
     config = {
         'openai': {
             'api_key': os.getenv('OPENAI_API_KEY', ''),
@@ -49,28 +50,71 @@ def load_config():
             'api_key': os.getenv('DEEPSEEK_API_KEY', ''),
             'default_model': os.getenv('DEEPSEEK_DEFAULT_MODEL', 'deepseek-chat')
         },
+        'volces_deepseek': {
+            'api_key': os.getenv('VOLCES_DEEPSEEK_API_KEY', ''),
+            'base_url': os.getenv('VOLCES_DEEPSEEK_BASE_URL', 'https://ark.cn-beijing.volces.com/api/v3/chat/completions'),
+            'default_model': os.getenv('VOLCES_DEEPSEEK_DEFAULT_MODEL', 'deepseek-r1-250528'),
+            'max_tokens': int(os.getenv('VOLCES_DEEPSEEK_MAX_TOKENS', '16191'))
+        },
+        'ollama_deepseek': {
+            'base_url': os.getenv('OLLAMA_BASE_URL', 'http://localhost:11434'),
+            'default_model': os.getenv('OLLAMA_DEFAULT_MODEL', 'deepseek-r1:7b')
+        },
         'qianwen': {
             'api_key': os.getenv('QIANWEN_API_KEY', ''),
             'secret_key': os.getenv('QIANWEN_SECRET_KEY', ''),
             'default_model': os.getenv('QIANWEN_DEFAULT_MODEL', 'ERNIE-Bot-4')
         },
-        'default_provider': os.getenv('DEFAULT_LLM_PROVIDER', 'openai')
+        'ali_qwen': {
+            'api_key': os.getenv('ALI_QWEN_API_KEY', ''),
+            'base_url': os.getenv('ALI_QWEN_BASE_URL', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'),
+            'default_model': os.getenv('ALI_QWEN_DEFAULT_MODEL', 'qwen-plus-2025-04-28'),
+            'max_tokens': int(os.getenv('ALI_QWEN_MAX_TOKENS', '16191'))
+        },
+        'claude': {
+            'api_key': os.getenv('CLAUDE_API_KEY', ''),
+            'default_model': os.getenv('CLAUDE_DEFAULT_MODEL', 'claude-3-sonnet-20240229')
+        },
+        'gemini': {
+            'api_key': os.getenv('GEMINI_API_KEY', ''),
+            'default_model': os.getenv('GEMINI_DEFAULT_MODEL', 'gemini-1.5-flash')
+        },
+        'llama': {
+            'api_key': os.getenv('LLAMA_API_KEY', ''),
+            'default_model': os.getenv('LLAMA_DEFAULT_MODEL', 'llama-3-70b')
+        },
+        'default_provider': os.getenv('DEFAULT_LLM_PROVIDER', 'gemini')
     }
     
     # For development, try to load from config file if exists
     config_path = os.path.join(os.path.dirname(__file__), 'config.json')
     if os.path.exists(config_path):
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path, 'r', encoding='utf-8') as f:
                 file_config = json.load(f)
-                # Update config with file values
+                print(f"Loading configuration from {config_path}")
+                
+                # Completely replace config with file values
                 for key, value in file_config.items():
-                    if key in config and isinstance(value, dict):
+                    if isinstance(value, dict) and key in config and isinstance(config[key], dict):
+                        # Merge dictionaries
                         config[key].update(value)
                     else:
+                        # Replace value completely
                         config[key] = value
+                
+                print(f"Configuration loaded successfully. Default provider: {config.get('default_provider', 'not set')}")
+                
+                # Debug: Print which providers have API keys
+                for provider_name, provider_config in config.items():
+                    if isinstance(provider_config, dict) and 'api_key' in provider_config:
+                        has_key = bool(provider_config['api_key'] and provider_config['api_key'].strip())
+                        print(f"Provider {provider_name}: {'✓' if has_key else '✗'} API key configured")
+                        
         except Exception as e:
             print(f"Error loading config file: {e}")
+    else:
+        print(f"Config file not found at {config_path}, using environment variables only")
     
     return config
 

@@ -368,10 +368,16 @@ function setupEventListeners() {
             }
         });
 
-        // 按Enter键提交问题
+        // 按Enter键提交问题（支持单独按Enter键）
         questionInput.addEventListener('keydown', function (e) {
-            if (e.key === 'Enter' && e.ctrlKey) {
-                submitButton.click();
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault(); // 防止换行
+                const question = questionInput.value.trim();
+                if (question) {
+                    submitQuestion(question);
+                } else {
+                    showNotification('请输入问题', 'error');
+                }
             }
         });
     }
@@ -417,11 +423,21 @@ function submitQuestion(question) {
     // 保存当前问题到localStorage
     localStorage.setItem('currentQuestion', question);
 
-    // 在新窗口打开回答页面
-    window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+    // 在新窗口打开回答页面（只打开一次）
+    const answerUrl = `/static/answer.html?q=${encodeURIComponent(question)}`;
+    window.open(answerUrl, '_blank');
+
+    // 清空输入框
+    const questionInput = document.getElementById('question-input');
+    if (questionInput) {
+        questionInput.value = '';
+    }
 
     // 隐藏加载状态
     showLoading(false);
+
+    // 显示提交成功提示
+    showNotification('问题已提交，正在新窗口中生成答案...', 'success');
 }
 
 /**

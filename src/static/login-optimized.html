@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登录 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <link href="/static/libs/css/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
+    <!-- Custom styles -->
+    <style>
+        @font-face {
+            font-family: 'Noto Sans SC';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: local('Noto Sans SC Regular'), local('NotoSansSC-Regular'),
+                 url('/static/libs/fonts/noto-sans-sc-v36-chinese-simplified-regular.woff2') format('woff2');
+        }
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .login-container {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-input {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .form-input:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(44, 165, 141, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-color), #22d3ee);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(44, 165, 141, 0.3);
+        }
+        
+        .logo {
+            height: 60px;
+        }
+        
+        .social-btn {
+            transition: all 0.3s ease;
+            border: 2px solid #e2e8f0;
+        }
+        
+        .social-btn:hover {
+            border-color: var(--accent-color);
+            background-color: #f0fdfa;
+        }
+        
+        .floating-shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .floating-shape:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .floating-shape:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 20%;
+            right: 10%;
+            animation-delay: 2s;
+        }
+        
+        .floating-shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 20%;
+            left: 20%;
+            animation-delay: 4s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .error-message {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        
+        .success-message {
+            background-color: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: none;
+        }
+
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .language-switcher:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher" onclick="switchLanguage()">
+        <span class="text-sm font-medium">🇺🇸 English</span>
+    </div>
+
+    <!-- Floating shapes for decoration -->
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    <div class="floating-shape"></div>
+    
+    <div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <div class="login-container p-8">
+                <!-- Logo and title -->
+                <div class="text-center mb-8">
+                    <div class="flex justify-center items-center mb-4">
+                        <img src="/static/logo.png" alt="Alethea Logo" class="logo mr-3">
+                        <h1 class="text-3xl font-bold text-gray-800">Alethea</h1>
+                    </div>
+                    <h2 class="text-xl text-gray-600">欢迎回来</h2>
+                    <p class="text-gray-500 mt-2">登录您的账户继续学习之旅</p>
+                </div>
+                
+                <!-- Error/Success messages -->
+                <div id="error-message" class="error-message">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <span id="error-text"></span>
+                </div>
+                
+                <div id="success-message" class="success-message">
+                    <i class="fas fa-check-circle mr-2"></i>
+                    <span id="success-text"></span>
+                </div>
+                
+                <!-- Login form -->
+                <form id="login-form" class="space-y-6">
+                    <div>
+                        <label for="username" class="block text-sm font-medium text-gray-700 mb-2">
+                            用户名或邮箱
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400"></i>
+                            </div>
+                            <input id="username" name="username" type="text" required 
+                                   class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
+                                   placeholder="请输入用户名或邮箱">
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
+                            密码
+                        </label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400"></i>
+                            </div>
+                            <input id="password" name="password" type="password" required 
+                                   class="form-input block w-full pl-10 pr-10 py-3 rounded-lg focus:outline-none"
+                                   placeholder="请输入密码">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
+                                <button type="button" id="toggle-password" class="text-gray-400 hover:text-gray-600">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <input id="remember-me" name="remember-me" type="checkbox" 
+                                   class="h-4 w-4 text-teal-600 focus:ring-teal-500 border-gray-300 rounded">
+                            <label for="remember-me" class="ml-2 block text-sm text-gray-700">
+                                记住我
+                            </label>
+                        </div>
+                        
+                        <div class="text-sm">
+                            <a href="#" class="font-medium text-teal-600 hover:text-teal-500">
+                                忘记密码？
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <button type="submit" id="login-btn" 
+                                class="btn-primary group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500">
+                            <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                                <i class="fas fa-sign-in-alt text-white"></i>
+                            </span>
+                            <span id="login-text">登录</span>
+                            <div id="login-spinner" class="hidden ml-2">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+                        </button>
+                    </div>
+                </form>
+                
+                <!-- Divider -->
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-white text-gray-500">或者</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Social login -->
+                <div class="mt-6 grid grid-cols-2 gap-3">
+                    <button class="social-btn w-full inline-flex justify-center py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-google text-red-500 mr-2"></i>
+                        Google
+                    </button>
+                    
+                    <button class="social-btn w-full inline-flex justify-center py-2 px-4 rounded-lg shadow-sm text-sm font-medium text-gray-500 hover:text-gray-700">
+                        <i class="fab fa-github text-gray-800 mr-2"></i>
+                        GitHub
+                    </button>
+                </div>
+                
+                <!-- Register link -->
+                <div class="mt-6 text-center">
+                    <p class="text-sm text-gray-600">
+                        还没有账户？
+                        <a href="/static/register.html" class="font-medium text-teal-600 hover:text-teal-500">
+                            立即注册
+                        </a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Language switching function
+        function switchLanguage() {
+            const currentParams = new URLSearchParams(window.location.search);
+            const returnUrl = currentParams.get('return');
+            let targetUrl = '/static/login-en.html';
+            if (returnUrl) {
+                targetUrl += `?return=${encodeURIComponent(returnUrl)}`;
+            }
+            window.location.href = targetUrl;
+        }
+
+        // DOM elements
+        const loginForm = document.getElementById('login-form');
+        const loginBtn = document.getElementById('login-btn');
+        const loginText = document.getElementById('login-text');
+        const loginSpinner = document.getElementById('login-spinner');
+        const togglePassword = document.getElementById('toggle-password');
+        const passwordInput = document.getElementById('password');
+        const errorMessage = document.getElementById('error-message');
+        const successMessage = document.getElementById('success-message');
+        const errorText = document.getElementById('error-text');
+        const successText = document.getElementById('success-text');
+
+        // Toggle password visibility
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            
+            const icon = this.querySelector('i');
+            if (type === 'password') {
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            } else {
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            }
+        });
+
+        // Show error message
+        function showError(message) {
+            errorText.textContent = message;
+            errorMessage.style.display = 'block';
+            successMessage.style.display = 'none';
+        }
+
+        // Show success message
+        function showSuccess(message) {
+            successText.textContent = message;
+            successMessage.style.display = 'block';
+            errorMessage.style.display = 'none';
+        }
+
+        // Hide messages
+        function hideMessages() {
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+        }
+
+        // Set loading state
+        function setLoading(loading) {
+            if (loading) {
+                loginBtn.disabled = true;
+                loginText.textContent = '登录中...';
+                loginSpinner.classList.remove('hidden');
+            } else {
+                loginBtn.disabled = false;
+                loginText.textContent = '登录';
+                loginSpinner.classList.add('hidden');
+            }
+        }
+
+        // Handle form submission
+        loginForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            hideMessages();
+            setLoading(true);
+            
+            const formData = new FormData(loginForm);
+            const loginData = {
+                username: formData.get('username'),
+                password: formData.get('password')
+            };
+            
+            try {
+                const response = await fetch('/api/user/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(loginData)
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    // Store token and user info
+                    localStorage.setItem('auth_token', data.token);
+                    localStorage.setItem('current_user', JSON.stringify(data.user));
+                    
+                    showSuccess('登录成功！正在跳转...');
+                    
+                    // Redirect to previous page or home page
+                    setTimeout(() => {
+                        const returnUrl = new URLSearchParams(window.location.search).get('return') || '/static/index.html';
+                        window.location.href = returnUrl;
+                    }, 1500);
+                } else {
+                    showError(data.error || '登录失败，请重试');
+                }
+            } catch (error) {
+                console.error('Login error:', error);
+                showError('网络错误，请检查您的连接');
+            } finally {
+                setLoading(false);
+            }
+        });
+
+        // Check if user is already logged in
+        window.addEventListener('load', function() {
+            const token = localStorage.getItem('auth_token');
+            if (token) {
+                // Verify token is still valid
+                fetch('/api/user/profile', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // User is already logged in, redirect
+                        const returnUrl = new URLSearchParams(window.location.search).get('return') || '/static/dashboard.html';
+                        window.location.href = returnUrl;
+                    }
+                })
+                .catch(error => {
+                    // Token is invalid, remove it
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('current_user');
+                });
+            }
+        });
+
+        // Handle social login (placeholder)
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                showError('社交登录功能即将推出');
+            });
+        });
+    </script>
+
+    <script>
+        // 延迟加载脚本函数
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // 页面加载完成后加载非关键资源
+        window.addEventListener('load', function() {
+            // 延迟加载Chart.js
+            if (document.querySelector('canvas')) {
+                loadScript('/static/libs/js/chart.min.js');
+            }
+            
+            // 延迟加载Highlight.js
+            if (document.querySelector('pre code')) {
+                loadScript('/static/libs/js/highlight.min.js', function() {
+                    if (window.hljs) {
+                        hljs.highlightAll();
+                    }
+                });
+            }
+
+            // 延迟加载MathJax
+            if (document.querySelector('.math') || document.querySelector('[data-math]')) {
+                loadScript('/static/libs/js/mathjax.min.js');
+            }
+        });
+    </script>
+</body>
+</html>

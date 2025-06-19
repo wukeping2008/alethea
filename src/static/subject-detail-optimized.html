@@ -1,0 +1,1065 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="page-title">学科详情 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <link href="/static/libs/css/tailwind.min.css" rel="stylesheet">
+    <!-- MathJax for LaTeX rendering -->
+    
+    <!-- MathJax will be loaded dynamically -->
+    <!-- Chart.js for data visualization -->
+    <!-- Chart.js will be loaded dynamically -->
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
+    <!-- Custom styles -->
+    <style>
+        @font-face {
+            font-family: 'Noto Sans SC';
+            font-style: normal;
+            font-weight: 400;
+            font-display: swap;
+            src: local('Noto Sans SC Regular'), local('NotoSansSC-Regular'),
+                 url('/static/libs/fonts/noto-sans-sc-v36-chinese-simplified-regular.woff2') format('woff2');
+        }
+
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: white;
+        }
+
+        /* 学术黑板背景 */
+        .blackboard-bg {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            position: relative;
+        }
+
+        .blackboard-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image:
+                /* 粉笔纹理 */
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                radial-gradient(circle at 80% 70%, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+                radial-gradient(circle at 40% 90%, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                /* 网格线 */
+                linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                linear-gradient(0deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size:
+                200px 200px,
+                150px 150px,
+                180px 180px,
+                50px 50px,
+                50px 50px;
+            pointer-events: none;
+        }
+
+        /* 毛玻璃卡片效果 */
+        .glass-module {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .glass-module:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow:
+                0 12px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        /* 导航栏样式 */
+        .nav-header {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 标题样式 */
+        .subject-title {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 公式显示区域 */
+        .formula-highlight {
+            background: rgba(79, 172, 254, 0.1);
+            border: 2px solid rgba(79, 172, 254, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .formula-highlight::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 2px;
+        }
+
+        /* 图表容器 */
+        .chart-container {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* 控制面板 */
+        .control-panel {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 15px;
+            padding: 20px;
+        }
+
+        /* 滑块样式 */
+        .slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            outline: none;
+            margin: 10px 0;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 下拉选择框 */
+        .select-box {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            color: white;
+            padding: 10px 15px;
+            width: 100%;
+            outline: none;
+        }
+
+        .select-box option {
+            background: #1a1a2e;
+            color: white;
+        }
+
+        /* 按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            padding: 12px 24px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 172, 254, 0.4);
+        }
+
+        /* 知识点列表 */
+        .knowledge-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 15px;
+            margin: 10px 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .knowledge-item:hover {
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(79, 172, 254, 0.5);
+            transform: translateX(5px);
+        }
+
+        .knowledge-item .icon {
+            color: #4facfe;
+            margin-right: 10px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .glass-module {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .subject-title {
+                font-size: 1.8rem;
+            }
+        }
+
+        /* 动画效果 */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease forwards;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #4facfe;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body class="blackboard-bg">
+    <!-- 导航栏 -->
+    <nav class="nav-header py-4 px-6 fixed top-0 left-0 right-0 z-50">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <button onclick="goBack()" class="text-white hover:text-blue-300 mr-4 transition-colors">
+                    <i class="fas fa-arrow-left text-xl"></i>
+                </button>
+                <div class="flex items-center">
+                    <img src="/static/logo.png" alt="Alethea Logo" class="h-8 mr-3">
+                    <span class="text-xl font-bold">Alethea</span>
+                </div>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="/static/index.html" class="text-white hover:text-blue-300 transition-colors">首页</a>
+                <a href="/static/projects.html" class="text-white hover:text-blue-300 transition-colors">项目制学习</a>
+                <a href="/static/experiments.html" class="text-white hover:text-blue-300 transition-colors">实验仿真</a>
+                <a href="#" class="text-white hover:text-blue-300 transition-colors">应用实例</a>
+            </div>
+            <button class="md:hidden text-white">
+                <i class="fas fa-bars text-xl"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <main class="pt-20 px-6 pb-10">
+        <!-- 学科标题区域 -->
+        <div class="text-center mb-8 fade-in-up">
+            <h1 id="subject-title" class="subject-title text-4xl md:text-5xl font-bold mb-4">
+                学科详情
+            </h1>
+            <p id="subject-description" class="text-blue-200 text-lg max-w-3xl mx-auto">
+                正在加载学科信息...
+            </p>
+        </div>
+
+        <!-- 学科介绍区域 -->
+        <div class="glass-module p-8 mb-8 fade-in-up" style="animation-delay: 0.2s">
+            <div id="subject-introduction">
+                <div class="flex items-center justify-center py-8">
+                    <div class="loading-spinner mr-3"></div>
+                    <span class="text-blue-200">AI正在生成学科介绍...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 核心概念和公式区域 -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+            <!-- 关键概念 -->
+            <div class="glass-module p-6 fade-in-up" style="animation-delay: 0.4s">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-lightbulb text-yellow-400 mr-3"></i>
+                    关键概念
+                </h3>
+                <div id="key-concepts">
+                    <div class="flex items-center justify-center py-8">
+                        <div class="loading-spinner mr-3"></div>
+                        <span class="text-blue-200">加载中...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 核心公式 -->
+            <div class="glass-module p-6 fade-in-up" style="animation-delay: 0.6s">
+                <h3 class="text-2xl font-bold mb-6 flex items-center">
+                    <i class="fas fa-calculator text-green-400 mr-3"></i>
+                    核心公式
+                </h3>
+                <div id="core-formulas">
+                    <div class="formula-highlight">
+                        <div class="text-center">
+                            <div class="text-2xl font-mono mb-2" id="main-formula">
+                                F(ω) = ∫<sub>-∞</sub><sup>∞</sup> f(t) e<sup>-jωt</sup> dt
+                            </div>
+                            <p class="text-sm text-blue-200" id="formula-description">
+                                其中，f(t)是时域信号，F(ω)是频域表示
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 可视化实验区域 -->
+        <div class="glass-module p-8 mb-8 fade-in-up" style="animation-delay: 0.8s">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-chart-line text-blue-400 mr-3"></i>
+                <span id="visualization-title">时域信号可视化</span>
+            </h3>
+
+            <!-- 实验控制面板 -->
+            <div class="control-panel mb-6">
+                <h4 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-sliders-h text-purple-400 mr-2"></i>
+                    实验控制
+                </h4>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- 信号类型选择 -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">信号类型</label>
+                        <select id="signal-type" class="select-box">
+                            <option value="sine">正弦波</option>
+                            <option value="cosine">余弦波</option>
+                            <option value="square">方波</option>
+                            <option value="triangle">三角波</option>
+                            <option value="sawtooth">锯齿波</option>
+                        </select>
+                    </div>
+
+                    <!-- 主频率控制 -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            主频率 (<span id="freq-value">2</span> Hz)
+                        </label>
+                        <input type="range" id="frequency-slider" class="slider" min="0.5" max="10" step="0.5"
+                            value="2">
+                        <div class="flex justify-between text-xs text-blue-200 mt-1">
+                            <span>0.5 Hz</span>
+                            <span>5.25 Hz</span>
+                            <span>10 Hz</span>
+                        </div>
+                    </div>
+
+                    <!-- 幅度控制 -->
+                    <div>
+                        <label class="block text-sm font-medium mb-2">
+                            幅度 (<span id="amplitude-value">1.0</span>)
+                        </label>
+                        <input type="range" id="amplitude-slider" class="slider" min="0.1" max="2.0" step="0.1"
+                            value="1.0">
+                        <div class="flex justify-between text-xs text-blue-200 mt-1">
+                            <span>0.1</span>
+                            <span>1.05</span>
+                            <span>2.0</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 text-center">
+                    <button id="start-simulation" class="btn-primary">
+                        <i class="fas fa-play mr-2"></i>
+                        开始仿真
+                    </button>
+                </div>
+            </div>
+
+            <!-- 图表显示区域 -->
+            <div class="chart-container">
+                <canvas id="signal-chart" width="800" height="400"></canvas>
+            </div>
+        </div>
+
+        <!-- 应用实例区域 -->
+        <div class="glass-module p-8 fade-in-up" style="animation-delay: 1.0s">
+            <h3 class="text-2xl font-bold mb-6 flex items-center">
+                <i class="fas fa-cogs text-orange-400 mr-3"></i>
+                应用实例
+            </h3>
+            <div id="applications" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="knowledge-item">
+                    <i class="fas fa-microchip icon"></i>
+                    <span>广泛应用于实时频谱分析、音频处理等领域</span>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script>
+        // 全局变量
+        let chart = null;
+        let animationId = null;
+        let currentSubject = null;
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', function () {
+            // 获取URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            const subject = urlParams.get('subject');
+            const title = urlParams.get('title');
+            const description = urlParams.get('desc');
+
+            if (subject && title) {
+                currentSubject = {
+                    name: subject,
+                    title: decodeURIComponent(title),
+                    description: decodeURIComponent(description)
+                };
+
+                // 更新页面标题和内容
+                updatePageContent();
+
+                // 生成学科内容
+                generateSubjectContent();
+            } else {
+                // 如果没有参数，显示默认内容
+                showDefaultContent();
+            }
+
+            // 初始化图表
+            initializeChart();
+
+            // 设置事件监听器
+            setupEventListeners();
+        });
+
+        /**
+         * 更新页面内容
+         */
+        function updatePageContent() {
+            if (!currentSubject) return;
+
+            // 更新页面标题
+            document.getElementById('page-title').textContent = `${currentSubject.title} - Alethea`;
+            document.getElementById('subject-title').textContent = currentSubject.title;
+            document.getElementById('subject-description').textContent = currentSubject.description;
+
+            // 根据学科类型更新可视化标题和公式
+            updateSubjectSpecificContent();
+        }
+
+        /**
+         * 根据学科更新特定内容
+         */
+        function updateSubjectSpecificContent() {
+            const subjectName = currentSubject.name.toLowerCase();
+
+            // 根据不同学科设置不同的公式和可视化内容
+            if (subjectName.includes('信号') || subjectName.includes('通信') || subjectName.includes('数字信号处理')) {
+                document.getElementById('main-formula').innerHTML = 'F(ω) = ∫<sub>-∞</sub><sup>∞</sup> f(t) e<sup>-jωt</sup> dt';
+                document.getElementById('formula-description').textContent = '其中，f(t)是时域信号，F(ω)是频域表示';
+                document.getElementById('visualization-title').textContent = '时域信号可视化';
+            } else if (subjectName.includes('机器学习') || subjectName.includes('深度学习')) {
+                document.getElementById('main-formula').innerHTML = 'y = σ(Wx + b)';
+                document.getElementById('formula-description').textContent = '其中，σ是激活函数，W是权重矩阵，b是偏置';
+                document.getElementById('visualization-title').textContent = '神经网络可视化';
+            } else if (subjectName.includes('量子')) {
+                document.getElementById('main-formula').innerHTML = 'Ĥ|ψ⟩ = E|ψ⟩';
+                document.getElementById('formula-description').textContent = '薛定谔方程：Ĥ是哈密顿算符，|ψ⟩是量子态';
+                document.getElementById('visualization-title').textContent = '量子态可视化';
+            } else if (subjectName.includes('vlsi') || subjectName.includes('fpga')) {
+                document.getElementById('main-formula').innerHTML = 'P = CV²f';
+                document.getElementById('formula-description').textContent = '动态功耗：C是电容，V是电压，f是频率';
+                document.getElementById('visualization-title').textContent = '电路仿真';
+            } else {
+                // 默认使用傅里叶变换
+                document.getElementById('main-formula').innerHTML = 'F(ω) = ∫<sub>-∞</sub><sup>∞</sup> f(t) e<sup>-jωt</sup> dt';
+                document.getElementById('formula-description').textContent = '傅里叶变换：时域到频域的转换';
+                document.getElementById('visualization-title').textContent = '数据可视化';
+            }
+        }
+
+        /**
+         * 生成学科内容
+         */
+        function generateSubjectContent() {
+            // 生成学科介绍
+            generateSubjectIntroduction();
+
+            // 生成关键概念
+            generateKeyConcepts();
+
+            // 生成应用实例
+            generateApplications();
+
+            // 检查是否需要显示仿真模块
+            checkSimulationNeeded();
+        }
+
+        /**
+         * 生成学科介绍
+         */
+        function generateSubjectIntroduction() {
+            const question = `请简洁地介绍${currentSubject.title}学科，包括定义、主要研究内容和重要性。要求：1.直接给出答案，不要包含思考过程 2.内容简洁明了 3.重点突出 4.不超过200字`;
+
+            fetch('/api/llm/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: question,
+                    provider: null,
+                    model: null,
+                    options: {}
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displaySubjectIntroduction(data.content);
+                })
+                .catch(error => {
+                    console.error('Error generating subject introduction:', error);
+                    document.getElementById('subject-introduction').innerHTML =
+                        '<p class="text-red-400">学科介绍生成失败，请稍后重试</p>';
+                });
+        }
+
+        /**
+         * 显示学科介绍
+         */
+        function displaySubjectIntroduction(content) {
+            // 过滤AI思考过程，特别是DeepSeek的思考内容
+            let cleanContent = filterAIThinking(content);
+
+            // 格式化内容
+            cleanContent = cleanContent.replace(/\n/g, '<br>');
+            cleanContent = cleanContent.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            cleanContent = cleanContent.replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+            document.getElementById('subject-introduction').innerHTML = `
+                <div class="prose prose-invert max-w-none">
+                    <div class="text-blue-100 leading-relaxed">${cleanContent}</div>
+                </div>
+            `;
+        }
+
+        /**
+         * 过滤AI思考过程
+         */
+        function filterAIThinking(content) {
+            // 移除DeepSeek思考过程标记
+            let filtered = content.replace(/<think>[\s\S]*?<\/think>/gi, '');
+
+            // 移除其他常见的思考过程标记
+            filtered = filtered.replace(/【思考】[\s\S]*?【\/思考】/gi, '');
+            filtered = filtered.replace(/\[思考\][\s\S]*?\[\/思考\]/gi, '');
+            filtered = filtered.replace(/思考过程：[\s\S]*?(?=\n\n|\n[^思]|$)/gi, '');
+            filtered = filtered.replace(/让我思考一下[\s\S]*?(?=\n\n|\n[^让]|$)/gi, '');
+
+            // 移除多余的空行
+            filtered = filtered.replace(/\n\s*\n\s*\n/g, '\n\n');
+            filtered = filtered.trim();
+
+            return filtered;
+        }
+
+        /**
+         * 生成关键概念
+         */
+        function generateKeyConcepts() {
+            const question = `请为${currentSubject.title}学科生成4-6个核心知识点，每个知识点包含标题和简短描述（不超过15字）。要求：1.直接给出答案，不要思考过程 2.格式为"标题：描述" 3.每行一个知识点 4.知识点要具体且重要`;
+
+            fetch('/api/llm/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: question,
+                    provider: null,
+                    model: null,
+                    options: {}
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayKeyConcepts(data.content);
+                })
+                .catch(error => {
+                    console.error('Error generating key concepts:', error);
+                    document.getElementById('key-concepts').innerHTML =
+                        '<p class="text-red-400">关键概念生成失败</p>';
+                });
+        }
+
+        /**
+         * 显示关键概念
+         */
+        function displayKeyConcepts(content) {
+            const cleanContent = filterAIThinking(content);
+            const lines = cleanContent.split('\n').filter(line => line.trim());
+
+            const concepts = lines.map(line => {
+                const parts = line.replace(/^\d+\.?\s*/, '').split(/[：:]/);
+                if (parts.length >= 2) {
+                    return {
+                        title: parts[0].trim(),
+                        description: parts[1].trim(),
+                        icon: getRandomIcon()
+                    };
+                }
+                return null;
+            }).filter(concept => concept !== null);
+
+            const conceptsHtml = concepts.map(concept => `
+                <div class="knowledge-item" onclick="exploreKnowledge('${concept.title}')">
+                    <i class="${concept.icon} icon"></i>
+                    <div>
+                        <div class="font-semibold">${concept.title}</div>
+                        <div class="text-sm text-blue-200 mt-1">${concept.description}</div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('key-concepts').innerHTML = conceptsHtml || '<p class="text-blue-200">暂无关键概念</p>';
+        }
+
+        /**
+         * 获取随机图标
+         */
+        function getRandomIcon() {
+            const icons = [
+                'fas fa-lightbulb', 'fas fa-cog', 'fas fa-chart-line', 'fas fa-atom',
+                'fas fa-brain', 'fas fa-microchip', 'fas fa-dna', 'fas fa-rocket',
+                'fas fa-flask', 'fas fa-graduation-cap', 'fas fa-search', 'fas fa-tools',
+                'fas fa-code', 'fas fa-database', 'fas fa-network-wired', 'fas fa-shield-alt'
+            ];
+            return icons[Math.floor(Math.random() * icons.length)];
+        }
+
+        /**
+         * 生成应用实例
+         */
+        function generateApplications() {
+            const question = `请为${currentSubject.title}学科生成4-6个实际应用实例，每个应用包含领域和具体应用（不超过20字）。要求：1.直接给出答案，不要思考过程 2.格式为"应用领域：具体应用描述" 3.每行一个应用 4.应用要真实且有代表性`;
+
+            fetch('/api/llm/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: question,
+                    provider: null,
+                    model: null,
+                    options: {}
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    displayApplications(data.content);
+                })
+                .catch(error => {
+                    console.error('Error generating applications:', error);
+                    document.getElementById('applications').innerHTML =
+                        '<div class="knowledge-item"><i class="fas fa-exclamation-triangle icon"></i><span>应用实例生成失败</span></div>';
+                });
+        }
+
+        /**
+         * 显示应用实例
+         */
+        function displayApplications(content) {
+            const cleanContent = filterAIThinking(content);
+            const lines = cleanContent.split('\n').filter(line => line.trim());
+
+            const applications = lines.map(line => {
+                const parts = line.replace(/^\d+\.?\s*/, '').split(/[：:]/);
+                if (parts.length >= 2) {
+                    return {
+                        description: `${parts[0].trim()}：${parts[1].trim()}`,
+                        icon: getRandomIcon()
+                    };
+                }
+                return null;
+            }).filter(app => app !== null);
+
+            const applicationsHtml = applications.map(app => `
+                <div class="knowledge-item">
+                    <i class="${app.icon} icon"></i>
+                    <span>${app.description}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('applications').innerHTML = applicationsHtml ||
+                '<div class="knowledge-item"><i class="fas fa-info-circle icon"></i><span>暂无应用实例</span></div>';
+        }
+
+        /**
+         * 检查是否需要显示仿真模块
+         */
+        function checkSimulationNeeded() {
+            const question = `${currentSubject.title}学科是否适合进行数值仿真、可视化实验或交互式演示？请只回答"是"或"否"，不要解释。`;
+
+            fetch('/api/llm/ask', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    question: question,
+                    provider: null,
+                    model: null,
+                    options: {}
+                })
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const answer = filterAIThinking(data.content).trim().toLowerCase();
+                    if (answer.includes('是') || answer.includes('yes')) {
+                        // 显示仿真模块
+                        document.querySelector('.glass-module:has(#visualization-title)').style.display = 'block';
+                    } else {
+                        // 隐藏仿真模块
+                        document.querySelector('.glass-module:has(#visualization-title)').style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking simulation need:', error);
+                    // 默认显示仿真模块
+                    document.querySelector('.glass-module:has(#visualization-title)').style.display = 'block';
+                });
+        }
+
+        /**
+         * 显示默认内容
+         */
+        function showDefaultContent() {
+            document.getElementById('subject-title').textContent = '学科详情';
+            document.getElementById('subject-description').textContent = '请从主页选择一个学科来查看详细信息';
+            document.getElementById('subject-introduction').innerHTML =
+                '<p class="text-blue-200">请返回主页选择一个学科来查看详细介绍</p>';
+        }
+
+        /**
+         * 初始化图表
+         */
+        function initializeChart() {
+            const ctx = document.getElementById('signal-chart').getContext('2d');
+
+            // 创建初始数据
+            const labels = [];
+            const data = [];
+            for (let i = 0; i <= 100; i++) {
+                labels.push((i / 10).toFixed(1));
+                data.push(Math.sin(2 * Math.PI * i / 50));
+            }
+
+            chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: '信号幅度',
+                        data: data,
+                        borderColor: '#4facfe',
+                        backgroundColor: 'rgba(79, 172, 254, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: 'white'
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: '时间 (s)',
+                                color: 'white'
+                            },
+                            ticks: {
+                                color: 'white'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: '幅度',
+                                color: 'white'
+                            },
+                            ticks: {
+                                color: 'white'
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.1)'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        /**
+         * 设置事件监听器
+         */
+        function setupEventListeners() {
+            // 频率滑块
+            const freqSlider = document.getElementById('frequency-slider');
+            const freqValue = document.getElementById('freq-value');
+            freqSlider.addEventListener('input', function () {
+                freqValue.textContent = this.value;
+                updateChart();
+            });
+
+            // 幅度滑块
+            const ampSlider = document.getElementById('amplitude-slider');
+            const ampValue = document.getElementById('amplitude-value');
+            ampSlider.addEventListener('input', function () {
+                ampValue.textContent = this.value;
+                updateChart();
+            });
+
+            // 信号类型选择
+            const signalType = document.getElementById('signal-type');
+            signalType.addEventListener('change', function () {
+                updateChart();
+            });
+
+            // 开始仿真按钮
+            const startBtn = document.getElementById('start-simulation');
+            startBtn.addEventListener('click', function () {
+                startAnimation();
+            });
+        }
+
+        /**
+         * 更新图表
+         */
+        function updateChart() {
+            if (!chart) return;
+
+            const frequency = parseFloat(document.getElementById('frequency-slider').value);
+            const amplitude = parseFloat(document.getElementById('amplitude-slider').value);
+            const signalType = document.getElementById('signal-type').value;
+
+            const data = [];
+            for (let i = 0; i <= 100; i++) {
+                const t = i / 10;
+                let value = 0;
+
+                switch (signalType) {
+                    case 'sine':
+                        value = amplitude * Math.sin(2 * Math.PI * frequency * t);
+                        break;
+                    case 'cosine':
+                        value = amplitude * Math.cos(2 * Math.PI * frequency * t);
+                        break;
+                    case 'square':
+                        value = amplitude * Math.sign(Math.sin(2 * Math.PI * frequency * t));
+                        break;
+                    case 'triangle':
+                        value = amplitude * (2 / Math.PI) * Math.asin(Math.sin(2 * Math.PI * frequency * t));
+                        break;
+                    case 'sawtooth':
+                        value = amplitude * (2 * (frequency * t - Math.floor(frequency * t + 0.5)));
+                        break;
+                }
+                data.push(value);
+            }
+
+            chart.data.datasets[0].data = data;
+            chart.update('none');
+        }
+
+        /**
+         * 开始动画
+         */
+        function startAnimation() {
+            const btn = document.getElementById('start-simulation');
+            const icon = btn.querySelector('i');
+
+            if (animationId) {
+                // 停止动画
+                cancelAnimationFrame(animationId);
+                animationId = null;
+                btn.innerHTML = '<i class="fas fa-play mr-2"></i>开始仿真';
+            } else {
+                // 开始动画
+                btn.innerHTML = '<i class="fas fa-pause mr-2"></i>停止仿真';
+                animateChart();
+            }
+        }
+
+        /**
+         * 图表动画
+         */
+        function animateChart() {
+            let phase = 0;
+
+            function animate() {
+                if (!chart) return;
+
+                const frequency = parseFloat(document.getElementById('frequency-slider').value);
+                const amplitude = parseFloat(document.getElementById('amplitude-slider').value);
+                const signalType = document.getElementById('signal-type').value;
+
+                const data = [];
+                for (let i = 0; i <= 100; i++) {
+                    const t = i / 10;
+                    let value = 0;
+
+                    switch (signalType) {
+                        case 'sine':
+                            value = amplitude * Math.sin(2 * Math.PI * frequency * t + phase);
+                            break;
+                        case 'cosine':
+                            value = amplitude * Math.cos(2 * Math.PI * frequency * t + phase);
+                            break;
+                        case 'square':
+                            value = amplitude * Math.sign(Math.sin(2 * Math.PI * frequency * t + phase));
+                            break;
+                        case 'triangle':
+                            value = amplitude * (2 / Math.PI) * Math.asin(Math.sin(2 * Math.PI * frequency * t + phase));
+                            break;
+                        case 'sawtooth':
+                            value = amplitude * (2 * (frequency * t + phase / (2 * Math.PI) - Math.floor(frequency * t + phase / (2 * Math.PI) + 0.5)));
+                            break;
+                    }
+                    data.push(value);
+                }
+
+                chart.data.datasets[0].data = data;
+                chart.update('none');
+
+                phase += 0.1;
+                animationId = requestAnimationFrame(animate);
+            }
+
+            animate();
+        }
+
+        /**
+         * 探索知识点
+         */
+        function exploreKnowledge(topic) {
+            const question = `请详细解释${topic}的相关概念、原理和应用`;
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+        }
+
+        /**
+         * 返回上一页
+         */
+        function goBack() {
+            if (window.history.length > 1) {
+                window.history.back();
+            } else {
+                window.location.href = '/static/index.html';
+            }
+        }
+    </script>
+
+    <script>
+        // 延迟加载脚本函数
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // 页面加载完成后加载非关键资源
+        window.addEventListener('load', function() {
+            // 延迟加载Chart.js
+            if (document.querySelector('canvas')) {
+                loadScript('/static/libs/js/chart.min.js');
+            }
+            
+            // 延迟加载Highlight.js
+            if (document.querySelector('pre code')) {
+                loadScript('/static/libs/js/highlight.min.js', function() {
+                    if (window.hljs) {
+                        hljs.highlightAll();
+                    }
+                });
+            }
+
+            // 延迟加载MathJax
+            if (document.querySelector('.math') || document.querySelector('[data-math]')) {
+                loadScript('/static/libs/js/mathjax.min.js');
+            }
+        });
+    </script>
+</body>
+
+</html>

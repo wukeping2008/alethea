@@ -1408,10 +1408,12 @@ def initialize_llm_providers(config: Dict[str, Any]) -> None:
     
     # Initialize AliQwen (阿里云通义千问) - 备用服务
     ali_qwen_provider = AliQwenProvider()
+    # 支持两种配置名称：qwen_plus 和 ali_qwen
+    qwen_config = config.get('qwen_plus', config.get('ali_qwen', {}))
     ali_qwen_provider.initialize(
-        api_key=config.get('ali_qwen', {}).get('api_key', 'sk-b2353c2803ba4d0395f91ee12100d964'),
-        api_url=config.get('ali_qwen', {}).get('api_url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'),
-        default_model=config.get('ali_qwen', {}).get('default_model', 'qwen-plus-2025-04-28')
+        api_key=qwen_config.get('api_key', ''),
+        api_url=qwen_config.get('base_url', 'https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions'),
+        default_model=qwen_config.get('default_model', 'qwen-plus-2025-04-28')
     )
     llm_manager.register_provider('ali_qwen', ali_qwen_provider)
     

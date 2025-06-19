@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab Simulation - Alethea Enhanced</title>
+    <link href="/static/libs/css/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .experiment-card {
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .experiment-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            border-color: #3b82f6;
+        }
+        .subject-tab {
+            transition: all 0.3s ease;
+        }
+        .subject-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .modal-overlay {
+            backdrop-filter: blur(8px);
+        }
+        .loading-spinner {
+            border: 3px solid #f3f4f6;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-lg border-b border-gray-200">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex items-center">
+                    <img src="logo.png" alt="Alethea" class="h-8 w-8 mr-3">
+                    <span class="text-xl font-bold text-gray-900">Alethea Enhanced</span>
+                </div>
+                <div class="flex items-center space-x-8">
+                    <a href="index-en.html" class="text-gray-600 hover:text-blue-600 transition-colors">Home</a>
+                    <a href="index-en.html#subjects" class="text-gray-600 hover:text-blue-600 transition-colors">Subjects</a>
+                    <a href="projects-en.html" class="text-gray-600 hover:text-blue-600 transition-colors">Project Learning</a>
+                    <a href="experiments-en.html" class="text-blue-600 font-medium">Lab Simulation</a>
+                    <a href="dashboard-en.html" class="text-gray-600 hover:text-blue-600 transition-colors">Learning Analytics</a>
+                    <div class="relative">
+                        <button id="userMenuBtn" class="flex items-center text-gray-600 hover:text-blue-600 transition-colors">
+                            <i class="fas fa-user-circle text-xl mr-1"></i>
+                            <span>User</span>
+                            <i class="fas fa-chevron-down ml-1 text-sm"></i>
+                        </button>
+                        <div id="userMenu" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                            <a href="profile-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profile</a>
+                            <a href="settings-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Settings</a>
+                            <hr class="my-1">
+                            <a href="login-en.html" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Logout</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Page Title -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">
+                <i class="fas fa-flask text-blue-600 mr-3"></i>
+                Lab Simulation Platform
+            </h1>
+            <p class="text-gray-600">Select experiment topics and AI will generate personalized experiment content and online simulation environments for you</p>
+        </div>
+
+        <!-- Subject Tabs -->
+        <div class="mb-8">
+            <div class="flex flex-wrap gap-2 mb-6">
+                <button class="subject-tab active px-6 py-3 rounded-lg font-medium transition-all" data-subject="all">
+                    <i class="fas fa-th-large mr-2"></i>All Experiments
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="circuit">
+                    <i class="fas fa-bolt mr-2"></i>Circuit Analysis
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="digital">
+                    <i class="fas fa-microchip mr-2"></i>Digital Circuits
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="analog">
+                    <i class="fas fa-wave-square mr-2"></i>Analog Circuits
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="signal">
+                    <i class="fas fa-signal mr-2"></i>Signals & Systems
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="communication">
+                    <i class="fas fa-broadcast-tower mr-2"></i>Communications
+                </button>
+                <button class="subject-tab px-6 py-3 rounded-lg font-medium bg-white text-gray-700 hover:bg-gray-50" data-subject="embedded">
+                    <i class="fas fa-memory mr-2"></i>Embedded Systems
+                </button>
+            </div>
+        </div>
+
+        <!-- Experiments List -->
+        <div id="experimentsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Experiment cards will be dynamically generated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Experiment Details Modal -->
+    <div id="experimentModal" class="hidden fixed inset-0 bg-black bg-opacity-50 modal-overlay z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h3 id="modalTitle" class="text-xl font-bold text-gray-900"></h3>
+                <button id="closeModal" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
+                <div id="modalContent">
+                    <!-- Modal content will be dynamically generated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Assistant Floating Button -->
+    <div class="fixed bottom-6 right-6 z-40">
+        <button id="aiAssistantBtn" class="bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-all duration-300 hover:scale-110">
+            <i class="fas fa-robot text-xl"></i>
+        </button>
+    </div>
+
+    <!-- AI Assistant Chat Window -->
+    <div id="aiChatWindow" class="hidden fixed bottom-24 right-6 w-80 h-96 bg-white rounded-lg shadow-2xl border border-gray-200 z-50">
+        <div class="flex justify-between items-center p-4 border-b border-gray-200 bg-blue-600 text-white rounded-t-lg">
+            <h4 class="font-medium">AI Lab Assistant</h4>
+            <button id="closeChatBtn" class="text-white hover:text-gray-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div id="chatMessages" class="flex-1 p-4 overflow-y-auto h-64 space-y-3">
+            <div class="bg-blue-100 rounded-lg p-3">
+                <p class="text-sm text-blue-800">👋 Hello! I'm your AI lab assistant. I can help you with experiment-related questions.</p>
+            </div>
+        </div>
+        <div class="p-4 border-t border-gray-200">
+            <div class="flex gap-2">
+                <input type="text" id="chatInput" placeholder="Enter your question..." 
+                       class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <button id="sendChatBtn" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Experiment modules data
+        const experimentModules = {
+            circuit: [
+                {
+                    id: 'circuit_ohm',
+                    title: 'Ohm\'s Law Verification',
+                    description: 'Verify Ohm\'s law by observing the relationship between voltage and current with varying resistance',
+                    icon: 'fas fa-bolt',
+                    color: 'blue',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_rc',
+                    title: 'RC Circuit Analysis',
+                    description: 'Analyze the charging and discharging process of RC circuits, understand the concept of time constant',
+                    icon: 'fas fa-chart-line',
+                    color: 'green',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_thevenin',
+                    title: 'Thevenin Equivalent Circuit',
+                    description: 'Verify Thevenin\'s theorem and solve equivalent circuits for complex networks',
+                    icon: 'fas fa-project-diagram',
+                    color: 'purple',
+                    subject: 'circuit'
+                },
+                {
+                    id: 'circuit_rlc',
+                    title: 'RLC Resonant Circuit',
+                    description: 'Study the frequency characteristics and quality factor of RLC series resonant circuits',
+                    icon: 'fas fa-wave-square',
+                    color: 'indigo',
+                    subject: 'circuit'
+                }
+            ],
+            digital: [
+                {
+                    id: 'digital_gates',
+                    title: 'Logic Gate Characteristics',
+                    description: 'Test truth tables of various logic gates, understand digital logic fundamentals',
+                    icon: 'fas fa-microchip',
+                    color: 'cyan',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_combinational',
+                    title: 'Combinational Logic Design',
+                    description: 'Design and implement multiplexers, master combinational logic design methods',
+                    icon: 'fas fa-sitemap',
+                    color: 'teal',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_counter',
+                    title: 'Counter Design',
+                    description: 'Design synchronous binary counters, understand sequential circuit principles',
+                    icon: 'fas fa-stopwatch',
+                    color: 'red',
+                    subject: 'digital'
+                },
+                {
+                    id: 'digital_flipflop',
+                    title: 'Flip-Flop Applications',
+                    description: 'Learn the working principles and application scenarios of various flip-flops',
+                    icon: 'fas fa-toggle-on',
+                    color: 'orange',
+                    subject: 'digital'
+                }
+            ],
+            analog: [
+                {
+                    id: 'analog_transistor',
+                    title: 'Transistor Characteristics',
+                    description: 'Measure input and output characteristics of transistors, understand transistor operation principles',
+                    icon: 'fas fa-wave-square',
+                    color: 'orange',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_opamp',
+                    title: 'Op-Amp Basic Circuits',
+                    description: 'Implement inverting and non-inverting amplifiers, master op-amp applications',
+                    icon: 'fas fa-expand-arrows-alt',
+                    color: 'pink',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_filter',
+                    title: 'Filter Design',
+                    description: 'Design low-pass, high-pass, and band-pass filters, analyze frequency response',
+                    icon: 'fas fa-filter',
+                    color: 'emerald',
+                    subject: 'analog'
+                },
+                {
+                    id: 'analog_oscillator',
+                    title: 'Oscillator Circuits',
+                    description: 'Design sine wave and square wave oscillators, understand oscillation conditions',
+                    icon: 'fas fa-broadcast-tower',
+                    color: 'violet',
+                    subject: 'analog'
+                }
+            ],
+            signal: [
+                {
+                    id: 'signal_time',
+                    title: 'Time Domain Signal Analysis',
+                    description: 'Analyze time domain characteristics of various basic signals, master signal analysis methods',
+                    icon: 'fas fa-chart-area',
+                    color: 'cyan',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_fourier',
+                    title: 'Fourier Transform',
+                    description: 'Use MATLAB to analyze signal spectrum, understand Fourier transform',
+                    icon: 'fas fa-wave-square',
+                    color: 'lime',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_sampling',
+                    title: 'Sampling Theorem Verification',
+                    description: 'Verify Nyquist sampling theorem, understand aliasing phenomenon',
+                    icon: 'fas fa-chart-line',
+                    color: 'amber',
+                    subject: 'signal'
+                },
+                {
+                    id: 'signal_convolution',
+                    title: 'Convolution Operation',
+                    description: 'Understand the physical meaning of convolution, master system response analysis',
+                    icon: 'fas fa-calculator',
+                    color: 'rose',
+                    subject: 'signal'
+                }
+            ],
+            communication: [
+                {
+                    id: 'comm_am',
+                    title: 'AM Modulation/Demodulation',
+                    description: 'Implement AM modulation and demodulation, understand analog modulation principles',
+                    icon: 'fas fa-radio',
+                    color: 'amber',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_fm',
+                    title: 'FM Modulation/Demodulation',
+                    description: 'Implement FM modulation and demodulation, compare different modulation methods',
+                    icon: 'fas fa-satellite',
+                    color: 'sky',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_digital',
+                    title: 'Digital Modulation',
+                    description: 'Learn ASK, FSK, PSK and other digital modulation techniques',
+                    icon: 'fas fa-wifi',
+                    color: 'emerald',
+                    subject: 'communication'
+                },
+                {
+                    id: 'comm_channel',
+                    title: 'Channel Coding',
+                    description: 'Understand channel coding principles, implement error detection and correction',
+                    icon: 'fas fa-shield-alt',
+                    color: 'indigo',
+                    subject: 'communication'
+                }
+            ],
+            embedded: [
+                {
+                    id: 'embedded_gpio',
+                    title: 'GPIO Control',
+                    description: 'STM32 microcontroller GPIO control and basic applications',
+                    icon: 'fas fa-microchip',
+                    color: 'slate',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_timer',
+                    title: 'Timer Applications',
+                    description: 'Learn timer configuration and interrupt handling',
+                    icon: 'fas fa-clock',
+                    color: 'blue',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_adc',
+                    title: 'ADC Data Acquisition',
+                    description: 'Use ADC for analog signal acquisition and processing',
+                    icon: 'fas fa-chart-bar',
+                    color: 'green',
+                    subject: 'embedded'
+                },
+                {
+                    id: 'embedded_uart',
+                    title: 'UART Communication',
+                    description: 'Implement UART serial communication and data transmission',
+                    icon: 'fas fa-exchange-alt',
+                    color: 'purple',
+                    subject: 'embedded'
+                }
+            ]
+        };
+
+        // Get all experiment modules
+        function getAllExperiments() {
+            const allExperiments = [];
+            Object.keys(experimentModules).forEach(subject => {
+                experimentModules[subject].forEach(exp => {
+                    allExperiments.push({...exp, subject});
+                });
+            });
+            return allExperiments;
+        }
+
+        // Render experiment cards
+        function renderExperiments(experiments) {
+            const container = document.getElementById('experimentsContainer');
+            container.innerHTML = '';
+
+            experiments.forEach(exp => {
+                const card = document.createElement('div');
+                card.className = 'experiment-card bg-white rounded-xl shadow-md p-6 cursor-pointer hover:shadow-lg transition-all';
+                card.innerHTML = `
+                    <div class="flex items-center mb-4">
+                        <div class="p-4 bg-${exp.color}-100 rounded-lg mr-4">
+                            <i class="${exp.icon} text-${exp.color}-600 text-2xl"></i>
+                        </div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-semibold text-gray-900 mb-1">${exp.title}</h3>
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-${exp.color}-100 text-${exp.color}-800">
+                                ${getSubjectName(exp.subject)}
+                            </span>
+                        </div>
+                    </div>
+                    <p class="text-gray-600 text-sm mb-6 line-clamp-2">${exp.description}</p>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center text-sm text-gray-500">
+                            <i class="fas fa-magic mr-2"></i>
+                            <span>AI Generated</span>
+                        </div>
+                        <button class="bg-${exp.color}-600 hover:bg-${exp.color}-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
+                            Start Experiment
+                        </button>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => generateExperiment(exp));
+                container.appendChild(card);
+            });
+        }
+
+        // Get subject name
+        function getSubjectName(subject) {
+            const names = {
+                'circuit': 'Circuit Analysis',
+                'digital': 'Digital Circuits',
+                'analog': 'Analog Circuits',
+                'signal': 'Signals & Systems',
+                'communication': 'Communications',
+                'embedded': 'Embedded Systems'
+            };
+            return names[subject] || 'Experiment';
+        }
+
+        // AI generate experiment content
+        async function generateExperiment(experiment) {
+            const modal = document.getElementById('experimentModal');
+            const title = document.getElementById('modalTitle');
+            const content = document.getElementById('modalContent');
+            
+            title.textContent = experiment.title;
+            
+            // Show loading state
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-12">
+                    <div class="loading-spinner mb-4"></div>
+                    <h3 class="text-lg font-semibold text-gray-900 mb-2">AI is generating experiment content...</h3>
+                    <p class="text-gray-600 text-center">Please wait while we customize an exclusive experiment plan for you</p>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+
+            try {
+                // Call AI to generate experiment content
+                const response = await fetch('/api/llm/generate-experiment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        experiment_id: experiment.id,
+                        title: experiment.title,
+                        description: experiment.description,
+                        subject: experiment.subject,
+                        language: 'en'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Display generated experiment content
+                    displayGeneratedExperiment(data.experiment, experiment);
+                } else {
+                    // Display error message
+                    content.innerHTML = `
+                        <div class="text-center py-12">
+                            <i class="fas fa-exclamation-triangle text-4xl text-yellow-500 mb-4"></i>
+                            <h3 class="text-lg font-semibold text-gray-900 mb-2">Generation Failed</h3>
+                            <p class="text-gray-600 mb-4">Sorry, AI experiment generation is temporarily unavailable</p>
+                            <button onclick="generateExperiment({id: '${experiment.id}', title: '${experiment.title}', description: '${experiment.description}', subject: '${experiment.subject}'})" 
+                                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                                Retry
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Failed to generate experiment content:', error);
+                // Display fallback content
+                displayFallbackExperiment(experiment);
+            }
+        }
+
+        // Display generated experiment content
+        function displayGeneratedExperiment(experimentData, originalExp) {
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Experiment Overview -->
+                    <div class="bg-gradient-to-r from-${originalExp.color}-50 to-${originalExp.color}-100 rounded-lg p-6">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-${originalExp.color}-200 rounded-lg mr-4">
+                                <i class="${originalExp.icon} text-${originalExp.color}-700 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Experiment Overview</h4>
+                                <p class="text-gray-700">${experimentData.overview || originalExp.description}</p>
+                                <div class="mt-4 flex items-center text-sm text-${originalExp.color}-700">
+                                    <i class="fas fa-robot mr-2"></i>
+                                    <span>Personalized experiment content generated by AI</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Experiment Objectives -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-bullseye text-blue-600 mr-2"></i>
+                            Experiment Objectives
+                        </h4>
+                        <ul class="space-y-2">
+                            ${(experimentData.objectives || []).map(obj => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-check-circle text-green-500 mt-1 mr-3"></i>
+                                    <span class="text-gray-700">${obj}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+
+                    <!-- Theoretical Background -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-book text-purple-600 mr-2"></i>
+                            Theoretical Background
+                        </h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-700">${experimentData.theory || 'Related theoretical knowledge will be introduced in detail during the experiment'}</p>
+                        </div>
+                    </div>
+
+                    <!-- Experiment Steps -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-list-ol text-orange-600 mr-2"></i>
+                            Experiment Steps
+                        </h4>
+                        <ol class="space-y-3">
+                            ${(experimentData.steps || []).map((step, index) => `
+                                <li class="flex items-start">
+                                    <div class="flex-shrink-0 w-8 h-8 bg-${originalExp.color}-500 text-white rounded-full flex items-center justify-center text-sm font-medium mr-3">
+                                        ${index + 1}
+                                    </div>
+                                    <span class="text-gray-700 pt-1">${step}</span>
+                                </li>
+                            `).join('')}
+                        </ol>
+                    </div>
+
+                    <!-- Online Simulation Interface -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-desktop text-green-600 mr-2"></i>
+                            Online Simulation Interface
+                        </h4>
+                        <div class="bg-gray-900 rounded-lg p-6 text-center">
+                            <div class="bg-gray-800 rounded-lg p-8 mb-4">
+                                <i class="fas fa-play-circle text-4xl text-green-400 mb-4"></i>
+                                <h5 class="text-white text-lg font-medium mb-2">Interactive Simulation Environment</h5>
+                                <p class="text-gray-300 text-sm mb-4">Click the button below to launch the simulation environment customized for this experiment</p>
+                                ${experimentData.simulation_url ? `
+                                    <iframe src="${experimentData.simulation_url}" 
+                                            class="w-full h-64 rounded-lg border-2 border-gray-600 mb-4"
+                                            frameborder="0">
+                                    </iframe>
+                                ` : `
+                                    <div class="bg-gray-700 rounded-lg p-6 mb-4">
+                                        <i class="fas fa-cogs text-2xl text-blue-400 mb-2"></i>
+                                        <p class="text-gray-300 text-sm">Simulation environment is being prepared...</p>
+                                    </div>
+                                `}
+                            </div>
+                            <button class="bg-${originalExp.color}-600 hover:bg-${originalExp.color}-700 text-white px-6 py-3 rounded-lg font-medium transition-colors" 
+                                    onclick="startSimulation('${originalExp.id}')">
+                                <i class="fas fa-rocket mr-2"></i>
+                                Launch Simulation
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Expected Results -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-chart-line text-indigo-600 mr-2"></i>
+                            Expected Results
+                        </h4>
+                        <div class="bg-blue-50 rounded-lg p-4">
+                            <p class="text-gray-700">${experimentData.expected_results || 'Through this experiment, you will gain deep understanding of related theories and practical experience'}</p>
+                        </div>
+                    </div>
+
+                    <!-- AI Assistant Suggestions -->
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6">
+                        <h4 class="text-lg font-semibold text-blue-900 mb-3">
+                            <i class="fas fa-robot mr-2"></i>
+                            AI Assistant Suggestions
+                        </h4>
+                        <div class="space-y-2 text-blue-800">
+                            <p>• Please read the experiment objectives and theoretical background carefully before starting</p>
+                            <p>• Follow the steps progressively and pay attention to experimental phenomena</p>
+                            <p>• If you have questions, click the AI assistant for help anytime</p>
+                            <p>• After completing the experiment, analyze results carefully and summarize your experience</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Display fallback experiment content
+        function displayFallbackExperiment(experiment) {
+            const content = document.getElementById('modalContent');
+            
+            content.innerHTML = `
+                <div class="space-y-6">
+                    <!-- Experiment Overview -->
+                    <div class="bg-gradient-to-r from-${experiment.color}-50 to-${experiment.color}-100 rounded-lg p-6">
+                        <div class="flex items-start">
+                            <div class="p-3 bg-${experiment.color}-200 rounded-lg mr-4">
+                                <i class="${experiment.icon} text-${experiment.color}-700 text-2xl"></i>
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-lg font-semibold text-gray-900 mb-2">Experiment Overview</h4>
+                                <p class="text-gray-700">${experiment.description}</p>
+                                <div class="mt-4 flex items-center text-sm text-${experiment.color}-700">
+                                    <i class="fas fa-exclamation-circle mr-2"></i>
+                                    <span>AI generation service temporarily unavailable, showing basic experiment content</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Information -->
+                    <div>
+                        <h4 class="text-lg font-semibold text-gray-900 mb-3">
+                            <i class="fas fa-info-circle text-blue-600 mr-2"></i>
+                            Experiment Information
+                        </h4>
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-gray-700 mb-4">This is an experiment about ${experiment.title}.</p>
+                            <p class="text-gray-700">AI assistant will generate detailed experiment content for you after service recovery, including:</p>
+                            <ul class="mt-2 space-y-1 text-gray-600">
+                                <li>• Detailed experiment objectives and theoretical background</li>
+                                <li>• Step-by-step experimental operation guidance</li>
+                                <li>• Interactive online simulation environment</li>
+                                <li>• Personalized learning suggestions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Retry Button -->
+                    <div class="text-center">
+                        <button onclick="generateExperiment({id: '${experiment.id}', title: '${experiment.title}', description: '${experiment.description}', subject: '${experiment.subject}', icon: '${experiment.icon}', color: '${experiment.color}'})" 
+                                class="bg-${experiment.color}-600 hover:bg-${experiment.color}-700 text-white px-6 py-3 rounded-lg font-medium transition-colors">
+                            <i class="fas fa-redo mr-2"></i>
+                            Regenerate Experiment Content
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Start simulation experiment
+        function startSimulation(experimentId) {
+            alert(`Starting simulation experiment: ${experimentId}\n\nIn actual applications, this would open the corresponding online simulation environment.`);
+        }
+
+        // Initialize subject tabs
+        function initSubjectTabs() {
+            const tabs = document.querySelectorAll('.subject-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove all active states
+                    tabs.forEach(t => t.classList.remove('active'));
+                    // Add current active state
+                    tab.classList.add('active');
+                    
+                    const subject = tab.dataset.subject;
+                    if (subject === 'all') {
+                        renderExperiments(getAllExperiments());
+                    } else {
+                        renderExperiments(experimentModules[subject] || []);
+                    }
+                });
+            });
+        }
+
+        // AI assistant functionality
+        function initAIAssistant() {
+            const aiBtn = document.getElementById('aiAssistantBtn');
+            const chatWindow = document.getElementById('aiChatWindow');
+            const closeBtn = document.getElementById('closeChatBtn');
+            const sendBtn = document.getElementById('sendChatBtn');
+            const chatInput = document.getElementById('chatInput');
+            const chatMessages = document.getElementById('chatMessages');
+
+            aiBtn.addEventListener('click', () => {
+                chatWindow.classList.toggle('hidden');
+            });
+
+            closeBtn.addEventListener('click', () => {
+                chatWindow.classList.add('hidden');
+            });
+
+            function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+
+                // Add user message
+                const userMsg = document.createElement('div');
+                userMsg.className = 'bg-gray-100 rounded-lg p-3 ml-8';
+                userMsg.innerHTML = `<p class="text-sm text-gray-800">${message}</p>`;
+                chatMessages.appendChild(userMsg);
+
+                // Clear input
+                chatInput.value = '';
+
+                // Simulate AI reply
+                setTimeout(() => {
+                    const aiMsg = document.createElement('div');
+                    aiMsg.className = 'bg-blue-100 rounded-lg p-3';
+                    aiMsg.innerHTML = `<p class="text-sm text-blue-800">🤖 Regarding "${message}", I suggest you review the theoretical foundations of the related experiment, or refer to the detailed instructions in the experiment steps. For more specific help, please describe the specific problem you encountered.</p>`;
+                    chatMessages.appendChild(aiMsg);
+                    chatMessages.scrollTop = chatMessages.scrollHeight;
+                }, 1000);
+
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            sendBtn.addEventListener('click', sendMessage);
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        }
+
+        // Modal control
+        function initModal() {
+            const modal = document.getElementById('experimentModal');
+            const closeBtn = document.getElementById('closeModal');
+
+            closeBtn.addEventListener('click', () => {
+                modal.classList.add('hidden');
+            });
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.add('hidden');
+                }
+            });
+        }
+
+        // User menu
+        function initUserMenu() {
+            const userMenuBtn = document.getElementById('userMenuBtn');
+            const userMenu = document.getElementById('userMenu');
+
+            userMenuBtn.addEventListener('click', () => {
+                userMenu.classList.toggle('hidden');
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!userMenuBtn.contains(e.target)) {
+                    userMenu.classList.add('hidden');
+                }
+            });
+        }
+
+        // Page initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            renderExperiments(getAllExperiments());
+            initSubjectTabs();
+            initAIAssistant();
+            initModal();
+            initUserMenu();
+        });
+    </script>
+
+    <script>
+        // 延迟加载脚本函数
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // 页面加载完成后加载非关键资源
+        window.addEventListener('load', function() {
+            // 延迟加载Chart.js
+            if (document.querySelector('canvas')) {
+                loadScript('/static/libs/js/chart.min.js');
+            }
+            
+            // 延迟加载Highlight.js
+            if (document.querySelector('pre code')) {
+                loadScript('/static/libs/js/highlight.min.js', function() {
+                    if (window.hljs) {
+                        hljs.highlightAll();
+                    }
+                });
+            }
+
+            // 延迟加载MathJax
+            if (document.querySelector('.math') || document.querySelector('[data-math]')) {
+                loadScript('/static/libs/js/mathjax.min.js');
+            }
+        });
+    </script>
+</body>
+</html>

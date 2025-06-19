@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人学习仪表板 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js for data visualization -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+            color: #1f2937;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .progress-ring {
+            width: 120px;
+            height: 120px;
+            position: relative;
+        }
+
+        .progress-ring svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .progress-ring circle {
+            fill: none;
+            stroke-width: 8;
+        }
+
+        .progress-ring .bg {
+            stroke: #e5e7eb;
+        }
+
+        .progress-ring .progress {
+            stroke: #667eea;
+            stroke-linecap: round;
+            transition: stroke-dasharray 0.5s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+
+        .achievement-badge {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #1f2937;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 8px rgba(255, 215, 0, 0.3);
+        }
+
+        .subject-progress {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        .progress-bar {
+            background: #e5e7eb;
+            border-radius: 10px;
+            height: 8px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .recent-activity {
+            border-left: 3px solid #667eea;
+            padding-left: 16px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .recent-activity::before {
+            content: '';
+            position: absolute;
+            left: -6px;
+            top: 8px;
+            width: 9px;
+            height: 9px;
+            background: #667eea;
+            border-radius: 50%;
+        }
+
+        .nav-header {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .knowledge-item {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .knowledge-item:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .experiment-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .experiment-card:hover {
+            border-color: var(--accent-color);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .status-completed {
+            background: #10b981;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-in-progress {
+            background: #f59e0b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .status-not-started {
+            background: #6b7280;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+        }
+
+        .recommendation-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.875rem;
+        }
+
+        .btn-primary:hover {
+            background: var(--secondary-color);
+            transform: translateY(-1px);
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 4px;
+            margin-top: 12px;
+        }
+
+        .calendar-day {
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            cursor: pointer;
+        }
+
+        .calendar-day.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .calendar-day.has-activity {
+            background: #10b981;
+            color: white;
+        }
+
+        .calendar-day:hover {
+            background: #e5e7eb;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--accent-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="nav-header py-4 px-6">
+        <div class="flex justify-between items-center">
+            <div class="flex items-center">
+                <img src="/static/logo.png" alt="Alethea Logo" class="h-8 mr-3">
+                <span class="text-xl font-bold text-gray-800">Alethea</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="/static/index.html" class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-home mr-2"></i>返回首页
+                </a>
+                <div class="flex items-center space-x-2">
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <span class="text-gray-700 font-medium">张三</span>
+                </div>
+                <button class="text-gray-600 hover:text-gray-800">
+                    <i class="fas fa-cog"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 py-8">
+        <!-- Welcome Section -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">欢迎回来，张三！</h1>
+            <p class="text-gray-600">继续您的学习之旅，探索更多知识领域</p>
+        </div>
+
+        <!-- Statistics Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div class="stat-card">
+                <div class="stat-number" id="total-knowledge">45</div>
+                <div class="stat-label">掌握知识点</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <div class="stat-number" id="completed-experiments">12</div>
+                <div class="stat-label">完成实验</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <div class="stat-number" id="study-hours">128</div>
+                <div class="stat-label">学习时长(小时)</div>
+            </div>
+            <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                <div class="stat-number" id="current-streak">15</div>
+                <div class="stat-label">连续学习天数</div>
+            </div>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left Column: Progress & Subjects -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Overall Progress -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-6">学习进度概览</h3>
+                    <div class="flex items-center justify-between">
+                        <div class="progress-ring">
+                            <svg>
+                                <circle class="bg" cx="60" cy="60" r="52"></circle>
+                                <circle class="progress" cx="60" cy="60" r="52" stroke-dasharray="327"
+                                    stroke-dashoffset="81.75"></circle>
+                            </svg>
+                            <div class="progress-text">85%</div>
+                        </div>
+                        <div class="flex-1 ml-8">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">6</div>
+                                    <div class="text-sm text-gray-600">学习学科</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">23</div>
+                                    <div class="text-sm text-gray-600">本周学习</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">92%</div>
+                                    <div class="text-sm text-gray-600">作业完成率</div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="text-2xl font-bold text-gray-800">A-</div>
+                                    <div class="text-sm text-gray-600">平均成绩</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Subject Progress -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学科学习进度</h3>
+                    <div class="space-y-4" id="subject-progress">
+                        <!-- Subject items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Learning Analytics -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学习分析</h3>
+                    <div class="chart-container">
+                        <canvas id="learningChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Recent Experiments -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最近实验</h3>
+                    <div class="space-y-4" id="recent-experiments">
+                        <!-- Experiment items will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Activities & Recommendations -->
+            <div class="space-y-6">
+                <!-- Achievements -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最新成就</h3>
+                    <div class="space-y-4" id="achievements">
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-trophy"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">电路分析专家</h4>
+                                <p class="text-sm text-gray-600">完成所有电路分析实验</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">学习达人</h4>
+                                <p class="text-sm text-gray-600">连续学习15天</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center">
+                            <div class="achievement-badge">
+                                <i class="fas fa-star"></i>
+                            </div>
+                            <div class="ml-3">
+                                <h4 class="font-semibold text-gray-800">知识探索者</h4>
+                                <p class="text-sm text-gray-600">掌握45个知识点</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI Recommendations -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">AI学习建议</h3>
+                    <div class="space-y-4">
+                        <div class="recommendation-card">
+                            <h4 class="font-semibold mb-2">
+                                <i class="fas fa-lightbulb mr-2"></i>
+                                推荐学习
+                            </h4>
+                            <p class="text-sm mb-3">基于您的学习进度，建议深入学习PID控制系统</p>
+                            <button class="btn-primary" onclick="startRecommendedLearning('PID控制系统')">
+                                开始学习
+                            </button>
+                        </div>
+                        <div class="recommendation-card"
+                            style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                            <h4 class="font-semibold mb-2">
+                                <i class="fas fa-flask mr-2"></i>
+                                推荐实验
+                            </h4>
+                            <p class="text-sm mb-3">数字信号处理实验将帮助您巩固理论知识</p>
+                            <button class="btn-primary" onclick="startRecommendedExperiment('数字信号处理')">
+                                开始实验
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">最近活动</h3>
+                    <div class="space-y-4" id="recent-activity">
+                        <!-- Activity items will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Study Calendar -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">学习日历</h3>
+                    <div class="text-center mb-2">
+                        <span class="font-semibold">2025年1月</span>
+                    </div>
+                    <div class="calendar-grid" id="study-calendar">
+                        <!-- Calendar will be populated by JavaScript -->
+                    </div>
+                    <div class="mt-4 text-sm text-gray-600">
+                        <div class="flex items-center justify-between">
+                            <span>🟢 有学习活动</span>
+                            <span>🔵 今天</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="dashboard-card p-6">
+                    <h3 class="text-xl font-bold text-gray-800 mb-4">快速操作</h3>
+                    <div class="space-y-3">
+                        <button class="w-full btn-primary" onclick="askQuestion()">
+                            <i class="fas fa-question-circle mr-2"></i>
+                            提问AI助手
+                        </button>
+                        <button class="w-full btn-primary" onclick="startExperiment()">
+                            <i class="fas fa-flask mr-2"></i>
+                            开始新实验
+                        </button>
+                        <button class="w-full btn-primary" onclick="reviewKnowledge()">
+                            <i class="fas fa-book mr-2"></i>
+                            复习知识点
+                        </button>
+                        <button class="w-full btn-primary" onclick="viewProgress()">
+                            <i class="fas fa-chart-line mr-2"></i>
+                            查看详细进度
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/realtime-tracking.js"></script>
+    <script>
+        // Sample user data
+        const userData = {
+            name: '张三',
+            totalKnowledge: 45,
+            completedExperiments: 12,
+            studyHours: 128,
+            currentStreak: 15,
+            overallProgress: 85,
+            subjects: [
+                { name: '电工实验', progress: 92, knowledgePoints: 15, experiments: 5 },
+                { name: '电路分析', progress: 88, knowledgePoints: 12, experiments: 3 },
+                { name: '模拟电子技术', progress: 75, knowledgePoints: 8, experiments: 2 },
+                { name: '数字电子技术', progress: 82, knowledgePoints: 6, experiments: 1 },
+                { name: '控制系统', progress: 68, knowledgePoints: 4, experiments: 1 },
+                { name: 'PID控制', progress: 45, knowledgePoints: 0, experiments: 0 }
+            ],
+            recentExperiments: [
+                { name: '基尔霍夫定律验证', subject: '电工实验', status: 'completed', score: 95, date: '2025-01-08' },
+                { name: '运算放大器特性测试', subject: '模拟电子技术', status: 'completed', score: 88, date: '2025-01-06' },
+                { name: '数字逻辑门实验', subject: '数字电子技术', status: 'in-progress', score: null, date: '2025-01-10' },
+                { name: 'RC滤波器设计', subject: '电路分析', status: 'not-started', score: null, date: '2025-01-12' }
+            ],
+            recentActivities: [
+                { type: 'experiment', content: '完成了基尔霍夫定律验证实验', time: '2小时前' },
+                { type: 'knowledge', content: '学习了运算放大器的工作原理', time: '5小时前' },
+                { type: 'question', content: '向AI提问了关于电路分析的问题', time: '1天前' },
+                { type: 'achievement', content: '获得了"电路分析专家"成就', time: '2天前' },
+                { type: 'study', content: '完成了模拟电子技术的章节学习', time: '3天前' }
+            ],
+            learningData: {
+                labels: ['第1周', '第2周', '第3周', '第4周', '第5周', '第6周', '第7周', '第8周'],
+                knowledgePoints: [5, 8, 12, 18, 25, 32, 38, 45],
+                experiments: [1, 2, 4, 6, 8, 10, 11, 12],
+                studyHours: [8, 12, 16, 20, 24, 28, 32, 36]
+            }
+        };
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function () {
+            populateSubjectProgress();
+            populateRecentExperiments();
+            populateRecentActivity();
+            initializeLearningChart();
+            generateStudyCalendar();
+        });
+
+        // Populate subject progress
+        function populateSubjectProgress() {
+            const container = document.getElementById('subject-progress');
+            container.innerHTML = '';
+
+            userData.subjects.forEach(subject => {
+                const subjectItem = document.createElement('div');
+                subjectItem.className = 'subject-progress';
+                subjectItem.innerHTML = `
+                    <div class="flex justify-between items-center mb-2">
+                        <h4 class="font-semibold text-gray-800">${subject.name}</h4>
+                        <span class="text-sm text-gray-600">${subject.progress}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${subject.progress}%"></div>
+                    </div>
+                    <div class="flex justify-between text-sm text-gray-600 mt-2">
+                        <span>${subject.knowledgePoints}个知识点</span>
+                        <span>${subject.experiments}个实验</span>
+                    </div>
+                `;
+                container.appendChild(subjectItem);
+            });
+        }
+
+        // Populate recent experiments
+        function populateRecentExperiments() {
+            const container = document.getElementById('recent-experiments');
+            container.innerHTML = '';
+
+            userData.recentExperiments.forEach(experiment => {
+                const experimentItem = document.createElement('div');
+                experimentItem.className = 'experiment-card';
+
+                let statusClass = '';
+                let statusText = '';
+                let scoreDisplay = '';
+
+                switch (experiment.status) {
+                    case 'completed':
+                        statusClass = 'status-completed';
+                        statusText = '已完成';
+                        scoreDisplay = experiment.score ? `<span class="text-green-600 font-semibold">${experiment.score}分</span>` : '';
+                        break;
+                    case 'in-progress':
+                        statusClass = 'status-in-progress';
+                        statusText = '进行中';
+                        break;
+                    case 'not-started':
+                        statusClass = 'status-not-started';
+                        statusText = '未开始';
+                        break;
+                }
+
+                experimentItem.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <h4 class="font-semibold text-gray-800">${experiment.name}</h4>
+                        <span class="${statusClass}">${statusText}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 mb-2">${experiment.subject}</p>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-500">${experiment.date}</span>
+                        ${scoreDisplay}
+                    </div>
+                `;
+                container.appendChild(experimentItem);
+            });
+        }
+
+        // Populate recent activity
+        function populateRecentActivity() {
+            const container = document.getElementById('recent-activity');
+            container.innerHTML = '';
+
+            userData.recentActivities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'recent-activity';
+
+                let icon = '';
+                switch (activity.type) {
+                    case 'experiment':
+                        icon = '<i class="fas fa-flask text-blue-600"></i>';
+                        break;
+                    case 'knowledge':
+                        icon = '<i class="fas fa-book text-green-600"></i>';
+                        break;
+                    case 'question':
+                        icon = '<i class="fas fa-question-circle text-purple-600"></i>';
+                        break;
+                    case 'achievement':
+                        icon = '<i class="fas fa-trophy text-yellow-600"></i>';
+                        break;
+                    case 'study':
+                        icon = '<i class="fas fa-graduation-cap text-indigo-600"></i>';
+                        break;
+                }
+
+                activityItem.innerHTML = `
+                    <div class="flex items-start">
+                        <div class="mr-3 mt-1">${icon}</div>
+                        <div class="flex-1">
+                            <p class="text-sm text-gray-800">${activity.content}</p>
+                            <p class="text-xs text-gray-500 mt-1">${activity.time}</p>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(activityItem);
+            });
+        }
+
+        // Initialize learning chart
+        function initializeLearningChart() {
+            const ctx = document.getElementById('learningChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: userData.learningData.labels,
+                    datasets: [
+                        {
+                            label: '知识点掌握',
+                            data: userData.learningData.knowledgePoints,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        },
+                        {
+                            label: '完成实验',
+                            data: userData.learningData.experiments,
+                            borderColor: '#f093fb',
+                            backgroundColor: 'rgba(240, 147, 251, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        // Generate study calendar
+        function generateStudyCalendar() {
+            const container = document.getElementById('study-calendar');
+            container.innerHTML = '';
+
+            // Days of week header
+            const daysOfWeek = ['日', '一', '二', '三', '四', '五', '六'];
+            daysOfWeek.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'text-center text-xs font-semibold text-gray-600 py-2';
+                dayHeader.textContent = day;
+                container.appendChild(dayHeader);
+            });
+
+            // Generate calendar days for January 2025
+            const today = new Date();
+            const currentDay = today.getDate();
+            const studyDays = [2, 3, 5, 6, 8, 9, 10, 12, 13, 15, 16, 17, 19, 20, 22, 23, 24, 26, 27, 29, 30];
+
+            // Generate days for January 2025 (starts on Wednesday)
+            const daysInMonth = 31;
+            const startDay = 3; // January 1, 2025 is a Wednesday (0=Sunday, 3=Wednesday)
+
+            // Add empty cells for days before the 1st
+            for (let i = 0; i < startDay; i++) {
+                const emptyDay = document.createElement('div');
+                container.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+
+                if (day === currentDay) {
+                    dayElement.classList.add('active');
+                } else if (studyDays.includes(day)) {
+                    dayElement.classList.add('has-activity');
+                }
+
+                container.appendChild(dayElement);
+            }
+        }
+
+        // Quick action functions
+        function askQuestion() {
+            window.open('/static/answer.html', '_blank');
+        }
+
+        function startExperiment() {
+            alert('实验功能正在开发中，敬请期待！');
+        }
+
+        function reviewKnowledge() {
+            alert('知识点复习功能正在开发中，敬请期待！');
+        }
+
+        function viewProgress() {
+            alert('详细进度查看功能正在开发中，敬请期待！');
+        }
+
+        function startRecommendedLearning(topic) {
+            const question = `请详细介绍${topic}的相关知识和学习要点`;
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+        }
+
+        function startRecommendedExperiment(topic) {
+            const question = `请推荐${topic}相关的实验项目和实践方法`;
+            window.open(`/static/answer.html?q=${encodeURIComponent(question)}`, '_blank');
+        }
+    </script>
+</body>
+
+</html>

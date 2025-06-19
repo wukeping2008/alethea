@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目详情测试 - Alethea</title>
+    <link href="/static/libs/css/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm py-4">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center">
+                <span class="text-2xl font-bold text-blue-600">Alethea</span>
+            </div>
+            <button onclick="history.back()" class="bg-gray-500 text-white px-4 py-2 rounded">
+                <i class="fas fa-arrow-left mr-2"></i>返回
+            </button>
+        </div>
+    </nav>
+
+    <!-- Project Header -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <div class="flex items-center mb-4">
+                <div id="project-icon" class="w-16 h-16 bg-blue-500 rounded-lg flex items-center justify-center text-white text-2xl mr-4">
+                    <i class="fas fa-car"></i>
+                </div>
+                <div>
+                    <h1 id="project-title" class="text-3xl font-bold text-gray-800 mb-2">智能小车</h1>
+                    <span id="project-difficulty" class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-sm">中级</span>
+                </div>
+            </div>
+            <p id="project-description" class="text-gray-600 text-lg mb-6">
+                基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块，实现自主导航和避障功能
+            </p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="flex items-center">
+                    <i class="fas fa-clock text-blue-500 mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-500">预计时间</div>
+                        <div id="project-duration" class="font-semibold">2-3周</div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-users text-green-500 mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-500">适合人数</div>
+                        <div class="font-semibold">1-3人</div>
+                    </div>
+                </div>
+                <div class="flex items-center">
+                    <i class="fas fa-star text-yellow-500 mr-3"></i>
+                    <div>
+                        <div class="text-sm text-gray-500">项目评分</div>
+                        <div class="font-semibold">4.8/5.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- AI Assistant Modal -->
+    <div id="ai-assistant-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50">
+        <div class="flex items-center justify-center min-h-screen p-4">
+            <div class="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+                <div class="flex justify-between items-center p-6 border-b">
+                    <h3 class="text-xl font-bold text-gray-800 flex items-center">
+                        <i class="fas fa-robot text-blue-500 mr-2"></i>
+                        AI项目助手
+                    </h3>
+                    <button id="close-ai-assistant" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+                <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
+                    <div class="flex items-start space-x-3">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                            <i class="fas fa-robot text-white text-sm"></i>
+                        </div>
+                        <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                            <p class="text-sm">您好！我是您的AI项目助手。有什么关于项目的问题需要帮助吗？</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="p-6 border-t">
+                    <div class="flex space-x-3">
+                        <input type="text" id="ai-question-input" placeholder="请输入您的问题..." 
+                               class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <button id="send-ai-question" class="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition-colors">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Project Modules -->
+    <section class="container mx-auto px-4 py-8">
+        <div class="flex justify-between items-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800">项目模块</h2>
+            <button id="open-ai-assistant" class="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-4 py-2 rounded-lg hover:from-blue-600 hover:to-purple-700 transition-all duration-300 flex items-center">
+                <i class="fas fa-robot mr-2"></i>
+                AI助手
+            </button>
+        </div>
+        <div id="project-modules" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white mb-4">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800 mb-2">硬件平台搭建</h3>
+                <p class="text-gray-600 mb-4">选择合适的硬件平台，搭建小车基础结构</p>
+                <div class="flex flex-wrap gap-2">
+                    <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">Arduino基础</span>
+                    <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">电机驱动原理</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Project Steps -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">实施步骤</h2>
+        <div id="project-steps" class="space-y-6 mb-12">
+            <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-blue-500">
+                <div class="flex items-start">
+                    <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4">
+                        1
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">需求分析与设计</h3>
+                        <p class="text-gray-600 mb-4">明确项目目标，设计系统架构和硬件选型</p>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                功能需求分析
+                            </div>
+                            <div class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                硬件选型
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Required Skills -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">所需技能</h2>
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-12">
+            <div id="project-skills" class="flex flex-wrap gap-3">
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">Arduino编程</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">传感器应用</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">电机控制</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Related Knowledge Points -->
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">相关知识点</h2>
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <div id="knowledge-points" class="flex flex-wrap gap-3">
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">单片机原理</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">PWM控制</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">传感器技术</span>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // 获取URL参数
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // 项目数据
+        const projectsData = {
+            'smart-car': {
+                title: '智能小车',
+                description: '基于Arduino的避障智能小车，集成超声波传感器、电机驱动等模块',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-car',
+                color: 'bg-blue-500'
+            },
+            'image-classifier': {
+                title: '图像分类器',
+                description: '训练卷积神经网络进行图像分类和物体识别',
+                difficulty: 'medium',
+                duration: '2-3周',
+                icon: 'fas fa-images',
+                color: 'bg-purple-600'
+            },
+            'smart-home': {
+                title: '智能家居系统',
+                description: '构建物联网智能家居系统，实现远程控制和环境监测',
+                difficulty: 'medium',
+                duration: '3-4周',
+                icon: 'fas fa-home',
+                color: 'bg-teal-500'
+            }
+        };
+
+        // 加载项目信息
+        function loadProject() {
+            const projectId = getUrlParameter('id') || 'smart-car';
+            const project = projectsData[projectId];
+            
+            if (project) {
+                document.getElementById('project-title').textContent = project.title;
+                document.getElementById('project-description').textContent = project.description;
+                document.getElementById('project-duration').textContent = project.duration;
+                
+                const iconElement = document.getElementById('project-icon');
+                iconElement.innerHTML = `<i class="${project.icon}"></i>`;
+                iconElement.className = `w-16 h-16 ${project.color} rounded-lg flex items-center justify-center text-white text-2xl mr-4`;
+                
+                // 显示AI生成状态
+                showAIGenerating();
+            }
+        }
+
+        // 显示AI生成状态
+        function showAIGenerating() {
+            document.getElementById('project-modules').innerHTML = `
+                <div class="col-span-full text-center py-12">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+                    <p class="text-gray-600">AI正在生成项目详细内容...</p>
+                </div>
+            `;
+            
+            document.getElementById('project-steps').innerHTML = `
+                <div class="text-center py-8">
+                    <div class="animate-pulse bg-gray-200 h-4 w-3/4 mx-auto mb-2 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-4 w-1/2 mx-auto rounded"></div>
+                </div>
+            `;
+            
+            document.getElementById('project-skills').innerHTML = `
+                <div class="flex space-x-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                </div>
+            `;
+            
+            document.getElementById('knowledge-points').innerHTML = `
+                <div class="flex flex-wrap gap-2">
+                    <div class="animate-pulse bg-gray-200 h-8 w-20 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-24 rounded-full"></div>
+                    <div class="animate-pulse bg-gray-200 h-8 w-16 rounded-full"></div>
+                </div>
+            `;
+
+            // 3秒后显示生成的内容
+            setTimeout(showGeneratedContent, 3000);
+        }
+
+        // 显示生成的内容
+        function showGeneratedContent() {
+            // 恢复模块内容
+            document.getElementById('project-modules').innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="w-12 h-12 bg-purple-500 rounded-lg flex items-center justify-center text-white mb-4">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">硬件平台搭建</h3>
+                    <p class="text-gray-600 mb-4">选择合适的硬件平台，搭建小车基础结构</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">Arduino基础</span>
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">电机驱动原理</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white mb-4">
+                        <i class="fas fa-radar"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">传感器集成</h3>
+                    <p class="text-gray-600 mb-4">集成超声波传感器实现距离检测</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">超声波原理</span>
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">信号处理</span>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <div class="w-12 h-12 bg-red-500 rounded-lg flex items-center justify-center text-white mb-4">
+                        <i class="fas fa-brain"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-gray-800 mb-2">控制算法</h3>
+                    <p class="text-gray-600 mb-4">编写避障和路径规划算法</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">PID控制</span>
+                        <span class="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">路径规划</span>
+                    </div>
+                </div>
+            `;
+
+            // 恢复其他内容
+            document.getElementById('project-steps').innerHTML = `
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-blue-500">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center font-bold mr-4">1</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">需求分析与设计</h3>
+                            <p class="text-gray-600 mb-4">明确项目目标，设计系统架构和硬件选型</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>功能需求分析
+                                </div>
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>硬件选型
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg border-l-4 border-green-500">
+                    <div class="flex items-start">
+                        <div class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center font-bold mr-4">2</div>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-gray-800 mb-2">硬件采购与组装</h3>
+                            <p class="text-gray-600 mb-4">采购所需硬件并完成小车机械结构组装</p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>硬件采购
+                                </div>
+                                <div class="flex items-center text-sm text-gray-700">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>机械组装
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('project-skills').innerHTML = `
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">Arduino编程</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">传感器应用</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">电机控制</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">电路设计</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">C++编程</span>
+                <span class="bg-blue-100 text-blue-800 px-3 py-2 rounded-lg font-medium">系统调试</span>
+            `;
+
+            document.getElementById('knowledge-points').innerHTML = `
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">单片机原理</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">PWM控制</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">传感器技术</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">电机驱动</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">嵌入式编程</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">控制算法</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">信号处理</span>
+                <span class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-3 py-2 rounded-full text-sm cursor-pointer hover:shadow-lg transition-all">系统集成</span>
+            `;
+        }
+
+        // AI助手功能
+        function openAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.remove('hidden');
+            document.getElementById('ai-question-input').focus();
+        }
+
+        function closeAIAssistant() {
+            document.getElementById('ai-assistant-modal').classList.add('hidden');
+        }
+
+        function sendAIQuestion() {
+            const input = document.getElementById('ai-question-input');
+            const question = input.value.trim();
+            
+            if (!question) return;
+
+            // 添加用户消息
+            addChatMessage(question, 'user');
+            input.value = '';
+
+            // 模拟AI回答
+            setTimeout(() => {
+                addChatMessage('这是一个很好的问题！关于智能小车项目，我建议您首先了解Arduino的基本编程概念，然后学习超声波传感器的工作原理。您可以从简单的LED控制开始，逐步过渡到电机控制和传感器集成。', 'ai');
+            }, 1000);
+        }
+
+        function addChatMessage(message, sender) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'flex items-start space-x-3';
+            
+            if (sender === 'user') {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center ml-auto">
+                        <i class="fas fa-user text-white text-sm"></i>
+                    </div>
+                    <div class="bg-blue-100 rounded-lg p-3 max-w-xs ml-auto">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+                messageDiv.classList.add('flex-row-reverse');
+            } else {
+                messageDiv.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center">
+                        <i class="fas fa-robot text-white text-sm"></i>
+                    </div>
+                    <div class="bg-gray-100 rounded-lg p-3 max-w-xs">
+                        <p class="text-sm">${message}</p>
+                    </div>
+                `;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProject();
+
+            // AI助手事件监听
+            document.getElementById('open-ai-assistant').addEventListener('click', openAIAssistant);
+            document.getElementById('close-ai-assistant').addEventListener('click', closeAIAssistant);
+            document.getElementById('send-ai-question').addEventListener('click', sendAIQuestion);
+            
+            // 回车发送消息
+            document.getElementById('ai-question-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendAIQuestion();
+                }
+            });
+
+            // 点击模态框外部关闭
+            document.getElementById('ai-assistant-modal').addEventListener('click', function(e) {
+                if (e.target === this) {
+                    closeAIAssistant();
+                }
+            });
+        });
+    </script>
+
+    <script>
+        // 延迟加载脚本函数
+        function loadScript(src, callback) {
+            const script = document.createElement('script');
+            script.src = src;
+            script.onload = callback;
+            document.head.appendChild(script);
+        }
+
+        // 页面加载完成后加载非关键资源
+        window.addEventListener('load', function() {
+            // 延迟加载Chart.js
+            if (document.querySelector('canvas')) {
+                loadScript('/static/libs/js/chart.min.js');
+            }
+            
+            // 延迟加载Highlight.js
+            if (document.querySelector('pre code')) {
+                loadScript('/static/libs/js/highlight.min.js', function() {
+                    if (window.hljs) {
+                        hljs.highlightAll();
+                    }
+                });
+            }
+
+            // 延迟加载MathJax
+            if (document.querySelector('.math') || document.querySelector('[data-math]')) {
+                loadScript('/static/libs/js/mathjax.min.js');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -907,8 +907,26 @@
                     }
                 })
             })
-                .then(response => response.json())
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('API response data:', data);
+                    
+                    // 检查响应数据结构
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // 确保有content字段
+                    if (!data.content) {
+                        throw new Error('响应中缺少content字段');
+                    }
+                    
                     currentAnswer = data;
                     displayAnswer(data);
                     // Generate related content using AI
@@ -917,7 +935,7 @@
                 .catch(error => {
                     console.error('Error fetching answer:', error);
                     document.getElementById('answer-content').innerHTML =
-                        '<div class="text-red-600"><i class="fas fa-exclamation-triangle mr-2"></i>获取回答失败，请稍后重试</div>';
+                        `<div class="text-red-600"><i class="fas fa-exclamation-triangle mr-2"></i>获取回答失败：${error.message}</div>`;
                 });
         }
 
@@ -937,9 +955,22 @@
 
             answerContent.innerHTML = `<div class="prose max-w-none">${formattedContent}</div>`;
 
-            // Re-render MathJax if available
-            if (window.MathJax) {
-                MathJax.typesetPromise([answerContent]).catch((err) => console.log(err.message));
+            // Re-render MathJax if available - with proper error handling
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                try {
+                    MathJax.typesetPromise([answerContent]).catch((err) => {
+                        console.warn('MathJax rendering error:', err.message);
+                    });
+                } catch (error) {
+                    console.warn('MathJax not properly initialized:', error.message);
+                }
+            } else if (window.MathJax && window.MathJax.Hub) {
+                // Fallback for older MathJax versions
+                try {
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, answerContent]);
+                } catch (error) {
+                    console.warn('MathJax Hub rendering error:', error.message);
+                }
             }
 
             // Re-highlight code if available
@@ -2157,9 +2188,22 @@
 
             contentContainer.innerHTML = `<div class="prose max-w-none text-gray-700 leading-relaxed">${formattedContent}</div>`;
 
-            // Re-render MathJax if available
-            if (window.MathJax) {
-                MathJax.typesetPromise([contentContainer]).catch((err) => console.log(err.message));
+            // Re-render MathJax if available - with proper error handling
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                try {
+                    MathJax.typesetPromise([contentContainer]).catch((err) => {
+                        console.warn('MathJax rendering error:', err.message);
+                    });
+                } catch (error) {
+                    console.warn('MathJax not properly initialized:', error.message);
+                }
+            } else if (window.MathJax && window.MathJax.Hub) {
+                // Fallback for older MathJax versions
+                try {
+                    MathJax.Hub.Queue(["Typeset", MathJax.Hub, contentContainer]);
+                } catch (error) {
+                    console.warn('MathJax Hub rendering error:', error.message);
+                }
             }
         }
 

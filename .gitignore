@@ -160,6 +160,8 @@ cache/
 config/secrets.py
 secrets.json
 src/config.json
+src/config.json.local
+*.pem
 
 # Node modules (if any frontend build tools are used)
 node_modules/

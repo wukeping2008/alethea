@@ -13,6 +13,7 @@ from flask_sqlalchemy import SQLAlchemy
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from routes.llm_routes import llm_bp
+from services.content_optimization import get_optimization_services
 from routes.user import user_bp
 from routes.analytics_routes import analytics_bp
 from routes.project_routes import project_bp

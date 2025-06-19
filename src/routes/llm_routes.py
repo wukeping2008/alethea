@@ -1,11 +1,18 @@
 """
 API routes for LLM integration in Alethea platform
+Enhanced with optimization services
 """
 
 from flask import Blueprint, request, jsonify, session
 import json
 import os
+import asyncio
+from datetime import datetime
 from models.llm_models import llm_manager
+from services.content_optimization import (
+    content_cache, quality_validator, user_profile_manager, 
+    multimedia_enhancer, performance_monitor
+)
 
 # Create blueprint
 llm_bp = Blueprint('llm', __name__, url_prefix='/api/llm')
@@ -282,16 +289,45 @@ def generate_experiment():
         }), 500
 
 def generate_ai_related_content(question, answer):
-    """使用AI生成相关知识点、实验和仿真内容"""
+    """使用AI生成相关知识点、实验和仿真内容 - 集成所有优化功能"""
     import asyncio
     
+    # 记录开始时间
+    start_time = datetime.now()
+    user_id = session.get('user_id', 1)
+    
     try:
-        # 构建AI提示词来生成相关内容
+        # 1. 检查缓存
+        cached_content = content_cache.get_cached_content(question, answer, user_id)
+        if cached_content:
+            performance_monitor.log_generation_time(
+                start_time, datetime.now(), 'cache', True, 
+                cached_content.get('quality_score', 0)
+            )
+            return jsonify({
+                **cached_content,
+                'success': True,
+                'generated_by': 'cache'
+            })
+        
+        # 2. 获取用户个性化上下文
+        personalized_context = user_profile_manager.get_personalized_context(user_id)
+        
+        # 3. 分析学科领域
+        subject_analysis = analyze_subject_domain(question, answer)
+        domain = subject_analysis['domain']
+        
+        # 4. 构建增强的AI提示词
         content_prompt = f"""
 基于以下问题和回答，请生成相关的学习内容：
 
 问题：{question}
 回答：{answer}
+
+{personalized_context if personalized_context else ""}
+
+学科领域分析：{domain}
+关键概念：{', '.join(subject_analysis.get('key_concepts', [])[:3])}
 
 请按照以下JSON格式返回内容：
 
@@ -351,19 +387,31 @@ def generate_ai_related_content(question, answer):
 10. 只返回JSON格式，不要其他文字
 """
 
-        # 使用AI生成内容
+        # 5. 获取与问答相同的提供商（保持一致性）
+        last_provider = session.get('last_used_provider', 'gemini')
+        last_model = session.get('last_used_model', 'gemini-1.5-flash')
+        
+        # 6. 使用AI生成内容
         response = asyncio.run(llm_manager.generate_response(
             prompt=content_prompt,
-            provider=None,  # 使用默认提供商
+            provider=last_provider,  # 使用与问答相同的提供商
+            model=last_model,
             temperature=0.7,
             max_tokens=2000
         ))
         
+        # 记录使用的提供商
+        used_provider = response.get('selected_provider', last_provider)
+        
         if 'error' in response:
+            # 记录失败
+            performance_monitor.log_generation_time(
+                start_time, datetime.now(), used_provider, False, 0
+            )
             # 如果AI生成失败，使用备用方案
             return generate_fallback_content(question, answer)
         
-        # 尝试解析AI返回的JSON
+        # 7. 尝试解析AI返回的JSON
         try:
             import json
             ai_content = response['content']
@@ -376,24 +424,68 @@ def generate_ai_related_content(question, answer):
                 json_str = ai_content[start_idx:end_idx]
                 parsed_content = json.loads(json_str)
                 
-                # 验证和补充内容
+                # 8. 验证内容质量
+                is_valid, quality_score, issues = quality_validator.validate_content(parsed_content)
+                
+                if not is_valid:
+                    print(f"Content quality validation failed: {issues}")
+                    # 质量不合格，使用备用方案
+                    performance_monitor.log_generation_time(
+                        start_time, datetime.now(), used_provider, False, quality_score
+                    )
+                    return generate_fallback_content(question, answer)
+                
+                # 9. 验证和补充内容
                 validated_content = validate_and_enhance_content(parsed_content, question, answer)
                 
+                # 10. 多媒体内容增强
+                enhanced_content = multimedia_enhancer.enhance_content(validated_content, domain)
+                
+                # 11. 缓存高质量内容
+                if quality_score >= 80:
+                    content_cache.cache_content(
+                        question, answer, enhanced_content, 
+                        used_provider, quality_score, user_id
+                    )
+                
+                # 12. 更新用户画像
+                user_profile_manager.update_user_profile(user_id, question, answer)
+                
+                # 13. 记录性能指标
+                performance_monitor.log_generation_time(
+                    start_time, datetime.now(), used_provider, True, quality_score
+                )
+                
+                # 14. 记录缓存性能
+                cache_stats = content_cache.get_cache_stats()
+                performance_monitor.log_cache_performance(cache_stats)
+                
                 return jsonify({
-                    **validated_content,
+                    **enhanced_content,
                     'success': True,
-                    'generated_by': 'ai'
+                    'generated_by': 'ai_optimized',
+                    'quality_score': quality_score,
+                    'provider_used': used_provider,
+                    'cache_stats': cache_stats
                 })
             else:
                 raise ValueError("No valid JSON found in AI response")
                 
         except (json.JSONDecodeError, ValueError) as e:
             print(f"JSON parsing error: {e}")
+            # 记录解析失败
+            performance_monitor.log_generation_time(
+                start_time, datetime.now(), used_provider, False, 0
+            )
             # JSON解析失败，使用备用方案
             return generate_fallback_content(question, answer)
     
     except Exception as e:
         print(f"AI content generation error: {e}")
+        # 记录异常
+        performance_monitor.log_generation_time(
+            start_time, datetime.now(), 'unknown', False, 0
+        )
         return generate_fallback_content(question, answer)
 
 def validate_and_enhance_content(content, question, answer):
@@ -1725,6 +1817,124 @@ def generate_circuit_experiment(question, difficulty):
         "success": True,
         "generated_by": "fallback"
     })
+
+@llm_bp.route('/optimization/performance', methods=['GET'])
+def get_performance_report():
+    """获取AI系统性能报告"""
+    try:
+        report = performance_monitor.get_performance_report()
+        suggestions = performance_monitor.get_optimization_suggestions()
+        
+        return jsonify({
+            'performance_report': report,
+            'optimization_suggestions': suggestions,
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to generate performance report'
+        }), 500
+
+@llm_bp.route('/optimization/cache', methods=['GET'])
+def get_cache_stats():
+    """获取缓存统计信息"""
+    try:
+        cache_stats = content_cache.get_cache_stats()
+        return jsonify({
+            'cache_stats': cache_stats,
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to get cache statistics'
+        }), 500
+
+@llm_bp.route('/optimization/cache/clear', methods=['POST'])
+def clear_cache():
+    """清空内容缓存"""
+    try:
+        content_cache.clear_cache()
+        return jsonify({
+            'message': 'Cache cleared successfully',
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to clear cache'
+        }), 500
+
+@llm_bp.route('/optimization/user-profile/<int:user_id>', methods=['GET'])
+def get_user_profile(user_id):
+    """获取用户画像信息"""
+    try:
+        profile = user_profile_manager.get_user_profile(user_id)
+        if profile:
+            return jsonify({
+                'user_profile': {
+                    'user_id': profile.user_id,
+                    'interests': profile.interests,
+                    'knowledge_level': profile.knowledge_level,
+                    'preferred_difficulty': profile.preferred_difficulty,
+                    'question_count': len(profile.question_history),
+                    'last_updated': profile.last_updated.isoformat()
+                },
+                'success': True
+            })
+        else:
+            return jsonify({
+                'message': 'User profile not found',
+                'success': False
+            }), 404
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to get user profile'
+        }), 500
+
+@llm_bp.route('/optimization/feedback', methods=['POST'])
+def submit_user_feedback():
+    """提交用户反馈"""
+    try:
+        data = request.json
+        user_id = data.get('user_id', session.get('user_id', 1))
+        rating = data.get('rating', 5)
+        feedback = data.get('feedback', '')
+        
+        performance_monitor.log_user_satisfaction(user_id, rating, feedback)
+        
+        return jsonify({
+            'message': 'Feedback submitted successfully',
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to submit feedback'
+        }), 500
+
+@llm_bp.route('/optimization/quality-check', methods=['POST'])
+def check_content_quality():
+    """检查内容质量"""
+    try:
+        data = request.json
+        content = data.get('content', {})
+        
+        is_valid, quality_score, issues = quality_validator.validate_content(content)
+        
+        return jsonify({
+            'is_valid': is_valid,
+            'quality_score': quality_score,
+            'issues': issues,
+            'success': True
+        })
+    except Exception as e:
+        return jsonify({
+            'error': str(e),
+            'message': 'Failed to check content quality'
+        }), 500
 
 # 全局AI设置和知识库集成的辅助函数
 def get_user_ai_settings(user_id):

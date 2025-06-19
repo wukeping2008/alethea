@@ -6,14 +6,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>项目制学习 - Alethea</title>
     <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/libs/css/tailwind.min.css">
     <!-- Global Theme CSS -->
     <link rel="stylesheet" href="/static/css/global-theme.css">
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
     <!-- Custom styles -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        @font-face {
+            font-family: 'Noto Sans SC';
+            font-style: normal;
+            font-weight: 300 700;
+            font-display: swap;
+            src: url('/static/libs/fonts/noto-sans-sc-v36-chinese-simplified-regular.woff2') format('woff2');
+        }
 
         :root {
             --primary-color: #0a2342;
@@ -425,10 +431,10 @@
                         </div>
                     </div>
                     <div class="hidden lg:block ml-8">
-                        <div class="w-64 h-48 bg-white bg-opacity-10 rounded-lg flex items-center justify-center">
+                        <div class="w-64 h-48 bg-gray-800 bg-opacity-90 rounded-lg flex items-center justify-center" style="background-color: rgba(31, 41, 55, 0.9) !important;">
                             <div class="text-center">
-                                <i class="fas fa-wifi text-6xl mb-4 opacity-80"></i>
-                                <p class="text-sm opacity-80">WiFi信号感知演示</p>
+                                <i class="fas fa-wifi text-6xl mb-4 text-white" style="color: white !important;"></i>
+                                <p class="text-sm text-white" style="color: white !important; text-shadow: 0 1px 2px rgba(0,0,0,0.2);">WiFi信号感知演示</p>
                             </div>
                         </div>
                     </div>

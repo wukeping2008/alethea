@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alethea平台三层架构说明图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #3d566e 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: linear-gradient(145deg, #ecf0f1 0%, #d5dbdb 100%);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(189, 195, 199, 0.3);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 40px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .subtitle {
+            text-align: center;
+            font-size: 18px;
+            color: #34495e;
+            margin-bottom: 50px;
+            font-weight: 500;
+        }
+
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            perspective: 1000px;
+        }
+
+        .layer {
+            position: relative;
+            background: linear-gradient(45deg, var(--layer-color), var(--layer-color-light));
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: rotateX(5deg);
+            transition: all 0.3s ease;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .layer:hover {
+            transform: rotateX(0deg) translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .layer.application {
+            --layer-color: #5a6c7d;
+            --layer-color-light: #6b7d8a;
+        }
+
+        .layer.optimization {
+            --layer-color: #4a5d4a;
+            --layer-color-light: #5c6f5c;
+        }
+
+        .layer.foundation {
+            --layer-color: #5d4a5d;
+            --layer-color-light: #6f5c6f;
+        }
+
+        .layer-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .layer-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            margin-right: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .layer-title {
+            flex: 1;
+        }
+
+        .layer-name {
+            font-size: 28px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin-bottom: 5px;
+        }
+
+        .layer-description {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+        }
+
+        .layer-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-top: 20px;
+        }
+
+        .feature-group {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .feature-group h4 {
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            color: rgba(255, 255, 255, 0.95);
+            font-size: 14px;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+            line-height: 1.4;
+        }
+
+        .feature-list li:before {
+            content: "●";
+            color: rgba(255, 255, 255, 0.8);
+            position: absolute;
+            left: 0;
+            font-size: 12px;
+        }
+
+        .highlight-box {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid rgba(255, 255, 255, 0.6);
+        }
+
+        .highlight-box h5 {
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .highlight-box p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .tech-tag {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .connection-line {
+            position: absolute;
+            right: 50%;
+            bottom: -15px;
+            width: 2px;
+            height: 30px;
+            background: linear-gradient(to bottom, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.2));
+            transform: translateX(50%);
+        }
+
+        .connection-arrow {
+            position: absolute;
+            right: 50%;
+            bottom: -25px;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 10px solid rgba(255, 255, 255, 0.6);
+            transform: translateX(50%);
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .title {
+                font-size: 24px;
+            }
+            
+            .layer-content {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .layer-name {
+                font-size: 24px;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .alethea-special {
+            background: linear-gradient(45deg, #4a5568, #5d6d7e);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-top: 30px;
+            text-align: center;
+            box-shadow: 0 10px 25px rgba(74, 85, 104, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .alethea-special h3 {
+            font-size: 24px;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+            color: #f8f9fa;
+        }
+
+        .alethea-special p {
+            font-size: 16px;
+            line-height: 1.6;
+            opacity: 0.95;
+            color: rgba(255, 255, 255, 0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">Alethea智能教育平台三层架构</h1>
+        <p class="subtitle">构建新型人工智能驱动的高等教育学习环境</p>
+        
+        <div class="architecture">
+            <!-- 应用层 -->
+            <div class="layer application">
+                <div class="layer-header">
+                    <div class="layer-icon">🎓</div>
+                    <div class="layer-title">
+                        <div class="layer-name">应用层</div>
+                        <div class="layer-description">智能化在线教育交互平台</div>
+                    </div>
+                </div>
+                
+                <div class="layer-content">
+                    <div class="feature-group">
+                        <h4>🔬 在线仿真实验</h4>
+                        <ul class="feature-list">
+                            <li>电路仿真器 (CircuitJS集成)</li>
+                            <li>物理仿真 (PhET平台)</li>
+                            <li>数学可视化 (Desmos/GeoGebra)</li>
+                            <li>化学分子建模 (MolView)</li>
+                            <li>控制系统仿真 (Simulink)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>📚 项目制学习</h4>
+                        <ul class="feature-list">
+                            <li>智能小车项目</li>
+                            <li>人脸识别系统</li>
+                            <li>智能家居IoT</li>
+                            <li>PLC工业控制</li>
+                            <li>AI算法实现</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>🎯 课程导入系统</h4>
+                        <ul class="feature-list">
+                            <li>多格式文档解析 (PDF/Word/PPT)</li>
+                            <li>智能内容分类</li>
+                            <li>知识点自动提取</li>
+                            <li>个人知识库构建</li>
+                            <li>学习路径推荐</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>📊 学习分析</h4>
+                        <ul class="feature-list">
+                            <li>数字画像生成</li>
+                            <li>学习行为追踪</li>
+                            <li>知识掌握评估</li>
+                            <li>个性化推荐</li>
+                            <li>实时学习分析</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <h5>🌟 Alethea特色功能</h5>
+                    <p>集成多学科仿真平台，支持电子、物理、数学、化学等领域的在线实验，结合项目制学习模式，提供从理论到实践的完整学习闭环。</p>
+                </div>
+                
+                <div class="connection-line"></div>
+                <div class="connection-arrow"></div>
+            </div>
+            
+            <!-- 优化层 -->
+            <div class="layer optimization">
+                <div class="layer-header">
+                    <div class="layer-icon">⚡</div>
+                    <div class="layer-title">
+                        <div class="layer-name">智能优化层</div>
+                        <div class="layer-description">AI内容优化与个性化引擎</div>
+                    </div>
+                </div>
+                
+                <div class="layer-content">
+                    <div class="feature-group">
+                        <h4>🧠 专业Prompt工程</h4>
+                        <ul class="feature-list">
+                            <li>学科专业化提示词模板</li>
+                            <li>上下文感知提示优化</li>
+                            <li>多轮对话状态管理</li>
+                            <li>用户画像驱动个性化</li>
+                            <li>实验内容智能生成</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>📖 知识库增强</h4>
+                        <ul class="feature-list">
+                            <li>个人文档智能解析</li>
+                            <li>知识图谱构建</li>
+                            <li>语义相似度匹配</li>
+                            <li>上下文检索增强 (RAG)</li>
+                            <li>知识点关联分析</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>🎯 内容质量控制</h4>
+                        <ul class="feature-list">
+                            <li>AI生成内容验证</li>
+                            <li>质量评分算法</li>
+                            <li>多媒体内容增强</li>
+                            <li>实验可行性检查</li>
+                            <li>学科准确性验证</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>⚡ 性能优化</h4>
+                        <ul class="feature-list">
+                            <li>智能缓存策略</li>
+                            <li>响应时间优化</li>
+                            <li>负载均衡调度</li>
+                            <li>用户行为分析</li>
+                            <li>系统性能监控</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <h5>🔧 核心优化技术</h5>
+                    <p>结合用户个人知识库和专业提示词工程，实现AI回答的精准化和个性化，通过多层质量控制确保内容的专业性和准确性。</p>
+                </div>
+                
+                <div class="tech-stack">
+                    <span class="tech-tag">RAG检索增强</span>
+                    <span class="tech-tag">Prompt Engineering</span>
+                    <span class="tech-tag">知识图谱</span>
+                    <span class="tech-tag">语义分析</span>
+                    <span class="tech-tag">质量评估</span>
+                    <span class="tech-tag">缓存优化</span>
+                </div>
+                
+                <div class="connection-line"></div>
+                <div class="connection-arrow"></div>
+            </div>
+            
+            <!-- 模型层 -->
+            <div class="layer foundation">
+                <div class="layer-header">
+                    <div class="layer-icon">🤖</div>
+                    <div class="layer-title">
+                        <div class="layer-name">AI模型层</div>
+                        <div class="layer-description">多模型融合的智能底层架构</div>
+                    </div>
+                </div>
+                
+                <div class="layer-content">
+                    <div class="feature-group">
+                        <h4>🌐 云端AI服务</h4>
+                        <ul class="feature-list">
+                            <li>Google Gemini (主力模型)</li>
+                            <li>Anthropic Claude (推理专家)</li>
+                            <li>OpenAI GPT系列</li>
+                            <li>阿里云通义千问Plus</li>
+                            <li>火山引擎DeepSeek</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>🏠 本地部署</h4>
+                        <ul class="feature-list">
+                            <li>Ollama DeepSeek R1 (本地推理)</li>
+                            <li>离线模式支持</li>
+                            <li>数据隐私保护</li>
+                            <li>低延迟响应</li>
+                            <li>成本控制优化</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>🧮 智能调度</h4>
+                        <ul class="feature-list">
+                            <li>问题类型自动识别</li>
+                            <li>模型能力匹配算法</li>
+                            <li>负载均衡策略</li>
+                            <li>故障自动切换</li>
+                            <li>成本效益优化</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="feature-group">
+                        <h4>🔄 备用机制</h4>
+                        <ul class="feature-list">
+                            <li>多级备用策略</li>
+                            <li>服务健康检测</li>
+                            <li>自动降级处理</li>
+                            <li>错误恢复机制</li>
+                            <li>服务可用性保障</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="highlight-box">
+                    <h5>🎯 模型选择策略</h5>
+                    <p>基于问题内容智能选择最适合的AI模型：编程问题优选DeepSeek，物理化学问题使用Claude，数学计算选择Gemini，确保每个领域都有专业的AI支持。</p>
+                </div>
+                
+                <div class="tech-stack">
+                    <span class="tech-tag">Gemini 1.5 Flash</span>
+                    <span class="tech-tag">Claude 3 Sonnet</span>
+                    <span class="tech-tag">DeepSeek R1</span>
+                    <span class="tech-tag">通义千问Plus</span>
+                    <span class="tech-tag">Ollama本地部署</span>
+                    <span class="tech-tag">智能路由</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="alethea-special">
+            <h3>🚀 Alethea平台核心优势</h3>
+            <p>
+                <strong>多学科融合：</strong>支持电子、物理、数学、化学、计算机等多个理工科领域 • 
+                <strong>实验导向：</strong>集成第三方仿真平台，提供真实的在线实验体验 • 
+                <strong>AI驱动：</strong>多模型智能调度，确保专业领域问题的精准回答 • 
+                <strong>个性化学习：</strong>基于用户知识库和学习行为的智能推荐系统
+            </p>
+        </div>
+    </div>
+</body>
+</html>

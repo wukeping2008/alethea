@@ -5,10 +5,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>个人知识库 - Alethea智能学习平台</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/static/libs/css/tailwind.min.css">
     <!-- Global Theme CSS -->
     <link rel="stylesheet" href="/static/css/global-theme.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
     <style>
         .sidebar-item:hover {
             background-color: #f3f4f6;
@@ -41,7 +41,110 @@
         .glass-effect {
             background: rgba(255, 255, 255, 0.8);
             backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #1a1a2e;
+            color: #eee;
+        }
+
+        .dark-mode .bg-gray-100 {
+            background-color: #1a1a2e !important;
+        }
+
+        .dark-mode .glass-effect {
+            background: rgba(45, 45, 68, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .dark-mode .sidebar-item {
+            color: #eee;
+        }
+
+        .dark-mode .sidebar-item:hover {
+            background-color: #2d2d44;
+        }
+
+        .dark-mode .sidebar-item.active {
+            background-color: #3b82f6;
+            color: white;
+        }
+
+        .dark-mode .bg-white {
+            background-color: #2d2d44 !important;
+            border: 1px solid #444;
+        }
+
+        .dark-mode .text-gray-900 {
+            color: #fff !important;
+        }
+
+        .dark-mode .text-gray-800 {
+            color: #eee !important;
+        }
+
+        .dark-mode .text-gray-700 {
+            color: #ccc !important;
+        }
+
+        .dark-mode .text-gray-600 {
+            color: #999 !important;
+        }
+
+        .dark-mode .text-gray-500 {
+            color: #666 !important;
+        }
+
+        .dark-mode .border-gray-300 {
+            border-color: #444 !important;
+        }
+
+        .dark-mode .border-gray-200 {
+            border-color: #333 !important;
+        }
+
+        .dark-mode input,
+        .dark-mode select,
+        .dark-mode textarea {
+            background-color: #2d2d44;
+            border-color: #444;
+            color: #eee;
+        }
+
+        .dark-mode input:focus,
+        .dark-mode select:focus,
+        .dark-mode textarea:focus {
+            background-color: #353553;
+            border-color: #3b82f6;
+        }
+
+        .dark-mode .upload-area {
+            border-color: #444;
+            background-color: #2d2d44;
+        }
+
+        .dark-mode .upload-area:hover {
+            border-color: #3b82f6;
+            background-color: #353553;
+        }
+
+        .dark-mode .upload-area.dragover {
+            border-color: #3b82f6;
+            background-color: #1e3a8a;
+        }
+
+        /* Smooth transitions for theme switching */
+        body,
+        .glass-effect,
+        .sidebar-item,
+        input,
+        select,
+        textarea,
+        .upload-area {
+            transition: all 0.3s ease;
         }
     </style>
 </head>
@@ -59,7 +162,12 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-4">
-                    <span id="user-info" class="text-white"></span>
+                    <div class="bg-gray-800 bg-opacity-90 px-4 py-2 rounded-lg" style="background-color: rgba(31, 41, 55, 0.9) !important;">
+                        <span id="user-info" class="text-white" style="color: white !important;">欢迎，用户</span>
+                    </div>
+                    <button id="theme-toggle" class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-3 py-2 rounded-lg transition-all" title="切换主题">
+                        <i class="fas fa-moon"></i>
+                    </button>
                     <a href="index.html"
                         class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all">
                         <i class="fas fa-home mr-2"></i>返回首页

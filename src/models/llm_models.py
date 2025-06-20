@@ -369,14 +369,14 @@ class VolcesDeepSeekProvider(LLMProvider):
         return self._cost_tier
 
 
-class QianwenProvider(LLMProvider):
-    """Qianwen (通用千问) API integration"""
+class BaiduProvider(LLMProvider):
+    """百度文心一言 API integration"""
     
     def __init__(self):
         self.api_key = ""
         self.secret_key = ""
         self.default_model = "ERNIE-Bot-4"
-        self._capabilities = ["general", "chinese", "reasoning"]
+        self._capabilities = ["general", "chinese", "reasoning", "multimodal"]
         self._cost_tier = 2
     
     def initialize(self, api_key: str, **kwargs) -> None:
@@ -470,7 +470,7 @@ class QianwenProvider(LLMProvider):
     
     @property
     def provider_name(self) -> str:
-        return "qianwen"
+        return "baidu"
     
     @property
     def provider_capabilities(self) -> List[str]:
@@ -864,6 +864,297 @@ class LlamaProvider(LLMProvider):
         return self._cost_tier
 
 
+class TencentHunyuanProvider(LLMProvider):
+    """腾讯混元 API integration"""
+    
+    def __init__(self):
+        self.api_key = ""
+        self.default_model = "hunyuan-lite"
+        self._capabilities = ["general", "chinese", "reasoning", "multimodal"]
+        self._cost_tier = 2
+    
+    def initialize(self, api_key: str, **kwargs) -> None:
+        """Initialize Tencent Hunyuan client with API key"""
+        self.api_key = api_key
+        self.default_model = kwargs.get('default_model', 'hunyuan-lite')
+        logger.info("Tencent Hunyuan provider initialized")
+    
+    async def generate_response(self, prompt: str, **kwargs) -> Dict[str, Any]:
+        """Generate a response using Tencent Hunyuan models"""
+        try:
+            model = kwargs.get('model', self.default_model)
+            temperature = kwargs.get('temperature', 0.7)
+            max_tokens = kwargs.get('max_tokens', 1000)
+            
+            # For development/testing without API key
+            if not self.api_key or self.api_key == "":
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": f"这是来自腾讯混元 ({model})的模拟回答。在生产环境中配置API密钥后，这里将显示真实的AI回答。\n\n您的问题是: {prompt}",
+                    "raw_response": None,
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Prepare the request
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_tokens
+            }
+            
+            # Make the API call
+            response = requests.post(
+                "https://hunyuan.tencentcloudapi.com/v1/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": result["choices"][0]["message"]["content"],
+                    "raw_response": result,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                logger.error(f"Tencent Hunyuan API error: {response.status_code} - {response.text}")
+                return {
+                    "provider": self.provider_name,
+                    "error": f"API error: {response.status_code}",
+                    "content": "抱歉，在处理您的请求时遇到了问题。",
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            logger.error(f"Error generating response from Tencent Hunyuan: {str(e)}")
+            return {
+                "provider": self.provider_name,
+                "error": str(e),
+                "content": "抱歉，在生成回答时遇到了错误。",
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def get_available_models(self) -> List[str]:
+        """Get available Tencent Hunyuan models"""
+        return ["hunyuan-lite", "hunyuan-standard", "hunyuan-pro"]
+    
+    @property
+    def provider_name(self) -> str:
+        return "tencent_hunyuan"
+    
+    @property
+    def provider_capabilities(self) -> List[str]:
+        return self._capabilities
+    
+    @property
+    def provider_cost_tier(self) -> int:
+        return self._cost_tier
+
+
+class ZhipuAIProvider(LLMProvider):
+    """智谱AI API integration"""
+    
+    def __init__(self):
+        self.api_key = ""
+        self.default_model = "glm-4"
+        self._capabilities = ["general", "chinese", "reasoning", "code", "multimodal"]
+        self._cost_tier = 2
+    
+    def initialize(self, api_key: str, **kwargs) -> None:
+        """Initialize Zhipu AI client with API key"""
+        self.api_key = api_key
+        self.default_model = kwargs.get('default_model', 'glm-4')
+        logger.info("Zhipu AI provider initialized")
+    
+    async def generate_response(self, prompt: str, **kwargs) -> Dict[str, Any]:
+        """Generate a response using Zhipu AI models"""
+        try:
+            model = kwargs.get('model', self.default_model)
+            temperature = kwargs.get('temperature', 0.7)
+            max_tokens = kwargs.get('max_tokens', 1000)
+            
+            # For development/testing without API key
+            if not self.api_key or self.api_key == "":
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": f"这是来自智谱AI ({model})的模拟回答。在生产环境中配置API密钥后，这里将显示真实的AI回答。\n\n您的问题是: {prompt}",
+                    "raw_response": None,
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Prepare the request
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_tokens
+            }
+            
+            # Make the API call
+            response = requests.post(
+                "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": result["choices"][0]["message"]["content"],
+                    "raw_response": result,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                logger.error(f"Zhipu AI API error: {response.status_code} - {response.text}")
+                return {
+                    "provider": self.provider_name,
+                    "error": f"API error: {response.status_code}",
+                    "content": "抱歉，在处理您的请求时遇到了问题。",
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            logger.error(f"Error generating response from Zhipu AI: {str(e)}")
+            return {
+                "provider": self.provider_name,
+                "error": str(e),
+                "content": "抱歉，在生成回答时遇到了错误。",
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def get_available_models(self) -> List[str]:
+        """Get available Zhipu AI models"""
+        return ["glm-4", "glm-4v", "glm-3-turbo"]
+    
+    @property
+    def provider_name(self) -> str:
+        return "zhipu_ai"
+    
+    @property
+    def provider_capabilities(self) -> List[str]:
+        return self._capabilities
+    
+    @property
+    def provider_cost_tier(self) -> int:
+        return self._cost_tier
+
+
+class MoonshotAIProvider(LLMProvider):
+    """月之暗面 API integration"""
+    
+    def __init__(self):
+        self.api_key = ""
+        self.default_model = "moonshot-v1-8k"
+        self._capabilities = ["general", "chinese", "reasoning", "long_context"]
+        self._cost_tier = 2
+    
+    def initialize(self, api_key: str, **kwargs) -> None:
+        """Initialize Moonshot AI client with API key"""
+        self.api_key = api_key
+        self.default_model = kwargs.get('default_model', 'moonshot-v1-8k')
+        logger.info("Moonshot AI provider initialized")
+    
+    async def generate_response(self, prompt: str, **kwargs) -> Dict[str, Any]:
+        """Generate a response using Moonshot AI models"""
+        try:
+            model = kwargs.get('model', self.default_model)
+            temperature = kwargs.get('temperature', 0.7)
+            max_tokens = kwargs.get('max_tokens', 1000)
+            
+            # For development/testing without API key
+            if not self.api_key or self.api_key == "":
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": f"这是来自月之暗面 ({model})的模拟回答。在生产环境中配置API密钥后，这里将显示真实的AI回答。\n\n您的问题是: {prompt}",
+                    "raw_response": None,
+                    "timestamp": datetime.now().isoformat()
+                }
+            
+            # Prepare the request
+            headers = {
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json"
+            }
+            
+            data = {
+                "model": model,
+                "messages": [{"role": "user", "content": prompt}],
+                "temperature": temperature,
+                "max_tokens": max_tokens
+            }
+            
+            # Make the API call
+            response = requests.post(
+                "https://api.moonshot.cn/v1/chat/completions",
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            
+            if response.status_code == 200:
+                result = response.json()
+                return {
+                    "provider": self.provider_name,
+                    "model": model,
+                    "content": result["choices"][0]["message"]["content"],
+                    "raw_response": result,
+                    "timestamp": datetime.now().isoformat()
+                }
+            else:
+                logger.error(f"Moonshot AI API error: {response.status_code} - {response.text}")
+                return {
+                    "provider": self.provider_name,
+                    "error": f"API error: {response.status_code}",
+                    "content": "抱歉，在处理您的请求时遇到了问题。",
+                    "timestamp": datetime.now().isoformat()
+                }
+                
+        except Exception as e:
+            logger.error(f"Error generating response from Moonshot AI: {str(e)}")
+            return {
+                "provider": self.provider_name,
+                "error": str(e),
+                "content": "抱歉，在生成回答时遇到了错误。",
+                "timestamp": datetime.now().isoformat()
+            }
+    
+    def get_available_models(self) -> List[str]:
+        """Get available Moonshot AI models"""
+        return ["moonshot-v1-8k", "moonshot-v1-32k", "moonshot-v1-128k"]
+    
+    @property
+    def provider_name(self) -> str:
+        return "moonshot_ai"
+    
+    @property
+    def provider_capabilities(self) -> List[str]:
+        return self._capabilities
+    
+    @property
+    def provider_cost_tier(self) -> int:
+        return self._cost_tier
+
+
 class OllamaDeepSeekProvider(LLMProvider):
     """Ollama DeepSeek local deployment integration"""
     
@@ -1074,15 +1365,15 @@ class ModelSelector:
                 except:
                     logger.info("Ollama DeepSeek not available, falling back to cloud providers")
         
-        # 优先级顺序：Claude/Gemini > 备用AI服务(Qwen/DeepSeek) > 其他
-        primary_providers = ['claude', 'gemini']
-        backup_providers = ['volces_deepseek', 'ali_qwen']  # 备用AI服务
+        # 优先级顺序：主力中国AI服务 > 备用AI服务 > 其他
+        primary_providers = ['volces_deepseek', 'ali_qwen', 'baidu', 'tencent_hunyuan', 'zhipu_ai', 'moonshot_ai']  # 主力中国AI服务
+        backup_providers = ['deepseek', 'openai']  # 备用AI服务
         
-        # 首先尝试主要提供商 (Claude和Gemini)
+        # 首先尝试主力中国AI服务
         available_primary_providers = [p for p in primary_providers if p in self.llm_manager.get_all_providers()]
         
         if available_primary_providers:
-            # 评分主要提供商
+            # 评分主力提供商
             providers = {name: self.llm_manager.providers[name] for name in available_primary_providers}
             scores = {}
             for name, provider in providers.items():
@@ -1091,12 +1382,25 @@ class ModelSelector:
             
             logger.info(f"Primary provider scores: {scores}")
             
-            # 选择最佳主要提供商
+            # 选择最佳主力提供商
             best_provider_name = max(scores.items(), key=lambda x: x[1])[0]
             best_provider = self.llm_manager.providers[best_provider_name]
             
             # 生成选择理由
+            provider_names = {
+                'volces_deepseek': '火山引擎DeepSeek',
+                'ali_qwen': '阿里云通义千问',
+                'baidu': '百度文心一言',
+                'tencent_hunyuan': '腾讯混元',
+                'zhipu_ai': '智谱AI',
+                'moonshot_ai': '月之暗面'
+            }
+            
             reason_parts = []
+            if 'code' in characteristics:
+                reason_parts.append("编程")
+            if 'math' in characteristics:
+                reason_parts.append("数学")
             if 'physics' in characteristics:
                 reason_parts.append("物理学")
             if 'chemistry' in characteristics:
@@ -1105,18 +1409,21 @@ class ModelSelector:
                 reason_parts.append("生物学")
             if 'electronics' in characteristics:
                 reason_parts.append("电子学")
+            if 'chinese' in characteristics:
+                reason_parts.append("中文")
             if 'general' in characteristics and not reason_parts:
                 reason_parts.append("通用")
             
+            provider_display_name = provider_names.get(best_provider_name, best_provider_name)
             if reason_parts:
-                reason = f"{'/'.join(reason_parts)}问题，使用云端{best_provider_name.title()}专业模型"
+                reason = f"{'/'.join(reason_parts)}问题，使用{provider_display_name}专业模型"
             else:
-                reason = f"使用云端{best_provider_name.title()}模型"
+                reason = f"使用{provider_display_name}模型"
             
             logger.info(f"Selected primary provider: {best_provider_name}, model: {best_provider.default_model}")
             return best_provider_name, best_provider.default_model, reason
         
-        # 如果主要提供商不可用，尝试备用AI服务
+        # 如果主力提供商不可用，尝试备用AI服务
         available_backup_providers = [p for p in backup_providers if p in self.llm_manager.get_all_providers()]
         
         if available_backup_providers:
@@ -1397,14 +1704,14 @@ def initialize_llm_providers(config: Dict[str, Any]) -> None:
     )
     llm_manager.register_provider('ollama_deepseek', ollama_deepseek_provider)
     
-    # Initialize Qianwen (百度千问)
-    qianwen_provider = QianwenProvider()
-    qianwen_provider.initialize(
-        api_key=config.get('qianwen', {}).get('api_key', ''),
-        secret_key=config.get('qianwen', {}).get('secret_key', ''),
-        default_model=config.get('qianwen', {}).get('default_model', 'ERNIE-Bot-4')
+    # Initialize Baidu (百度文心一言)
+    baidu_provider = BaiduProvider()
+    baidu_provider.initialize(
+        api_key=config.get('baidu', {}).get('api_key', ''),
+        secret_key=config.get('baidu', {}).get('secret_key', ''),
+        default_model=config.get('baidu', {}).get('default_model', 'ERNIE-Bot-4')
     )
-    llm_manager.register_provider('qianwen', qianwen_provider)
+    llm_manager.register_provider('baidu', baidu_provider)
     
     # Initialize AliQwen (阿里云通义千问) - 备用服务
     ali_qwen_provider = AliQwenProvider()
@@ -1440,6 +1747,30 @@ def initialize_llm_providers(config: Dict[str, Any]) -> None:
         default_model=config.get('llama', {}).get('default_model', 'llama-3-70b')
     )
     llm_manager.register_provider('llama', llama_provider)
+    
+    # Initialize Tencent Hunyuan (腾讯混元)
+    hunyuan_provider = TencentHunyuanProvider()
+    hunyuan_provider.initialize(
+        api_key=config.get('tencent_hunyuan', {}).get('api_key', ''),
+        default_model=config.get('tencent_hunyuan', {}).get('default_model', 'hunyuan-lite')
+    )
+    llm_manager.register_provider('tencent_hunyuan', hunyuan_provider)
+    
+    # Initialize Zhipu AI (智谱AI)
+    zhipu_provider = ZhipuAIProvider()
+    zhipu_provider.initialize(
+        api_key=config.get('zhipu_ai', {}).get('api_key', ''),
+        default_model=config.get('zhipu_ai', {}).get('default_model', 'glm-4')
+    )
+    llm_manager.register_provider('zhipu_ai', zhipu_provider)
+    
+    # Initialize Moonshot AI (月之暗面)
+    moonshot_provider = MoonshotAIProvider()
+    moonshot_provider.initialize(
+        api_key=config.get('moonshot_ai', {}).get('api_key', ''),
+        default_model=config.get('moonshot_ai', {}).get('default_model', 'moonshot-v1-8k')
+    )
+    llm_manager.register_provider('moonshot_ai', moonshot_provider)
     
     # Set default provider if specified
     default_provider = config.get('default_provider', 'claude')

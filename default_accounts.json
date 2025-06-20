@@ -1,0 +1,32 @@
+[
+  {
+    "username": "admin",
+    "password": "admin123",
+    "role": "admin",
+    "email": "admin@alethea.edu"
+  },
+  {
+    "username": "teacher",
+    "password": "teacher123",
+    "role": "teacher",
+    "email": "teacher@alethea.edu"
+  },
+  {
+    "username": "admin_test",
+    "password": "admin123",
+    "role": "admin",
+    "email": "admin_test@alethea.edu"
+  },
+  {
+    "username": "teacher_test",
+    "password": "teacher123",
+    "role": "teacher",
+    "email": "teacher_test@alethea.edu"
+  },
+  {
+    "username": "student_test",
+    "password": "student123",
+    "role": "student",
+    "email": "student_test@alethea.edu"
+  }
+]

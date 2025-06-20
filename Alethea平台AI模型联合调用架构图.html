@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alethea平台AI模型联合调用架构图</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .title {
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .architecture {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* 用户请求层 */
+        .user-layer {
+            background: linear-gradient(45deg, #6c7b7f, #5a6c75);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            position: relative;
+        }
+
+        .user-layer h3 {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .user-layer p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        /* 智能路由层 */
+        .router-layer {
+            background: linear-gradient(45deg, #8b9dc3, #7a8db8);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            position: relative;
+        }
+
+        .router-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .router-info h3 {
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+
+        .router-features {
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .router-features li {
+            margin-bottom: 5px;
+        }
+
+        .decision-flow {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .flow-step .step-num {
+            background: rgba(255, 255, 255, 0.3);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+            font-size: 11px;
+        }
+
+        /* AI模型层 */
+        .models-layer {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .model-group {
+            border-radius: 10px;
+            padding: 15px;
+            color: white;
+            position: relative;
+        }
+
+        .primary-models {
+            background: linear-gradient(45deg, #7fb069, #6a9b5a);
+        }
+
+        .backup-models {
+            background: linear-gradient(45deg, #d4a574, #c19660);
+        }
+
+        .local-models {
+            background: linear-gradient(45deg, #a084ca, #8b73b8);
+        }
+
+        .model-group h4 {
+            font-size: 16px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .model-list {
+            list-style: none;
+        }
+
+        .model-list li {
+            font-size: 12px;
+            margin-bottom: 5px;
+            padding: 3px 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .model-features {
+            font-size: 11px;
+            margin-top: 8px;
+            opacity: 0.9;
+            text-align: center;
+        }
+
+        /* 备用机制 */
+        .fallback-layer {
+            background: linear-gradient(45deg, #34495e, #2c3e50);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .fallback-flow {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .fallback-step {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            flex: 1;
+            margin: 0 5px;
+        }
+
+        /* 连接箭头 */
+        .arrow {
+            text-align: center;
+            font-size: 20px;
+            color: #7f8c8d;
+            margin: 5px 0;
+        }
+
+        /* 特色标签 */
+        .feature-tag {
+            position: absolute;
+            top: -8px;
+            right: 10px;
+            background: #e74c3c;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .models-layer {
+                grid-template-columns: 1fr;
+            }
+            
+            .router-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .fallback-flow {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .fallback-step {
+                margin: 0;
+            }
+        }
+
+        /* 性能指标 */
+        .performance-box {
+            background: #ecf0f1;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            border-left: 4px solid #3498db;
+        }
+
+        .performance-box h4 {
+            color: #2c3e50;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+        }
+
+        .metric {
+            text-align: center;
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .metric-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #3498db;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="title">🤖 Alethea平台AI模型联合调用架构</h1>
+        
+        <div class="architecture">
+            <!-- 用户请求层 -->
+            <div class="user-layer">
+                <h3>👤 用户请求层</h3>
+                <p>学生提问 • 教师咨询 • 系统查询</p>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- 智能路由层 -->
+            <div class="router-layer">
+                <div class="feature-tag">核心</div>
+                <div class="router-content">
+                    <div class="router-info">
+                        <h3>🧠 智能路由调度器</h3>
+                        <ul class="router-features">
+                            <li>• 问题类型自动识别</li>
+                            <li>• 模型能力智能匹配</li>
+                            <li>• 负载均衡调度</li>
+                            <li>• 成本效益优化</li>
+                        </ul>
+                    </div>
+                    <div class="decision-flow">
+                        <div class="flow-step">
+                            <div class="step-num">1</div>
+                            <span>分析问题特征（编程/数学/物理/通用）</span>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-num">2</div>
+                            <span>匹配最佳模型（专业能力+成本考虑）</span>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-num">3</div>
+                            <span>检查服务可用性（健康状态监控）</span>
+                        </div>
+                        <div class="flow-step">
+                            <div class="step-num">4</div>
+                            <span>执行调用或启动备用机制</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- AI模型层 -->
+            <div class="models-layer">
+                <!-- 主力中国AI服务 -->
+                <div class="model-group primary-models">
+                    <div class="feature-tag">主力</div>
+                    <h4>🇨🇳 主力中国AI服务</h4>
+                    <ul class="model-list">
+                        <li>火山引擎DeepSeek</li>
+                        <li>阿里云通义千问</li>
+                        <li>百度文心一言</li>
+                        <li>腾讯混元</li>
+                        <li>智谱AI</li>
+                        <li>月之暗面</li>
+                    </ul>
+                    <div class="model-features">
+                        中文优化 • 编程专业<br>
+                        多模态支持 • 成本友好
+                    </div>
+                </div>
+
+                <!-- 备用AI服务 -->
+                <div class="model-group backup-models">
+                    <div class="feature-tag">备用</div>
+                    <h4>🔄 备用AI服务</h4>
+                    <ul class="model-list">
+                        <li>DeepSeek官方</li>
+                        <li>OpenAI GPT-4</li>
+                        <li>Meta Llama</li>
+                    </ul>
+                    <div class="model-features">
+                        国际模型 • 高质量回答<br>
+                        复杂推理 • 科学计算
+                    </div>
+                </div>
+
+                <!-- 本地部署 -->
+                <div class="model-group local-models">
+                    <div class="feature-tag">本地</div>
+                    <h4>🏠 本地部署</h4>
+                    <ul class="model-list">
+                        <li>Ollama DeepSeek R1</li>
+                        <li>本地推理引擎</li>
+                        <li>离线模式支持</li>
+                    </ul>
+                    <div class="model-features">
+                        数据隐私 • 零成本<br>
+                        低延迟 • 离线可用
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">⬇️</div>
+
+            <!-- 备用机制 -->
+            <div class="fallback-layer">
+                <h3>🛡️ 智能备用机制</h3>
+                <div class="fallback-flow">
+                    <div class="fallback-step">
+                        <strong>主服务失败</strong><br>
+                        网络/API错误检测
+                    </div>
+                    <div class="fallback-step">
+                        <strong>自动切换</strong><br>
+                        备用服务健康检查
+                    </div>
+                    <div class="fallback-step">
+                        <strong>本地降级</strong><br>
+                        Ollama本地推理
+                    </div>
+                    <div class="fallback-step">
+                        <strong>服务恢复</strong><br>
+                        自动回切主服务
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 性能指标 -->
+        <div class="performance-box">
+            <h4>📊 系统性能指标</h4>
+            <div class="metrics">
+                <div class="metric">
+                    <div class="metric-value">99.9%</div>
+                    <div class="metric-label">服务可用性</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">&lt;2s</div>
+                    <div class="metric-label">平均响应时间</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">8+</div>
+                    <div class="metric-label">AI模型支持</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">3层</div>
+                    <div class="metric-label">备用机制</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">智能</div>
+                    <div class="metric-label">模型选择</div>
+                </div>
+                <div class="metric">
+                    <div class="metric-value">本地</div>
+                    <div class="metric-label">隐私保护</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

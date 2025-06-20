@@ -93,25 +93,78 @@ def register():
         data = request.get_json()
         
         # Validate required fields
-        required_fields = ['username', 'email', 'password']
+        required_fields = ['username', 'email', 'password', 'full_name']
         for field in required_fields:
             if field not in data:
                 return jsonify({'error': f'Missing required field: {field}'}), 400
         
+        # Get role name (default to 'student')
+        role_name = data.get('role_name', 'student')
+        
+        # Validate teacher-specific fields if role is teacher
+        if role_name == 'teacher':
+            teacher_data = data.get('teacher_data', {})
+            teacher_required_fields = ['institution', 'teacher_id', 'phone']
+            
+            for field in teacher_required_fields:
+                if field not in teacher_data or not teacher_data[field].strip():
+                    return jsonify({'error': f'教师注册需要提供{field}信息'}), 400
+            
+            # Validate phone format
+            phone = teacher_data['phone'].strip()
+            import re
+            if not re.match(r'^1[3-9]\d{9}$', phone):
+                return jsonify({'error': '请输入有效的手机号码'}), 400
+        
         # Get user manager
         user_manager = get_managers()['user_manager']
         
-        # Create user (default role is 'student')
+        # Create user
         success, result = user_manager.create_user(
             username=data['username'],
             email=data['email'],
             password=data['password'],
-            full_name=data.get('full_name'),
-            role_name=data.get('role_name', 'student')
+            full_name=data['full_name'],
+            role_name=role_name
         )
         
         if not success:
             return jsonify({'error': result}), 400
+        
+        # If teacher registration, store additional data and set pending status
+        if role_name == 'teacher':
+            try:
+                # Get database from app context
+                db = current_app.db
+                
+                # Update user with teacher data and pending status
+                user = db.session.query(User).filter_by(id=result).first()
+                if user:
+                    # Store teacher data in user profile (you might want to create a separate table)
+                    teacher_info = {
+                        'institution': teacher_data['institution'],
+                        'teacher_id': teacher_data['teacher_id'],
+                        'phone': teacher_data['phone'],
+                        'subjects': teacher_data.get('subjects', ''),
+                        'status': 'pending_approval'
+                    }
+                    
+                    # For now, store in a JSON field or create additional fields
+                    # This is a simplified approach - in production, consider a separate teacher_profiles table
+                    user.teacher_data = str(teacher_info)  # Store as string for now
+                    user.is_active = False  # Deactivate until approved
+                    
+                    db.session.commit()
+                    
+                    return jsonify({
+                        'message': 'Teacher registration submitted successfully. Please wait for admin approval.',
+                        'user_id': result,
+                        'status': 'pending_approval'
+                    }), 201
+                    
+            except Exception as e:
+                logger.error(f"Error storing teacher data: {str(e)}")
+                # Continue with normal registration if teacher data storage fails
         
         return jsonify({'message': 'User registered successfully', 'user_id': result}), 201
         
@@ -276,7 +329,27 @@ def change_user_role(current_user, user_id):
         if 'role_name' not in data:
             return jsonify({'error': 'Missing role_name'}), 400
         
-        # Get user manager
+        # Get database from app context
+        db = current_app.db
+        
+        # Get the user to be updated
+        user = db.session.query(User).filter_by(id=user_id).first()
+        if not user:
+            return jsonify({'error': 'User not found'}), 404
+        
+        # Special handling for teacher approval
+        if data['role_name'] == 'teacher' and data.get('approve', False):
+            # Approve teacher application
+            user.is_active = True
+            
+            # Log the approval
+            logger.info(f"Teacher application approved for user {user.username} by admin {current_user.username}")
+            
+            db.session.commit()
+            
+            return jsonify({'message': 'Teacher application approved successfully'}), 200
+        
+        # Get user manager for regular role changes
         user_manager = get_managers()['user_manager']
         
         # Change user role
@@ -507,4 +580,147 @@ def get_all_questions(current_user):
         
     except Exception as e:
         logger.error(f"Error in get_all_questions: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+# Admin panel specific routes
+
+@user_bp.route('/admin/stats', methods=['GET'])
+@token_required
+@role_required('admin')
+def get_admin_stats(current_user):
+    """Get admin dashboard statistics"""
+    try:
+        # Get database from app context
+        db = current_app.db
+        
+        # Count total users
+        total_users = db.session.query(User).count()
+        
+        # Count pending teachers (inactive users with teacher role)
+        pending_teachers = db.session.query(User).join(Role).filter(
+            Role.name == 'teacher',
+            User.is_active == False
+        ).count()
+        
+        # Count active teachers
+        active_teachers = db.session.query(User).join(Role).filter(
+            Role.name == 'teacher',
+            User.is_active == True
+        ).count()
+        
+        # Count students
+        students = db.session.query(User).join(Role).filter(
+            Role.name == 'student'
+        ).count()
+        
+        stats = {
+            'total_users': total_users,
+            'pending_teachers': pending_teachers,
+            'active_teachers': active_teachers,
+            'students': students
+        }
+        
+        return jsonify(stats), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_admin_stats: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@user_bp.route('/admin/pending-teachers', methods=['GET'])
+@token_required
+@role_required('admin')
+def get_pending_teachers(current_user):
+    """Get pending teacher applications"""
+    try:
+        # Get database from app context
+        db = current_app.db
+        
+        # Query pending teachers
+        pending_teachers = db.session.query(User).join(Role).filter(
+            Role.name == 'teacher',
+            User.is_active == False
+        ).order_by(User.created_at.desc()).all()
+        
+        # Convert to dict with teacher data
+        teacher_list = []
+        for teacher in pending_teachers:
+            teacher_dict = teacher.to_dict()
+            
+            # Parse teacher data if exists
+            if hasattr(teacher, 'teacher_data') and teacher.teacher_data:
+                try:
+                    import ast
+                    teacher_info = ast.literal_eval(teacher.teacher_data)
+                    teacher_dict['teacher_info'] = teacher_info
+                except:
+                    teacher_dict['teacher_info'] = {}
+            else:
+                teacher_dict['teacher_info'] = {}
+            
+            teacher_list.append(teacher_dict)
+        
+        return jsonify(teacher_list), 200
+        
+    except Exception as e:
+        logger.error(f"Error in get_pending_teachers: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@user_bp.route('/admin/approve-teacher/<int:user_id>', methods=['POST'])
+@token_required
+@role_required('admin')
+def approve_teacher(current_user, user_id):
+    """Approve teacher application"""
+    try:
+        # Get database from app context
+        db = current_app.db
+        
+        # Get the teacher user
+        teacher = db.session.query(User).filter_by(id=user_id).first()
+        if not teacher:
+            return jsonify({'error': 'Teacher not found'}), 404
+        
+        # Check if user has teacher role
+        if not teacher.role or teacher.role.name != 'teacher':
+            return jsonify({'error': 'User is not a teacher'}), 400
+        
+        # Approve the teacher
+        teacher.is_active = True
+        db.session.commit()
+        
+        logger.info(f"Teacher {teacher.username} approved by admin {current_user.username}")
+        
+        return jsonify({'message': 'Teacher approved successfully'}), 200
+        
+    except Exception as e:
+        logger.error(f"Error in approve_teacher: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+
+@user_bp.route('/admin/reject-teacher/<int:user_id>', methods=['POST'])
+@token_required
+@role_required('admin')
+def reject_teacher(current_user, user_id):
+    """Reject teacher application"""
+    try:
+        # Get database from app context
+        db = current_app.db
+        
+        # Get the teacher user
+        teacher = db.session.query(User).filter_by(id=user_id).first()
+        if not teacher:
+            return jsonify({'error': 'Teacher not found'}), 404
+        
+        # Check if user has teacher role
+        if not teacher.role or teacher.role.name != 'teacher':
+            return jsonify({'error': 'User is not a teacher'}), 400
+        
+        # Delete the rejected application
+        db.session.delete(teacher)
+        db.session.commit()
+        
+        logger.info(f"Teacher application {teacher.username} rejected by admin {current_user.username}")
+        
+        return jsonify({'message': 'Teacher application rejected'}), 200
+        
+    except Exception as e:
+        logger.error(f"Error in reject_teacher: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500

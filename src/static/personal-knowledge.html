@@ -8,7 +8,10 @@
     <link rel="stylesheet" href="/static/libs/css/tailwind.min.css">
     <!-- Global Theme CSS -->
     <link rel="stylesheet" href="/static/css/global-theme.css">
-    <link rel="stylesheet" href="/static/libs/css/fontawesome.min.css">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous">
+    <!-- Backup Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css" crossorigin="anonymous">
     <style>
         .sidebar-item:hover {
             background-color: #f3f4f6;
@@ -146,6 +149,39 @@
         .upload-area {
             transition: all 0.3s ease;
         }
+
+        /* Fallback emoji icons for Font Awesome */
+        .fas.fa-brain::before { content: "🧠" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-moon::before { content: "🌙" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-home::before { content: "🏠" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-tachometer-alt::before { content: "📊" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-upload::before { content: "📤" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-file-alt::before { content: "📄" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-search::before { content: "🔍" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-comments::before { content: "💬" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-tags::before { content: "🏷️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-cog::before { content: "⚙️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-database::before { content: "💾" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-rocket::before { content: "🚀" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-clock::before { content: "⏰" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-history::before { content: "📜" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-chart-pie::before { content: "📊" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-folder-open::before { content: "📂" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-cloud-upload-alt::before { content: "☁️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-sync-alt::before { content: "🔄" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-download::before { content: "⬇️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-filter::before { content: "🔽" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-robot::before { content: "🤖" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-paper-plane::before { content: "✈️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-lightbulb::before { content: "💡" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-folder::before { content: "📁" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-spinner::before { content: "⏳" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-times::before { content: "❌" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-bell::before { content: "🔔" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-shield-alt::before { content: "🛡️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-undo::before { content: "↩️" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-save::before { content: "💾" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
+        .fas.fa-check-circle::before { content: "✅" !important; font-family: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif !important; }
     </style>
 </head>
 
@@ -169,7 +205,7 @@
                         <i class="fas fa-moon"></i>
                     </button>
                     <a href="index.html"
-                        class="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-lg transition-all">
+                        class="bg-gray-800 bg-opacity-90 hover:bg-gray-700 text-white px-4 py-2 rounded-lg transition-all" style="background-color: rgba(31, 41, 55, 0.9) !important;">
                         <i class="fas fa-home mr-2"></i>返回首页
                     </a>
                 </div>

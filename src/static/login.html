@@ -382,10 +382,33 @@
                     
                     showSuccess('登录成功！正在跳转...');
                     
-                    // Redirect to previous page or home page
+                    // Smart redirect based on user role
                     setTimeout(() => {
-                        const returnUrl = new URLSearchParams(window.location.search).get('return') || '/static/index.html';
-                        window.location.href = returnUrl;
+                        const returnUrl = new URLSearchParams(window.location.search).get('return');
+                        let redirectUrl;
+                        
+                        if (returnUrl) {
+                            // If there's a specific return URL, use it
+                            redirectUrl = returnUrl;
+                        } else {
+                            // Smart redirect based on user role
+                            const userRole = data.user.role?.name || data.user.role;
+                            
+                            switch (userRole) {
+                                case 'teacher':
+                                    redirectUrl = '/static/teacher-dashboard.html';
+                                    break;
+                                case 'admin':
+                                    redirectUrl = '/static/admin-panel.html'; // Admin goes to admin panel
+                                    break;
+                                case 'student':
+                                default:
+                                    redirectUrl = '/static/dashboard.html';
+                                    break;
+                            }
+                        }
+                        
+                        window.location.href = redirectUrl;
                     }, 1500);
                 } else {
                     showError(data.error || '登录失败，请重试');

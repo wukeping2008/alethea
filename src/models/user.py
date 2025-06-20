@@ -123,6 +123,7 @@ class User(db.Model):
     is_active = Column(Boolean, default=True)
     last_login = Column(DateTime)
     created_at = Column(DateTime, default=datetime.utcnow)
+    teacher_data = Column(Text)  # Store teacher-specific data as JSON string
     
     # Relationships
     questions = relationship('Question', backref='user')
@@ -215,13 +216,13 @@ class UserManager:
         try:
             # Validate input
             if not self._validate_username(username):
-                return False, "Invalid username format"
+                return False, "用户名格式不正确，请使用3-50个字符，只能包含字母、数字和下划线"
             
             if not self._validate_email(email):
-                return False, "Invalid email format"
+                return False, "邮箱格式不正确"
             
             if not self._validate_password(password):
-                return False, "Password does not meet requirements"
+                return False, "密码长度至少需要3个字符"
             
             # Check if username or email already exists
             existing_user = self.db.session.query(User).filter(
@@ -229,12 +230,15 @@ class UserManager:
             ).first()
             
             if existing_user:
-                return False, "Username or email already exists"
+                if existing_user.username == username:
+                    return False, "用户名已存在，请选择其他用户名"
+                else:
+                    return False, "邮箱已被注册，请使用其他邮箱"
             
             # Get role
             role = self.db.session.query(Role).filter_by(name=role_name).first()
             if not role:
-                return False, f"Role '{role_name}' not found"
+                return False, f"用户角色 '{role_name}' 不存在"
             
             # Create user
             user = User(
@@ -253,7 +257,8 @@ class UserManager:
         except Exception as e:
             self.db.session.rollback()
             logger.error(f"Error creating user: {str(e)}")
-            return False, str(e)
+            # Return user-friendly error message instead of technical details
+            return False, "注册服务暂时不可用，请稍后重试"
     
     def authenticate_user(self, username_or_email, password):
         """Authenticate user and return JWT token"""
@@ -264,13 +269,13 @@ class UserManager:
             ).first()
             
             if not user:
-                return False, "User not found"
+                return False, "用户名或邮箱不存在"
             
             if not user.is_active:
-                return False, "User account is inactive"
+                return False, "账户未激活，请联系管理员"
             
             if not user.check_password(password):
-                return False, "Invalid password"
+                return False, "密码错误"
             
             # Update last login time
             user.last_login = datetime.utcnow()
@@ -286,7 +291,8 @@ class UserManager:
             
         except Exception as e:
             logger.error(f"Error authenticating user: {str(e)}")
-            return False, str(e)
+            # Return user-friendly error message instead of technical details
+            return False, "登录服务暂时不可用，请稍后重试"
     
     def get_user_by_id(self, user_id):
         """Get user by ID"""

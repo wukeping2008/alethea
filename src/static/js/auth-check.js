@@ -229,21 +229,49 @@ function updateNavigationByRole() {
     const teacherLink = document.querySelector('a[href="/static/teacher-dashboard.html"]');
     const mobileTeacherLink = document.querySelector('#mobile-menu a[href="/static/teacher-dashboard.html"]');
     
+    // 始终显示教师助手链接，但在点击时进行权限检查
     if (teacherLink) {
-        if (window.authManager.canAccessTeacherDashboard()) {
-            teacherLink.style.display = '';
-            teacherLink.innerHTML = '<i class="fas fa-chalkboard-teacher mr-1"></i>教师助手';
-        } else {
-            teacherLink.style.display = 'none';
-        }
+        teacherLink.style.display = '';
+        
+        // 移除旧的事件监听器
+        const newTeacherLink = teacherLink.cloneNode(true);
+        teacherLink.parentNode.replaceChild(newTeacherLink, teacherLink);
+        
+        // 添加点击事件处理
+        newTeacherLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 检查权限
+            if (window.authManager.canAccessTeacherDashboard()) {
+                // 有权限，直接跳转
+                window.location.href = '/static/teacher-dashboard.html';
+            } else {
+                // 没有权限，显示登录提示或权限说明
+                showTeacherAccessPrompt();
+            }
+        });
     }
     
     if (mobileTeacherLink) {
-        if (window.authManager.canAccessTeacherDashboard()) {
-            mobileTeacherLink.style.display = '';
-        } else {
-            mobileTeacherLink.style.display = 'none';
-        }
+        mobileTeacherLink.style.display = '';
+        
+        // 移除旧的事件监听器
+        const newMobileTeacherLink = mobileTeacherLink.cloneNode(true);
+        mobileTeacherLink.parentNode.replaceChild(newMobileTeacherLink, mobileTeacherLink);
+        
+        // 添加点击事件处理
+        newMobileTeacherLink.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // 检查权限
+            if (window.authManager.canAccessTeacherDashboard()) {
+                // 有权限，直接跳转
+                window.location.href = '/static/teacher-dashboard.html';
+            } else {
+                // 没有权限，显示登录提示或权限说明
+                showTeacherAccessPrompt();
+            }
+        });
     }
 }
 
@@ -373,6 +401,130 @@ function checkTeacherDashboardAccess() {
         }, 100);
     }
     return true;
+}
+
+// 显示教师访问提示
+function showTeacherAccessPrompt() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg shadow-xl z-10 w-full max-w-md p-6 relative">
+            <button class="absolute top-4 right-4 text-gray-500 hover:text-gray-700" id="close-teacher-prompt">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 flex items-center justify-center">
+                    <i class="fas fa-chalkboard-teacher text-2xl text-blue-600"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-800">教师助手</h2>
+                <p class="text-gray-600 mt-2">专为教师打造的智能教学工具</p>
+            </div>
+            
+            <div class="space-y-4 mb-6">
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-blue-800 mb-2">🎯 功能特色</h3>
+                    <ul class="text-sm text-blue-700 space-y-1">
+                        <li>• 智能课程设计与教案生成</li>
+                        <li>• 学生学习数据分析</li>
+                        <li>• 个性化作业布置</li>
+                        <li>• 教学效果评估</li>
+                    </ul>
+                </div>
+                
+                ${window.authManager.isLoggedIn() ? `
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-yellow-800 mb-2">⚠️ 权限说明</h3>
+                    <p class="text-sm text-yellow-700">
+                        您当前是${window.authManager.getCurrentUser().role === 'student' ? '学生' : '普通用户'}账户，
+                        需要教师权限才能访问教师助手功能。
+                    </p>
+                </div>
+                ` : `
+                <div class="bg-gray-50 p-4 rounded-lg">
+                    <h3 class="font-bold text-gray-800 mb-2">🔐 访问要求</h3>
+                    <p class="text-sm text-gray-700">
+                        教师助手功能需要登录教师账户才能使用。
+                    </p>
+                </div>
+                `}
+            </div>
+            
+            <div class="space-y-3">
+                ${!window.authManager.isLoggedIn() ? `
+                <button onclick="window.location.href='/static/login.html'" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-sign-in-alt mr-2"></i>登录教师账户
+                </button>
+                <button onclick="window.location.href='/static/register.html'" 
+                        class="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-user-plus mr-2"></i>注册教师账户
+                </button>
+                ` : `
+                <button onclick="contactAdmin()" 
+                        class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-colors">
+                    <i class="fas fa-envelope mr-2"></i>申请教师权限
+                </button>
+                `}
+                
+                <!-- 开发模式快速测试 -->
+                <div class="border-t pt-3" id="dev-test-section" style="display: none;">
+                    <p class="text-xs text-gray-500 mb-2">开发模式 - 快速测试</p>
+                    <button onclick="quickTestTeacher()" 
+                            class="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-sm">
+                        <i class="fas fa-flask mr-2"></i>快速体验教师功能
+                    </button>
+                </div>
+                
+                <button onclick="closeTeacherPrompt()" 
+                        class="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 px-4 rounded-lg font-medium transition-colors">
+                    返回
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // 检查是否是开发环境
+    const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    if (isDevelopment) {
+        document.getElementById('dev-test-section').style.display = 'block';
+    }
+    
+    // 关闭模态框
+    document.getElementById('close-teacher-prompt').addEventListener('click', function () {
+        document.body.removeChild(modal);
+    });
+    
+    // 点击背景关闭
+    modal.addEventListener('click', function (e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+        }
+    });
+    
+    // 全局函数定义
+    window.closeTeacherPrompt = function() {
+        document.body.removeChild(modal);
+    };
+    
+    window.contactAdmin = function() {
+        alert('请联系系统管理员申请教师权限。\n邮箱：admin@alethea.edu\n电话：400-123-4567');
+    };
+    
+    window.quickTestTeacher = function() {
+        // 开发模式下的快速测试功能
+        if (window.simulateLogin) {
+            const result = window.simulateLogin('teacher', 'teacher');
+            if (result.success) {
+                document.body.removeChild(modal);
+                setTimeout(() => {
+                    window.location.href = '/static/teacher-dashboard.html';
+                }, 500);
+            }
+        }
+    };
 }
 
 // 页面加载完成后检查权限

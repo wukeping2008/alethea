@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理员面板 - Alethea</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap');
+        
+        :root {
+            --primary-color: #0a2342;
+            --secondary-color: #126872;
+            --accent-color: #2ca58d;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+        }
+        
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            background-color: #f5f7fa;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .stats-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .user-table {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .status-approved {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .status-rejected {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .status-active {
+            background-color: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .role-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        
+        .role-admin {
+            background-color: #fecaca;
+            color: #991b1b;
+        }
+        
+        .role-teacher {
+            background-color: #bfdbfe;
+            color: #1e40af;
+        }
+        
+        .role-student {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-approve {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .btn-approve:hover {
+            background-color: #059669;
+        }
+        
+        .btn-reject {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .btn-reject:hover {
+            background-color: #dc2626;
+        }
+        
+        .btn-view {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .btn-view:hover {
+            background-color: #2563eb;
+        }
+        
+        .btn-edit {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background-color: #d97706;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 5% auto;
+            position: relative;
+        }
+        
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .tab-button.active {
+            border-bottom-color: var(--accent-color);
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="admin-header py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                    <img src="/static/logo.png" alt="Alethea Logo" class="h-10 mr-3">
+                    <div>
+                        <h1 class="text-2xl font-bold">Alethea 管理员面板</h1>
+                        <p class="text-blue-100">用户管理与系统监控</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <span id="admin-name" class="text-blue-100">管理员</span>
+                    <button onclick="logout()" class="bg-white bg-opacity-20 hover:bg-opacity-30 px-4 py-2 rounded-lg transition-colors">
+                        <i class="fas fa-sign-out-alt mr-2"></i>退出
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-8">
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+            <div class="stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">总用户数</p>
+                        <p id="total-users" class="text-2xl font-bold text-gray-800">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-users text-blue-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">待审核教师</p>
+                        <p id="pending-teachers" class="text-2xl font-bold text-yellow-600">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-clock text-yellow-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">活跃教师</p>
+                        <p id="active-teachers" class="text-2xl font-bold text-green-600">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-chalkboard-teacher text-green-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stats-card p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-500 text-sm">学生用户</p>
+                        <p id="total-students" class="text-2xl font-bold text-purple-600">-</p>
+                    </div>
+                    <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                        <i class="fas fa-graduation-cap text-purple-600 text-xl"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="bg-white rounded-lg shadow-sm mb-6">
+            <div class="border-b border-gray-200">
+                <nav class="flex space-x-8 px-6">
+                    <button class="tab-button active" onclick="switchTab('pending-approvals')">
+                        <i class="fas fa-clock mr-2"></i>待审核申请
+                    </button>
+                    <button class="tab-button" onclick="switchTab('all-users')">
+                        <i class="fas fa-users mr-2"></i>所有用户
+                    </button>
+                    <button class="tab-button" onclick="switchTab('system-logs')">
+                        <i class="fas fa-list mr-2"></i>系统日志
+                    </button>
+                </nav>
+            </div>
+
+            <!-- Pending Approvals Tab -->
+            <div id="pending-approvals" class="tab-content active p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">待审核的教师申请</h2>
+                    <button onclick="refreshPendingApprovals()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-sync-alt mr-2"></i>刷新
+                    </button>
+                </div>
+                
+                <div id="pending-approvals-list" class="space-y-4">
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                        <p>正在加载待审核申请...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- All Users Tab -->
+            <div id="all-users" class="tab-content p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">用户管理</h2>
+                    <div class="flex space-x-2">
+                        <select id="role-filter" class="border border-gray-300 rounded-lg px-3 py-2" onchange="filterUsers()">
+                            <option value="">所有角色</option>
+                            <option value="admin">管理员</option>
+                            <option value="teacher">教师</option>
+                            <option value="student">学生</option>
+                        </select>
+                        <button onclick="refreshUsers()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-sync-alt mr-2"></i>刷新
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="user-table">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">用户</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">角色</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">状态</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">注册时间</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin text-2xl mb-2"></i>
+                                        <p>正在加载用户数据...</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- System Logs Tab -->
+            <div id="system-logs" class="tab-content p-6">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold text-gray-800">系统日志</h2>
+                    <button onclick="refreshLogs()" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">
+                        <i class="fas fa-sync-alt mr-2"></i>刷新
+                    </button>
+                </div>
+                
+                <div id="system-logs-list" class="bg-gray-50 rounded-lg p-4 h-96 overflow-y-auto">
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-list text-2xl mb-2"></i>
+                        <p>系统日志功能开发中...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Detail Modal -->
+    <div id="user-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">用户详情</h3>
+                    <button onclick="closeModal('user-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="user-modal-content" class="p-6">
+                <!-- User details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Approval Modal -->
+    <div id="approval-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-gray-800">审核教师申请</h3>
+                    <button onclick="closeModal('approval-modal')" class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-times text-xl"></i>
+                    </button>
+                </div>
+            </div>
+            <div id="approval-modal-content" class="p-6">
+                <!-- Approval details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Global variables
+        let currentUser = null;
+        let allUsers = [];
+        let pendingApprovals = [];
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAdminAuth();
+            loadDashboardData();
+        });
+
+        // Check admin authentication
+        function checkAdminAuth() {
+            const token = localStorage.getItem('auth_token');
+            const userStr = localStorage.getItem('current_user');
+            
+            if (!token || !userStr) {
+                redirectToLogin();
+                return;
+            }
+            
+            try {
+                currentUser = JSON.parse(userStr);
+                
+                // Check if user is admin
+                if (!currentUser.role || (currentUser.role.name !== 'admin' && currentUser.role !== 'admin')) {
+                    alert('您没有管理员权限访问此页面');
+                    window.location.href = '/static/index.html';
+                    return;
+                }
+                
+                // Update admin name
+                document.getElementById('admin-name').textContent = currentUser.username || '管理员';
+                
+            } catch (e) {
+                console.error('解析用户信息失败:', e);
+                redirectToLogin();
+            }
+        }
+
+        // Redirect to login
+        function redirectToLogin() {
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('current_user');
+            window.location.href = '/static/login.html?return=' + encodeURIComponent(window.location.pathname);
+        }
+
+        // Load dashboard data
+        async function loadDashboardData() {
+            await Promise.all([
+                loadStatistics(),
+                loadPendingApprovals(),
+                loadAllUsers()
+            ]);
+        }
+
+        // Load statistics
+        async function loadStatistics() {
+            try {
+                const response = await fetch('/api/user/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    
+                    const totalUsers = users.length;
+                    const pendingTeachers = users.filter(u => u.role === 'teacher' && !u.is_active).length;
+                    const activeTeachers = users.filter(u => u.role === 'teacher' && u.is_active).length;
+                    const totalStudents = users.filter(u => u.role === 'student').length;
+                    
+                    document.getElementById('total-users').textContent = totalUsers;
+                    document.getElementById('pending-teachers').textContent = pendingTeachers;
+                    document.getElementById('active-teachers').textContent = activeTeachers;
+                    document.getElementById('total-students').textContent = totalStudents;
+                }
+            } catch (error) {
+                console.error('加载统计数据失败:', error);
+            }
+        }
+
+        // Load pending approvals
+        async function loadPendingApprovals() {
+            try {
+                const response = await fetch('/api/user/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const users = await response.json();
+                    pendingApprovals = users.filter(u => u.role === 'teacher' && !u.is_active);
+                    
+                    displayPendingApprovals();
+                }
+            } catch (error) {
+                console.error('加载待审核申请失败:', error);
+                document.getElementById('pending-approvals-list').innerHTML = 
+                    '<div class="text-center py-8 text-red-500"><p>加载失败，请重试</p></div>';
+            }
+        }
+
+        // Display pending approvals
+        function displayPendingApprovals() {
+            const container = document.getElementById('pending-approvals-list');
+            
+            if (pendingApprovals.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-check-circle text-4xl mb-4 text-green-500"></i>
+                        <p class="text-lg font-medium">暂无待审核申请</p>
+                        <p class="text-sm">所有教师申请都已处理完成</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = pendingApprovals.map(user => `
+                <div class="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center mb-2">
+                                <h3 class="text-lg font-semibold text-gray-800">${user.full_name || user.username}</h3>
+                                <span class="status-badge status-pending ml-2">待审核</span>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                                <div><strong>用户名:</strong> ${user.username}</div>
+                                <div><strong>邮箱:</strong> ${user.email}</div>
+                                <div><strong>注册时间:</strong> ${formatDate(user.created_at)}</div>
+                                <div><strong>申请角色:</strong> 教师</div>
+                            </div>
+                            ${user.teacher_data ? `
+                                <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                                    <h4 class="font-medium text-blue-800 mb-2">教师信息</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-blue-700">
+                                        ${parseTeacherData(user.teacher_data)}
+                                    </div>
+                                </div>
+                            ` : ''}
+                        </div>
+                        <div class="flex space-x-2 ml-4">
+                            <button onclick="viewUserDetail(${user.id})" class="action-btn btn-view">
+                                <i class="fas fa-eye mr-1"></i>查看
+                            </button>
+                            <button onclick="approveTeacher(${user.id})" class="action-btn btn-approve">
+                                <i class="fas fa-check mr-1"></i>批准
+                            </button>
+                            <button onclick="rejectTeacher(${user.id})" class="action-btn btn-reject">
+                                <i class="fas fa-times mr-1"></i>拒绝
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Parse teacher data
+        function parseTeacherData(teacherDataStr) {
+            try {
+                const data = JSON.parse(teacherDataStr.replace(/'/g, '"'));
+                return `
+                    <div><strong>工作单位:</strong> ${data.institution || '未提供'}</div>
+                    <div><strong>教师工号:</strong> ${data.teacher_id || '未提供'}</div>
+                    <div><strong>联系电话:</strong> ${data.phone || '未提供'}</div>
+                    <div><strong>教学科目:</strong> ${data.subjects || '未提供'}</div>
+                `;
+            } catch (e) {
+                return '<div>教师信息解析失败</div>';
+            }
+        }
+
+        // Load all users
+        async function loadAllUsers() {
+            try {
+                const response = await fetch('/api/user/users', {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    allUsers = await response.json();
+                    displayUsers(allUsers);
+                }
+            } catch (error) {
+                console.error('加载用户数据失败:', error);
+                document.getElementById('users-table-body').innerHTML = 
+                    '<tr><td colspan="5" class="px-6 py-8 text-center text-red-500">加载失败，请重试</td></tr>';
+            }
+        }
+
+        // Display users
+        function displayUsers(users) {
+            const tbody = document.getElementById('users-table-body');
+            
+            if (users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="px-6 py-8 text-center text-gray-500">暂无用户数据</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => `
+                <tr class="hover:bg-gray-50">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-500"></i>
+                            </div>
+                            <div class="ml-4">
+                                <div class="text-sm font-medium text-gray-900">${user.full_name || user.username}</div>
+                                <div class="text-sm text-gray-500">${user.email}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="role-badge role-${user.role}">${getRoleText(user.role)}</span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="status-badge ${user.is_active ? 'status-active' : 'status-pending'}">
+                            ${user.is_active ? '活跃' : '待激活'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        ${formatDate(user.created_at)}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm space-x-2">
+                        <button onclick="viewUserDetail(${user.id})" class="action-btn btn-view">
+                            <i class="fas fa-eye mr-1"></i>查看
+                        </button>
+                        <button onclick="editUser(${user.id})" class="action-btn btn-edit">
+                            <i class="fas fa-edit mr-1"></i>编辑
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Get role text
+        function getRoleText(role) {
+            const roleMap = {
+                'admin': '管理员',
+                'teacher': '教师',
+                'student': '学生'
+            };
+            return roleMap[role] || role;
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            if (!dateStr) return '未知';
+            const date = new Date(dateStr);
+            return date.toLocaleDateString('zh-CN') + ' ' + date.toLocaleTimeString('zh-CN', {hour: '2-digit', minute: '2-digit'});
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Remove active class from all tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Filter users
+        function filterUsers() {
+            const roleFilter = document.getElementById('role-filter').value;
+            
+            if (roleFilter === '') {
+                displayUsers(allUsers);
+            } else {
+                const filteredUsers = allUsers.filter(user => user.role === roleFilter);
+                displayUsers(filteredUsers);
+            }
+        }
+
+        // Approve teacher
+        async function approveTeacher(userId) {
+            if (!confirm('确定要批准这个教师申请吗？')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`/api/user/users/${userId}/role`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        role_name: 'teacher',
+                        approve: true
+                    })
+                });
+                
+                if (response.ok) {
+                    alert('教师申请已批准！');
+                    await loadDashboardData();
+                } else {
+                    const error = await response.json();
+                    alert('批准失败：' + (error.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('批准教师失败:', error);
+                alert('批准失败，请重试');
+            }
+        }
+
+        // Reject teacher
+        async function rejectTeacher(userId) {
+            const reason = prompt('请输入拒绝理由（可选）：');
+            if (reason === null) return; // User cancelled
+            
+            try {
+                const response = await fetch(`/api/user/users/${userId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('教师申请已拒绝！');
+                    await loadDashboardData();
+                } else {
+                    const error = await response.json();
+                    alert('拒绝失败：' + (error.error || '未知错误'));
+                }
+            } catch (error) {
+                console.error('拒绝教师失败:', error);
+                alert('拒绝失败，请重试');
+            }
+        }
+
+        // View user detail
+        async function viewUserDetail(userId) {
+            try {
+                const response = await fetch(`/api/user/users/${userId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    showUserModal(user);
+                } else {
+                    alert('获取用户详情失败');
+                }
+            } catch (error) {
+                console.error('获取用户详情失败:', error);
+                alert('获取用户详情失败，请重试');
+            }
+        }
+
+        // Show user modal
+        function showUserModal(user) {
+            const modalContent = document.getElementById('user-modal-content');
+            
+            modalContent.innerHTML = `
+                <div class="space-y-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-gray-500 text-2xl"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-xl font-bold text-gray-800">${user.full_name || user.username}</h3>
+                            <p class="text-gray-600">${user.email}</p>
+                            <span class="role-badge role-${user.role} mt-1 inline-block">${getRoleText(user.role)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">基本信息</h4>
+                            <div class="space-y-2 text-sm">
+                                <div><strong>用户ID:</strong> ${user.id}</div>
+                                <div><strong>用户名:</strong> ${user.username}</div>
+                                <div><strong>邮箱:</strong> ${user.email}</div>
+                                <div><strong>真实姓名:</strong> ${user.full_name || '未设置'}</div>
+                                <div><strong>角色:</strong> ${getRoleText(user.role)}</div>
+                                <div><strong>状态:</strong> 
+                                    <span class="status-badge ${user.is_active ? 'status-active' : 'status-pending'}">
+                                        ${user.is_active ? '活跃' : '待激活'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">时间信息</h4>
+                            <div class="space-y-2 text-sm">
+                                <div><strong>注册时间:</strong> ${formatDate(user.created_at)}</div>
+                                <div><strong>最后更新:</strong> ${formatDate(user.updated_at)}</div>
+                                <div><strong>最后登录:</strong> ${user.last_login ? formatDate(user.last_login) : '从未登录'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    ${user.teacher_data ? `
+                        <div>
+                            <h4 class="font-semibold text-gray-800 mb-3">教师信息</h4>
+                            <div class="bg-blue-50 rounded-lg p-4">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-blue-700">
+                                    ${parseTeacherData(user.teacher_data)}
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="flex justify-end space-x-3 pt-4 border-t">
+                        <button onclick="closeModal('user-modal')" class="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400">
+                            关闭
+                        </button>
+                        ${user.role === 'teacher' && !user.is_active ? `
+                            <button onclick="approveTeacher(${user.id}); closeModal('user-modal')" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+                                批准申请
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('user-modal').style.display = 'block';
+        }
+
+        // Edit user
+        function editUser(userId) {
+            alert('用户编辑功能开发中...');
+        }
+
+        // Close modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Refresh functions
+        async function refreshPendingApprovals() {
+            await loadPendingApprovals();
+        }
+
+        async function refreshUsers() {
+            await loadAllUsers();
+        }
+
+        function refreshLogs() {
+            // System logs functionality to be implemented
+            alert('系统日志功能开发中...');
+        }
+
+        // Logout
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                localStorage.removeItem('auth_token');
+                localStorage.removeItem('current_user');
+                window.location.href = '/static/login.html';
+            }
+        }
+
+        // Click outside modal to close
+        window.addEventListener('click', function(event) {
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -224,15 +224,110 @@
                     
                     <div>
                         <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            真实姓名
+                            真实姓名 <span class="text-red-500">*</span>
                         </label>
                         <div class="relative">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <i class="fas fa-id-card text-gray-400"></i>
                             </div>
-                            <input id="full_name" name="full_name" type="text" 
+                            <input id="full_name" name="full_name" type="text" required
                                    class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
-                                   placeholder="请输入真实姓名（可选）">
+                                   placeholder="请输入真实姓名">
+                        </div>
+                        <div id="full-name-error" class="field-error"></div>
+                    </div>
+                    
+                    <div>
+                        <label for="role" class="block text-sm font-medium text-gray-700 mb-2">
+                            用户类型 <span class="text-red-500">*</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-4">
+                            <label class="role-option cursor-pointer">
+                                <input type="radio" name="role" value="student" checked class="sr-only">
+                                <div class="role-card border-2 border-gray-200 rounded-lg p-4 text-center transition-all hover:border-blue-300">
+                                    <div class="text-3xl mb-2">🎓</div>
+                                    <div class="font-medium text-gray-800">学生</div>
+                                    <div class="text-sm text-gray-500 mt-1">学习知识，提问答疑</div>
+                                </div>
+                            </label>
+                            <label class="role-option cursor-pointer">
+                                <input type="radio" name="role" value="teacher" class="sr-only">
+                                <div class="role-card border-2 border-gray-200 rounded-lg p-4 text-center transition-all hover:border-blue-300">
+                                    <div class="text-3xl mb-2">👨‍🏫</div>
+                                    <div class="font-medium text-gray-800">教师</div>
+                                    <div class="text-sm text-gray-500 mt-1">教学管理，数据分析</div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- 教师专用字段 -->
+                    <div id="teacher-fields" class="hidden space-y-6">
+                        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                            <div class="flex items-center mb-2">
+                                <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                                <span class="font-medium text-blue-800">教师身份验证</span>
+                            </div>
+                            <p class="text-sm text-blue-700">教师账户需要提供额外信息以验证身份，注册后需要管理员审核。</p>
+                        </div>
+                        
+                        <div>
+                            <label for="institution" class="block text-sm font-medium text-gray-700 mb-2">
+                                工作单位/学校 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-university text-gray-400"></i>
+                                </div>
+                                <input id="institution" name="institution" type="text" 
+                                       class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
+                                       placeholder="请输入工作单位或学校名称">
+                            </div>
+                            <div id="institution-error" class="field-error"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="teacher_id" class="block text-sm font-medium text-gray-700 mb-2">
+                                教师工号/证件号 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-id-badge text-gray-400"></i>
+                                </div>
+                                <input id="teacher_id" name="teacher_id" type="text" 
+                                       class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
+                                       placeholder="请输入教师工号或身份证件号">
+                            </div>
+                            <div id="teacher-id-error" class="field-error"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="phone" class="block text-sm font-medium text-gray-700 mb-2">
+                                联系电话 <span class="text-red-500">*</span>
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-phone text-gray-400"></i>
+                                </div>
+                                <input id="phone" name="phone" type="tel" 
+                                       class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
+                                       placeholder="请输入联系电话">
+                            </div>
+                            <div id="phone-error" class="field-error"></div>
+                        </div>
+                        
+                        <div>
+                            <label for="subjects" class="block text-sm font-medium text-gray-700 mb-2">
+                                教学科目
+                            </label>
+                            <div class="relative">
+                                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                    <i class="fas fa-book text-gray-400"></i>
+                                </div>
+                                <input id="subjects" name="subjects" type="text" 
+                                       class="form-input block w-full pl-10 pr-3 py-3 rounded-lg focus:outline-none"
+                                       placeholder="请输入主要教学科目，多个科目用逗号分隔">
+                            </div>
                         </div>
                     </div>
                     
@@ -347,6 +442,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             initializeValidation();
             initializePasswordToggle();
+            initializeRoleSelection();
         });
 
         // Initialize form validation
@@ -595,7 +691,134 @@
             }
         }
 
-        // Handle form submission
+
+        // Initialize role selection
+        function initializeRoleSelection() {
+            const roleOptions = document.querySelectorAll('input[name="role"]');
+            const teacherFields = document.getElementById('teacher-fields');
+            
+            roleOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    // Update visual selection
+                    updateRoleSelection();
+                    
+                    // Show/hide teacher fields
+                    if (this.value === 'teacher') {
+                        teacherFields.classList.remove('hidden');
+                        // Add teacher field validation
+                        validation.teacherFields = false;
+                        addTeacherFieldValidation();
+                    } else {
+                        teacherFields.classList.add('hidden');
+                        // Remove teacher field validation
+                        delete validation.teacherFields;
+                        clearTeacherFieldValidation();
+                    }
+                    
+                    updateSubmitButton();
+                });
+            });
+            
+            // Initialize role card click handlers
+            document.querySelectorAll('.role-option').forEach(label => {
+                label.addEventListener('click', function() {
+                    const radio = this.querySelector('input[type="radio"]');
+                    radio.checked = true;
+                    radio.dispatchEvent(new Event('change'));
+                });
+            });
+        }
+        
+        // Update role selection visual
+        function updateRoleSelection() {
+            const roleOptions = document.querySelectorAll('.role-option');
+            roleOptions.forEach(option => {
+                const radio = option.querySelector('input[type="radio"]');
+                const card = option.querySelector('.role-card');
+                
+                if (radio.checked) {
+                    card.classList.remove('border-gray-200');
+                    card.classList.add('border-blue-500', 'bg-blue-50');
+                } else {
+                    card.classList.remove('border-blue-500', 'bg-blue-50');
+                    card.classList.add('border-gray-200');
+                }
+            });
+        }
+        
+        // Add teacher field validation
+        function addTeacherFieldValidation() {
+            // Institution validation
+            document.getElementById('institution').addEventListener('input', validateTeacherFields);
+            document.getElementById('institution').addEventListener('blur', validateTeacherFields);
+            
+            // Teacher ID validation
+            document.getElementById('teacher_id').addEventListener('input', validateTeacherFields);
+            document.getElementById('teacher_id').addEventListener('blur', validateTeacherFields);
+            
+            // Phone validation
+            document.getElementById('phone').addEventListener('input', validateTeacherFields);
+            document.getElementById('phone').addEventListener('blur', validateTeacherFields);
+        }
+        
+        // Clear teacher field validation
+        function clearTeacherFieldValidation() {
+            const teacherInputs = ['institution', 'teacher_id', 'phone'];
+            teacherInputs.forEach(inputId => {
+                const input = document.getElementById(inputId);
+                const errorDiv = document.getElementById(inputId.replace('_', '-') + '-error');
+                
+                input.classList.remove('error', 'success');
+                if (errorDiv) {
+                    errorDiv.style.display = 'none';
+                }
+            });
+        }
+        
+        // Validate teacher fields
+        function validateTeacherFields() {
+            const institution = document.getElementById('institution').value.trim();
+            const teacherId = document.getElementById('teacher_id').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            
+            let allValid = true;
+            
+            // Validate institution
+            const institutionInput = document.getElementById('institution');
+            const institutionError = document.getElementById('institution-error');
+            if (institution.length < 2) {
+                showFieldError(institutionInput, institutionError, null, '请输入工作单位或学校名称');
+                allValid = false;
+            } else {
+                hideFieldError(institutionInput, institutionError);
+            }
+            
+            // Validate teacher ID
+            const teacherIdInput = document.getElementById('teacher_id');
+            const teacherIdError = document.getElementById('teacher-id-error');
+            if (teacherId.length < 3) {
+                showFieldError(teacherIdInput, teacherIdError, null, '请输入有效的教师工号或证件号');
+                allValid = false;
+            } else {
+                hideFieldError(teacherIdInput, teacherIdError);
+            }
+            
+            // Validate phone
+            const phoneInput = document.getElementById('phone');
+            const phoneError = document.getElementById('phone-error');
+            const phoneRegex = /^1[3-9]\d{9}$/;
+            if (!phoneRegex.test(phone)) {
+                showFieldError(phoneInput, phoneError, null, '请输入有效的手机号码');
+                allValid = false;
+            } else {
+                hideFieldError(phoneInput, phoneError);
+            }
+            
+            validation.teacherFields = allValid;
+            updateSubmitButton();
+        }
+        
+        // Update form submission to include role and teacher data
         async function handleSubmit(e) {
             e.preventDefault();
             
@@ -603,12 +826,25 @@
             setLoading(true);
             
             const formData = new FormData(registerForm);
+            const selectedRole = document.querySelector('input[name="role"]:checked').value;
+            
             const registerData = {
                 username: formData.get('username'),
                 email: formData.get('email'),
                 password: formData.get('password'),
-                full_name: formData.get('full_name') || null
+                full_name: formData.get('full_name'),
+                role_name: selectedRole
             };
+            
+            // Add teacher-specific data if role is teacher
+            if (selectedRole === 'teacher') {
+                registerData.teacher_data = {
+                    institution: formData.get('institution'),
+                    teacher_id: formData.get('teacher_id'),
+                    phone: formData.get('phone'),
+                    subjects: formData.get('subjects') || ''
+                };
+            }
             
             try {
                 const response = await fetch('/api/user/register', {
@@ -622,12 +858,16 @@
                 const data = await response.json();
                 
                 if (response.ok) {
-                    showSuccess('注册成功！正在跳转到登录页面...');
+                    if (selectedRole === 'teacher') {
+                        showSuccess('教师账户注册成功！您的申请已提交，请等待管理员审核。审核通过后您将收到邮件通知。');
+                    } else {
+                        showSuccess('注册成功！正在跳转到登录页面...');
+                    }
                     
-                    // Redirect to login page after 2 seconds
+                    // Redirect to login page after showing message
                     setTimeout(() => {
                         window.location.href = '/static/login.html';
-                    }, 2000);
+                    }, selectedRole === 'teacher' ? 4000 : 2000);
                 } else {
                     showError(data.error || '注册失败，请重试');
                 }
@@ -641,6 +881,11 @@
 
         // Check agree terms checkbox
         document.getElementById('agree-terms').addEventListener('change', updateSubmitButton);
+        
+        // Initialize role selection on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateRoleSelection(); // Set initial visual state
+        });
     </script>
 </body>
 </html>

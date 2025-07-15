@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alethea平台AI模型调用架构图 - 详细版</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .architecture-diagram {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .layer {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 25px;
+            border-left: 5px solid;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .layer:hover {
+            transform: translateY(-5px);
+        }
+
+        .layer-title {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .layer-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .presentation-layer {
+            border-left-color: #e74c3c;
+        }
+
+        .presentation-layer .layer-icon {
+            background: #e74c3c;
+        }
+
+        .api-layer {
+            border-left-color: #f39c12;
+        }
+
+        .api-layer .layer-icon {
+            background: #f39c12;
+        }
+
+        .service-layer {
+            border-left-color: #27ae60;
+        }
+
+        .service-layer .layer-icon {
+            background: #27ae60;
+        }
+
+        .model-layer {
+            border-left-color: #8e44ad;
+        }
+
+        .model-layer .layer-icon {
+            background: #8e44ad;
+        }
+
+        .optimization-layer {
+            border-left-color: #3498db;
+        }
+
+        .optimization-layer .layer-icon {
+            background: #3498db;
+        }
+
+        .components {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .component {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #ecf0f1;
+            transition: all 0.3s ease;
+        }
+
+        .component:hover {
+            border-color: #3498db;
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.2);
+        }
+
+        .component-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 8px;
+        }
+
+        .component-desc {
+            font-size: 0.9em;
+            color: #7f8c8d;
+            line-height: 1.4;
+        }
+
+        .flow-diagram {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .flow-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+            color: #2c3e50;
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .flow-step {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            min-width: 150px;
+            position: relative;
+        }
+
+        .flow-step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5em;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .flow-step:last-child::after {
+            display: none;
+        }
+
+        .step-number {
+            background: #3498db;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 10px;
+            font-weight: bold;
+        }
+
+        .step-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .step-desc {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin: 30px 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border-top: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card:nth-child(1) { border-top-color: #e74c3c; }
+        .feature-card:nth-child(2) { border-top-color: #f39c12; }
+        .feature-card:nth-child(3) { border-top-color: #27ae60; }
+        .feature-card:nth-child(4) { border-top-color: #8e44ad; }
+        .feature-card:nth-child(5) { border-top-color: #3498db; }
+        .feature-card:nth-child(6) { border-top-color: #e67e22; }
+
+        .feature-title {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .feature-list {
+            list-style: none;
+        }
+
+        .feature-list li {
+            padding: 5px 0;
+            color: #7f8c8d;
+            position: relative;
+            padding-left: 20px;
+        }
+
+        .feature-list li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #27ae60;
+            font-weight: bold;
+        }
+
+        .tech-stack {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .tech-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .tech-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .tech-category {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .tech-category h4 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            color: #ecf0f1;
+        }
+
+        .tech-list {
+            list-style: none;
+        }
+
+        .tech-list li {
+            padding: 5px 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.9em;
+        }
+
+        .stats-section {
+            background: #2c3e50;
+            color: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin: 30px 0;
+        }
+
+        .stats-title {
+            font-size: 1.8em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2.5em;
+            font-weight: bold;
+            color: #3498db;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 1.1em;
+            color: #ecf0f1;
+        }
+
+        @media (max-width: 768px) {
+            .flow-steps {
+                flex-direction: column;
+            }
+
+            .flow-step::after {
+                content: '↓';
+                right: 50%;
+                top: 100%;
+                transform: translateX(50%);
+            }
+
+            .components {
+                grid-template-columns: 1fr;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #a8edea 0%, #fed6e3 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .highlight h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .highlight p {
+            color: #7f8c8d;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🤖 Alethea平台AI模型调用架构图</h1>
+            <p>智能教学平台的AI模型集成与优化架构设计</p>
+        </div>
+
+        <div class="content">
+            <div class="highlight">
+                <h3>🎯 架构设计理念</h3>
+                <p>Alethea平台采用分层架构设计，集成8种国产AI模型和本地部署模型，通过智能选择算法、内容优化服务和用户画像系统，为理工科教育提供个性化、高质量的AI问答服务。</p>
+            </div>
+
+            <div class="architecture-diagram">
+                <!-- 表现层 -->
+                <div class="layer presentation-layer">
+                    <div class="layer-title">
+                        <div class="layer-icon">🖥️</div>
+                        表现层 (Presentation Layer)
+                    </div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-title">前端界面</div>
+                            <div class="component-desc">HTML5/CSS3/JavaScript，Tailwind CSS框架，响应式设计</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">用户交互</div>
+                            <div class="component-desc">问答界面、个人仪表板、项目管理、知识库管理</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">实时渲染</div>
+                            <div class="component-desc">MathJax数学公式、代码高亮、图表可视化</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">主题系统</div>
+                            <div class="component-desc">明暗主题切换、个性化配色、多语言支持</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- API层 -->
+                <div class="layer api-layer">
+                    <div class="layer-title">
+                        <div class="layer-icon">🔌</div>
+                        API接口层 (API Layer)
+                    </div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-title">LLM路由 (/api/llm)</div>
+                            <div class="component-desc">AI问答、模型选择、相关内容生成、实验设计</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">用户管理 (/api/user)</div>
+                            <div class="component-desc">注册登录、权限控制、个人资料、设置管理</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">分析服务 (/api/analytics)</div>
+                            <div class="component-desc">学习分析、用户画像、行为追踪、数据统计</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">项目服务 (/api/project)</div>
+                            <div class="component-desc">项目推荐、进度管理、协作功能、成果展示</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">知识库 (/api/knowledge)</div>
+                            <div class="component-desc">文档管理、智能搜索、内容分类、标签系统</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">实验仿真 (/api/experiment)</div>
+                            <div class="component-desc">实验生成、仿真集成、第三方平台对接</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 服务层 -->
+                <div class="layer service-layer">
+                    <div class="layer-title">
+                        <div class="layer-icon">⚙️</div>
+                        业务服务层 (Service Layer)
+                    </div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-title">内容优化服务</div>
+                            <div class="component-desc">智能缓存、质量验证、多媒体增强、性能监控</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">用户画像管理</div>
+                            <div class="component-desc">兴趣分析、知识水平评估、个性化推荐</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">学习分析服务</div>
+                            <div class="component-desc">行为追踪、进度分析、效果评估、报告生成</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">语料库服务</div>
+                            <div class="component-desc">文档处理、内容提取、智能分类、搜索索引</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- AI模型层 -->
+                <div class="layer model-layer">
+                    <div class="layer-title">
+                        <div class="layer-icon">🧠</div>
+                        AI模型层 (Model Layer)
+                    </div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-title">国产AI模型</div>
+                            <div class="component-desc">DeepSeek、通义千问、文心一言、智谱AI、月之暗面、腾讯混元、火山引擎豆包</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">本地部署模型</div>
+                            <div class="component-desc">Ollama DeepSeek R1、本地化推理、离线服务</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">模型选择器</div>
+                            <div class="component-desc">智能路由、负载均衡、故障转移、性能监控</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 优化层 -->
+                <div class="layer optimization-layer">
+                    <div class="layer-title">
+                        <div class="layer-icon">🚀</div>
+                        优化增强层 (Optimization Layer)
+                    </div>
+                    <div class="components">
+                        <div class="component">
+                            <div class="component-title">智能缓存系统</div>
+                            <div class="component-desc">内容缓存、命中率优化、过期策略、容量管理</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">质量验证器</div>
+                            <div class="component-desc">内容评分、规则验证、质量监控、自动优化</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">性能监控器</div>
+                            <div class="component-desc">响应时间、成功率、用户满意度、系统指标</div>
+                        </div>
+                        <div class="component">
+                            <div class="component-title">多媒体增强器</div>
+                            <div class="component-desc">领域适配、仿真集成、可视化增强、交互优化</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-diagram">
+                <div class="flow-title">🔄 AI问答处理流程</div>
+                <div class="flow-steps">
+                    <div class="flow-step">
+                        <div class="step-number">1</div>
+                        <div class="step-title">用户提问</div>
+                        <div class="step-desc">前端接收用户问题</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">2</div>
+                        <div class="step-title">缓存检查</div>
+                        <div class="step-desc">查询智能缓存系统</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">3</div>
+                        <div class="step-title">模型选择</div>
+                        <div class="step-desc">智能选择最佳AI模型</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">4</div>
+                        <div class="step-title">个性化增强</div>
+                        <div class="step-desc">结合用户画像优化</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">5</div>
+                        <div class="step-title">AI生成回答</div>
+                        <div class="step-desc">调用选定模型生成</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">6</div>
+                        <div class="step-title">质量验证</div>
+                        <div class="step-desc">内容质量检查评分</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">7</div>
+                        <div class="step-title">内容增强</div>
+                        <div class="step-desc">多媒体元素增强</div>
+                    </div>
+                    <div class="flow-step">
+                        <div class="step-number">8</div>
+                        <div class="step-title">返回结果</div>
+                        <div class="step-desc">渲染并展示给用户</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-title">🎯 智能模型选择</div>
+                    <ul class="feature-list">
+                        <li>基于问题内容自动选择最佳模型</li>
+                        <li>支持用户手动指定模型偏好</li>
+                        <li>智能故障转移和负载均衡</li>
+                        <li>实时性能监控和优化建议</li>
+                        <li>成本效益平衡算法</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🚀 性能优化策略</div>
+                    <ul class="feature-list">
+                        <li>多层缓存机制，提升响应速度</li>
+                        <li>异步处理，支持高并发访问</li>
+                        <li>内容质量自动验证和评分</li>
+                        <li>智能预加载和预测缓存</li>
+                        <li>资源使用监控和自动扩缩容</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">👤 个性化服务</div>
+                    <ul class="feature-list">
+                        <li>用户兴趣和知识水平分析</li>
+                        <li>学习行为追踪和模式识别</li>
+                        <li>个性化内容推荐算法</li>
+                        <li>自适应难度调节机制</li>
+                        <li>学习路径智能规划</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🔧 技术架构特色</div>
+                    <ul class="feature-list">
+                        <li>微服务架构，模块化设计</li>
+                        <li>RESTful API，标准化接口</li>
+                        <li>数据库抽象层，支持多种数据库</li>
+                        <li>容器化部署，云原生架构</li>
+                        <li>完善的错误处理和日志系统</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">📊 数据分析能力</div>
+                    <ul class="feature-list">
+                        <li>实时学习分析和进度追踪</li>
+                        <li>多维度数据可视化展示</li>
+                        <li>学习效果评估和预测</li>
+                        <li>用户行为模式挖掘</li>
+                        <li>教学质量持续改进建议</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-title">🔒 安全与可靠性</div>
+                    <ul class="feature-list">
+                        <li>多层身份认证和权限控制</li>
+                        <li>数据加密传输和存储</li>
+                        <li>API访问频率限制和防护</li>
+                        <li>系统健康监控和告警</li>
+                        <li>数据备份和灾难恢复机制</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tech-stack">
+                <div class="tech-title">🛠️ 技术栈详情</div>
+                <div class="tech-categories">
+                    <div class="tech-category">
+                        <h4>前端技术</h4>
+                        <ul class="tech-list">
+                            <li>HTML5/CSS3/JavaScript</li>
+                            <li>Tailwind CSS框架</li>
+                            <li>Chart.js数据可视化</li>
+                            <li>MathJax数学公式渲染</li>
+                            <li>Highlight.js代码高亮</li>
+                        </ul>
+                    </div>
+                    <div class="tech-category">
+                        <h4>后端框架</h4>
+                        <ul class="tech-list">
+                            <li>Python Flask Web框架</li>
+                            <li>SQLAlchemy ORM</li>
+                            <li>JWT身份认证</li>
+                            <li>Asyncio异步处理</li>
+                            <li>Requests HTTP客户端</li>
+                        </ul>
+                    </div>
+                    <div class="tech-category">
+                        <h4>AI模型集成</h4>
+                        <ul class="tech-list">
+                            <li>DeepSeek API</li>
+                            <li>通义千问API</li>
+                            <li>文心一言API</li>
+                            <li>火山引擎豆包API</li>
+                            <li>Ollama本地部署</li>
+                        </ul>
+                    </div>
+                    <div class="tech-category">
+                        <h4>数据存储</h4>
+                        <ul class="tech-list">
+                            <li>SQLite开发数据库</li>
+                            <li>PostgreSQL生产数据库</li>
+                            <li>Redis缓存系统</li>
+                            <li>文件系统存储</li>
+                            <li>云存储集成</li>
+                        </ul>
+                    </div>
+                    <div class="tech-category">
+                        <h4>部署运维</h4>
+                        <ul class="tech-list">
+                            <li>Docker容器化</li>
+                            <li>Docker Compose编排</li>
+                            <li>云服务器部署</li>
+                            <li>Nginx反向代理</li>
+                            <li>系统监控告警</li>
+                        </ul>
+                    </div>
+                    <div class="tech-category">
+                        <h4>第三方集成</h4>
+                        <ul class="tech-list">
+                            <li>CircuitJS电路仿真</li>
+                            <li>PhET物理仿真</li>
+                            <li>Desmos数学工具</li>
+                            <li>GeoGebra几何工具</li>
+                            <li>MolView化学仿真</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="stats-section">
+                <div class="stats-title">📈 系统能力指标</div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">8+</div>
+                        <div class="stat-label">国产AI模型集成</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">48+</div>
+                        <div class="stat-label">理工科学科支持</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">1000+</div>
+                        <div class="stat-label">并发用户支持</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">系统可用性</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">&lt;3s</div>
+                        <div class="stat-label">平均响应时间</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">85%+</div>
+                        <div class="stat-label">内容质量分数</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="highlight">
+                <h3>🔮 未来发展规划</h3>
+                <p>Alethea平台将持续优化AI模型集成，引入更多先进模型，完善个性化学习算法，扩展多模态交互能力，构建更加智能化的教育生态系统。</p>
+            </div>
+
+            <div style="text-align: center; padding: 30px; color: #7f8c8d;">
+                <p>© 2025 Alethea智能教学平台 - AI模型调用架构设计文档</p>
+                <p>基于实际项目代码分析生成 | 版本: v2.0 详细版</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 添加交互效果
+        document.addEventListener('DOMContentLoaded', function() {
+            // 为组件添加点击效果
+            const components = document.querySelectorAll('.component');
+            components.forEach(component => {
+                component.addEventListener('click', function() {
+                    this.style.transform = 'scale(1.05)';
+                    setTimeout(() => {
+                        this.style.transform = 'scale(1)';
+                    }, 200);
+                });
+            });
+
+            // 为特性卡片添加悬停效果
+            const featureCards = document.querySelectorAll('.feature-card');
+            featureCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.2)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.boxShadow = '0 10px 25px rgba(0, 0, 0, 0.1)';
+                });
+            });
+
+            // 流程步骤动画
+            const flowSteps = document.querySelectorAll('.flow-step');
+            flowSteps.forEach((step, index) => {
+                step.style.animationDelay = `${index * 0.1}s`;
+                step.classList.add('fade-in');
+            });
+
+            // 统计数字动画
+            const statNumbers = document.querySelectorAll('.stat-number');
+            statNumbers.forEach(stat => {
+                const finalValue = stat.textContent;
+                stat.textContent = '0';
+                
+                setTimeout(() => {
+                    animateNumber(stat, finalValue);
+                }, 1000);
+            });
+        });
+
+        function animateNumber(element, finalValue) {
+            const isNumeric = /^\d+/.test(finalValue);
+            if (!isNumeric) {
+                element.textContent = finalValue;
+                return;
+            }
+            
+            const numericValue = parseInt(finalValue.match(/\d+/)[0]);
+            const suffix = finalValue.replace(/^\d+/, '');
+            let current = 0;
+            const increment = Math.ceil(numericValue / 50);
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= numericValue) {
+                    current = numericValue;
+                    clearInterval(timer);
+                }
+                element.textContent = current + suffix;
+            }, 50);
+        }
+
+        // 添加CSS动画类
+        const style = document.createElement('style');
+        style.textContent = `
+            .fade-in {
+                opacity: 0;
+                transform: translateY(20px);
+                animation: fadeInUp 0.6s ease forwards;
+            }
+            
+            @keyframes fadeInUp {
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
